@@ -1,0 +1,21 @@
+{
+  "name": "Rattazzi Cartellini Prezzi",
+  "short_name": "Cartellini",
+  "description": "Gestione listini ferramenta con backup sicuro",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#121212",
+  "theme_color": "#ffcc00",
+  "lang": "it",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
