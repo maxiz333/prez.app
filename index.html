@@ -496,7 +496,7 @@ body.drag-active main.content{overflow:hidden;}
 }
 #printArea{
   background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;
-  min-height:277mm;      /* A4 (297) - margin top/bottom (8+8) - 4mm tolleranza */
+  min-height:277mm;
   display:flex;
   flex-direction:column;
 }
@@ -537,7 +537,6 @@ body.drag-active main.content{overflow:hidden;}
   height:1em;
   vertical-align:baseline;
 }
-/* Lista articoli: prende tutto lo spazio rimanente */
 #printArea .articoli-list{
   display:flex;
   flex-direction:column;
@@ -553,8 +552,8 @@ body.drag-active main.content{overflow:hidden;}
   padding:2mm 3mm;
   page-break-inside:avoid;
   background:#fff;
-  flex:1;              /* <-- ogni articolo cresce per riempire */
-  min-height:10mm;     /* ma non meno di 10mm */
+  flex:1;
+  min-height:10mm;
 }
 #printArea .art-info{
   flex:1;
@@ -718,8 +717,8 @@ body.drag-active main.content{overflow:hidden;}
   </header>
 
   <div class="info-bar" id="infoBar">
-    <span id="infoSave" class="ok">● Salvataggio protetto attivo</span>
-    <span id="infoStorage">Storage: —</span>
+    <span id="infoSave" class="ok">● Sincronizzazione cloud attiva</span>
+    <span id="infoStorage">Cache: —</span>
     <span id="infoRevision">Ultima revisione: —</span>
     <span id="infoOperator">Operatore: —</span>
   </div>
@@ -1024,15 +1023,15 @@ body.drag-active main.content{overflow:hidden;}
 <div class="modal-overlay" id="modalSettings">
   <div class="modal" style="max-width:520px">
     <div class="modal-header">
-      <div><h2>Impostazioni</h2><div class="sub">Operatore, revisione, sicurezza</div></div>
+      <div><h2>Impostazioni</h2><div class="sub">Operatore, revisione, cloud</div></div>
       <button class="modal-close" data-close>✕</button>
     </div>
     <div class="modal-body">
       <div class="field">
         <label>☁️ Sincronizzazione cloud</label>
         <div class="field-hint">
-          Alla apertura l'app carica <b style="color:var(--yellow)">sempre</b> i dati dal cloud.
-          Il salvataggio avviene automaticamente online.
+          Tutto è salvato <b style="color:var(--yellow)">automaticamente online</b>.
+          Ogni dispositivo carica i dati aggiornati dal cloud all'apertura.
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
           <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Ricarica dal cloud</button>
@@ -1044,9 +1043,8 @@ body.drag-active main.content{overflow:hidden;}
       <div style="background:#131313;border:1px solid var(--border);border-radius:8px;padding:12px;
         font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px">
         <strong style="color:var(--yellow)">🛡️ Sicurezza dati</strong><br>
-        Tutto il salvataggio è <b style="color:var(--yellow)">online su Firebase</b>. Non ci sono
-        duplicati locali da gestire. Se manca internet, l'app continua a funzionare
-        e sincronizza appena torna la connessione.<br><br>
+        Tutto viene salvato <b style="color:var(--yellow)">online su Firebase</b>. Zero copie locali.
+        Alla apertura l'app carica sempre e solo dal cloud.<br><br>
         <strong style="color:var(--yellow)">👁 Modalità Cliente</strong><br>
         Clicca il logo RZ in alto a sinistra per nascondere costo e margine.<br><br>
         <strong style="color:var(--yellow)">🔗 Correlati</strong><br>
@@ -1075,18 +1073,15 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.17
+   RATTAZZI CARTELLINI PREZZI v3.18 — CLOUD-ONLY PURO
    ---------------------------------------------------------------------------
-   Novità v3.17:
-     - Stampa con titolo grande (no "Settore:") + riempimento totale foglio
-     - Cloud-only: nessuna scelta tra locale e online, sempre dal cloud
-     - All'avvio: attesa cloud con spinner, poi render
+   - Zero localStorage come fonte dati
+   - Solo cache tecnica silenziosa per PWA offline
+   - Nessun confronto locale/cloud
+   - Salvataggio solo online
    ========================================================================== */
 
-const STORAGE_KEY='rattazzi_cartellini_v3';
-const TEMP_KEY='rattazzi_cartellini_temp';
-const BACKUP_KEYS=['rattazzi_cartellini_bk1','rattazzi_cartellini_bk2','rattazzi_cartellini_bk3'];
-const LEGACY_KEYS=['rattazzi_cartellini_v2','rattazzi_cartellini_v1'];
+const STORAGE_KEY='rattazzi_cartellini_cache_only';
 const CLIENT_MODE_KEY='rattazzi_client_mode';
 const APP_VERSION=3;
 const MAX_PHOTO_PX=500;
@@ -1294,7 +1289,7 @@ function compressImage(file,maxPx=MAX_PHOTO_PX,quality=PHOTO_QUALITY){
   });
 }
 
-/* -------- SEED (solo primissimo avvio, quando cloud è vuoto) -------- */
+/* -------- SEED (usato solo se il cloud è vuoto al primo avvio) -------- */
 function buildSeed(){
   return {
     version:APP_VERSION,
@@ -1342,52 +1337,13 @@ function mkArt(name,price,cost,unit,updatedAt,notes,purchases,sconti,code){
 }
 
 /* ============================================================================
-   STORAGE — ora è solo CACHE SILENZIOSA per l'offline
+   SALVATAGGIO — SOLO CLOUD. Il locale non esiste più come fonte dati.
    ========================================================================== */
 function saveState(silent=false){
-  try{
-    const json=JSON.stringify(state);
-    // Cache locale per uso offline (silenziosa)
-    localStorage.setItem(STORAGE_KEY, json);
-    localStorage.setItem(TEMP_KEY, json);
-    localStorage.removeItem(TEMP_KEY);
-
-    // Sync su cloud (obbligatoria)
-    try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
-
-    updateStorageInfo();
-    setInfo('save','● Salvato online '+new Date().toLocaleTimeString('it-IT'),'ok');
-    return true;
-  }catch(e){
-    console.error('Save error:',e);
-    // Anche se il locale fallisce, il cloud push parte comunque
-    try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
-    setInfo('save','● Salvataggio online in corso...','warn');
-    return true;
-  }
-}
-
-/* Legge lo stato SOLO dalla cache locale (per fallback offline) */
-function loadStateFromCache(){
-  const keys=[STORAGE_KEY,...BACKUP_KEYS,...LEGACY_KEYS];
-  for(const k of keys){
-    const raw=localStorage.getItem(k);if(!raw)continue;
-    try{
-      const p=JSON.parse(raw);
-      return normalizeState(p);
-    }catch(err){console.warn('Cache non valida in',k,err);}
-  }
-  return null;
-}
-
-/* Inizializza state VUOTO — sarà riempito dal cloud */
-function loadStateEmpty(){
-  state = {
-    version: APP_VERSION,
-    meta: {operator:'', lastRevision:new Date().toISOString(), globalMargin:40},
-    categories: []
-  };
-  activeCategoryId = null;
+  // Nessun salvataggio locale. Solo cloud.
+  try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
+  setInfo('save','● Salvo online...','ok');
+  return true;
 }
 
 function normalizeState(p){
@@ -1431,29 +1387,10 @@ function normalizeState(p){
   return p;
 }
 
-let _storageUpdateTimer = null;
 function updateStorageInfo(){
-  clearTimeout(_storageUpdateTimer);
-  _storageUpdateTimer = setTimeout(async () => {
-    let ourTxt='—', totalTxt='—';
-    try{
-      let bytes=0;
-      const v = localStorage.getItem(STORAGE_KEY);
-      if(v) bytes += v.length*2;
-      const kb=bytes/1024;
-      ourTxt = kb>=1024 ? (kb/1024).toFixed(2)+' MB' : kb.toFixed(1)+' KB';
-    }catch(e){}
-    try{
-      if(navigator.storage && navigator.storage.estimate){
-        const est=await navigator.storage.estimate();
-        const used=est.usage||0, quota=est.quota||0;
-        const pct = quota>0 ? ((used/quota)*100).toFixed(1) : '?';
-        totalTxt = (used/1024/1024).toFixed(2)+' MB / '+(quota/1024/1024).toFixed(0)+' MB ('+pct+'%)';
-      }
-    }catch(e){}
-    const el=$('#infoStorage');
-    if(el) el.textContent = 'Cache: '+ourTxt+' · Origine: '+totalTxt;
-  }, 200);
+  // Non esiste più storage locale dati — solo cache tecnica PWA invisibile
+  const el=$('#infoStorage');
+  if(el) el.textContent = 'Cache: cloud-only';
 }
 
 /* ============================================================================
@@ -1467,7 +1404,7 @@ let selectedArticles=new Set();
 let selectionMode=false;
 let editingArticleId=null;
 let pendingPhoto=null;
-let cloudReady=false;   // diventa true quando il cloud ha risposto
+let cloudReady=false;
 
 /* -------- UNDO/REDO -------- */
 let undoStack=[];
@@ -1593,7 +1530,6 @@ function renderTabs(){
 function renderTable(){
   const tbody=$('#tableBody');tbody.innerHTML='';
 
-  // Se il cloud non ha ancora risposto → spinner
   if(!cloudReady){
     tbody.innerHTML='<tr><td colspan="10"><div class="empty-state">'+
       '<div class="sync-spinner"></div>'+
@@ -1839,16 +1775,12 @@ $('#tableBody').addEventListener('click',e=>{
 });
 
 /* ============================================================================
-   DRAG & DROP delle righe
+   DRAG & DROP
    ========================================================================== */
 (function initDragDrop(){
   const tbody = document.getElementById('tableBody');
   if(!tbody) return;
-
-  let ctx = {
-    artId:null, row:null, active:false, timer:null,
-    startX:0, startY:0, moved:false
-  };
+  let ctx = { artId:null, row:null, active:false, timer:null, startX:0, startY:0, moved:false };
   const LONG_PRESS_MS = 500;
   const MOVE_TOLERANCE = 10;
 
@@ -1862,10 +1794,8 @@ $('#tableBody').addEventListener('click',e=>{
     cancelTimer();
     if(ctx.row) ctx.row.classList.remove('dragging');
     document.body.classList.remove('drag-active');
-    ctx = { artId:null, row:null, active:false, timer:null,
-            startX:0, startY:0, moved:false };
+    ctx = { artId:null, row:null, active:false, timer:null, startX:0, startY:0, moved:false };
   }
-
   function onStart(e){
     if(selectionMode) return;
     const tgt = e.target;
@@ -1884,7 +1814,6 @@ $('#tableBody').addEventListener('click',e=>{
       if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(_){} }
     }, LONG_PRESS_MS);
   }
-
   function onMove(e){
     if(!ctx.row) return;
     const pt = getPoint(e);
@@ -1903,7 +1832,6 @@ $('#tableBody').addEventListener('click',e=>{
     if(!ctx.artId) return;
     swapArticleOrder(ctx.artId, targetRow.dataset.art);
   }
-
   function onEnd(){
     if(ctx.active){
       const row = ctx.row;
@@ -1914,7 +1842,6 @@ $('#tableBody').addEventListener('click',e=>{
     }
     reset();
   }
-
   function swapArticleOrder(fromId, toId){
     const cat = getActiveCategory();
     if(!cat) return;
@@ -1927,13 +1854,9 @@ $('#tableBody').addEventListener('click',e=>{
     cat.articles.splice(toIdx, 0, art);
     renderTable();
     const newRow = document.querySelector('tr[data-art="'+fromId+'"]');
-    if(newRow){
-      newRow.classList.add('dragging');
-      ctx.row = newRow;
-    }
+    if(newRow){ newRow.classList.add('dragging'); ctx.row = newRow; }
     saveState();
   }
-
   tbody.addEventListener('touchstart', onStart, {passive:true});
   tbody.addEventListener('touchmove', onMove, {passive:false});
   tbody.addEventListener('touchend', onEnd);
@@ -1963,9 +1886,7 @@ function renderLinked(){
     if(!linked){
       return `<div class="linked-item">
         <span class="li-code">⚠</span>
-        <div style="flex:1">
-          <div class="li-name">Articolo eliminato</div>
-        </div>
+        <div style="flex:1"><div class="li-name">Articolo eliminato</div></div>
         <button class="btn btn-sm" data-remlinked="${idx}" style="color:var(--red)">🗑</button>
       </div>`;
     }
@@ -2014,9 +1935,7 @@ function searchAllArticles(query){
       if(a.id === editingArticleId) continue;
       const hay = normalizeStr(a.name + ' ' + (a.code||''));
       if(smartMatch(hay, q)){
-        matches.push({
-          article: a, category: cat, score: smartScore(hay, q), source: 'settore'
-        });
+        matches.push({ article: a, category: cat, score: smartScore(hay, q), source: 'settore' });
       }
     }
   }
@@ -2129,11 +2048,10 @@ $('#btnLinkConfirm').addEventListener('click', ()=>{
     const r = pendingLinkFromRubrica.article;
     if(!r || !r.code){ alert('Dati rubrica non validi.'); return; }
     const cat = getActiveCategory();
-    if(!cat){ alert('Nessun settore attivo per aggiungere il prodotto.'); return; }
+    if(!cat){ alert('Nessun settore attivo.'); return; }
     const existing = cat.articles.find(x => normalizeStr(x.code) === normalizeStr(r.code));
-    if(existing){
-      linkedId = existing.id;
-    } else {
+    if(existing){ linkedId = existing.id; }
+    else {
       const now = new Date().toISOString();
       pushUndo('Aggiunto "'+r.name+'" al settore '+cat.name);
       const newArt = {
@@ -2177,9 +2095,7 @@ $('#linkedList').addEventListener('change', e=>{
   const linkedArt = findArticle(linkedId);
   if(!linkedArt) return;
   const newPrice = parseFloat(inp.value);
-  if(isNaN(newPrice) || newPrice < 0){
-    inp.value = linkedArt.price.toFixed(2); return;
-  }
+  if(isNaN(newPrice) || newPrice < 0){ inp.value = linkedArt.price.toFixed(2); return; }
   if(linkedArt.price === newPrice) return;
   pushUndo('Modifica prezzo correlato "' + linkedArt.name + '"');
   const oldPrice = linkedArt.price;
@@ -2193,7 +2109,6 @@ $('#linkedList').addEventListener('change', e=>{
   state.meta.lastRevision = linkedArt.updatedAt;
   saveState();
   refreshRow(linkedArt);
-  setInfo('save', '● Prezzo correlato aggiornato', 'ok');
 });
 
 $('#linkedList').addEventListener('click', e=>{
@@ -2561,7 +2476,7 @@ $('#setSave').addEventListener('click',()=>{
   saveState();updateInfoBar();closeModal('#modalSettings');
 });
 
-/* -------- EXPORT / IMPORT -------- */
+/* -------- EXPORT JSON (solo per tuo backup personale) -------- */
 $('#btnExport').addEventListener('click',()=>{
   try{
     const data=JSON.stringify(state,null,2);
@@ -2585,14 +2500,14 @@ $('#btnImport').addEventListener('click',()=>{
       try{
         const p=JSON.parse(r.result);
         const normalized=normalizeState(p);
-        if(!confirm('Sovrascrivere i dati attuali?'))return;
+        if(!confirm('Sovrascrivere i dati ONLINE con questo file?'))return;
         pushUndo('Import backup');
         state=normalized;
         activeCategoryId=state.categories[0]?state.categories[0].id:null;
         selectedArticles.clear();
         searchQuery=''; const si=$('#searchInput'); if(si) si.value='';
         saveState();render();
-        alert('✅ Backup ripristinato.');
+        alert('✅ Backup caricato online.');
       }catch(err){alert('❌ File non valido: '+err.message);}
     };
     r.onerror=()=>alert('Errore lettura file.');
@@ -2651,15 +2566,6 @@ $('#checkAllHead').addEventListener('change',e=>{
   updateSelectionBar();
 });
 
-/* ============================================================================
-   STAMPA A4 — titolo grande + riempimento totale
-   ============================================================================
-   Layout:
-     - Header: titolo (18pt, bold) a sinistra + "Data: ______" a destra
-     - Gap: 8mm
-     - Lista: flex:1 su ogni articolo → gli articoli si espandono per
-       riempire tutto lo spazio rimanente. Con 4 articoli la pagina è piena.
-   ========================================================================== */
 function doActualPrint(){
   const isSearching = !!searchQuery.trim();
   const cat=getActiveCategory();
@@ -2672,24 +2578,18 @@ function doActualPrint(){
   if(!articles.length)return alert('Nessun articolo da stampare.');
 
   const n = articles.length;
-  const compact = n > 16;   // sotto i 16mm per riga → font compatto
-
-  // Riferimento altezza: con più di 16 articoli uso min-height per farli entrare in 1 pagina
-  // Altrimenti lascio flex:1 fare il suo lavoro (riempimento automatico)
+  const compact = n > 16;
   let minHeightStyle = '';
   if(n > 16){
-    // Calcolo altezza minima per far stare tutti in 1 pagina
-    const usableMM = 245;      // spazio disponibile per la lista
+    const usableMM = 245;
     const gapMM = 2 * (n-1);
     let hRow = (usableMM - gapMM) / n;
-    hRow = Math.max(9, hRow); // minimo assoluto 9mm
+    hRow = Math.max(9, hRow);
     minHeightStyle = ` style="min-height:${hRow}mm"`;
   }
 
   const rowsHtml = articles.map(a=>{
-    const codeHtml = a.code
-      ? ' <span class="art-code-inline">'+esc(a.code)+'</span>'
-      : '';
+    const codeHtml = a.code ? ' <span class="art-code-inline">'+esc(a.code)+'</span>' : '';
     return `
       <div class="articolo"${minHeightStyle}>
         <div class="art-info">
@@ -2944,7 +2844,6 @@ document.addEventListener('keydown',e=>{
 (function initCompactHeader(){
   const content=document.querySelector('#mainContent');
   if(!content) return;
-
   let lastScroll=0;
   let ticking=false;
   let isCompact=false;
@@ -2971,32 +2870,26 @@ document.addEventListener('keydown',e=>{
       if(isCompact){isCompact=false;document.body.classList.remove('compact');}
       lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false; return;
     }
-
     if(distFromBottom < BOTTOM_THRESHOLD){
       lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false; return;
     }
-
     if((now - lastToggleTime) < COOLDOWN_MS){
       lastScroll=y; ticking=false; return;
     }
-
     const diff = y - lastScroll;
     if(Math.abs(diff) < MIN_ABS_DIFF){
       lastDirection=0; consecutiveCount=0;
       lastScroll=y; ticking=false; return;
     }
-
     const dir = diff > 0 ? 1 : -1;
     if(dir === lastDirection){ consecutiveCount++; }
     else {
       lastDirection = dir; consecutiveCount = 1;
       lastScroll = y; ticking = false; return;
     }
-
     if(consecutiveCount < CONFIRM_COUNT){
       lastScroll=y; ticking=false; return;
     }
-
     if(!isCompact && lastDirection === 1 && diff > ENTER_DELTA && y > ENTER_MIN_Y){
       isCompact=true; document.body.classList.add('compact');
       lastToggleTime=now; consecutiveCount=0;
@@ -3004,7 +2897,6 @@ document.addEventListener('keydown',e=>{
       isCompact=false; document.body.classList.remove('compact');
       lastToggleTime=now; consecutiveCount=0;
     }
-
     lastScroll=y; ticking=false;
   }
 
@@ -3020,12 +2912,10 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ============================================================================
-   AVVIO — CLOUD-ONLY: aspetta Firebase, poi mostra i dati
+   AVVIO — CLOUD ONLY
    ========================================================================== */
 window.__cloudReady = function(){
-  // Chiamata da cloud.js quando il pull dal cloud è completato
   cloudReady = true;
-  // Seleziona primo settore
   if(state.categories.length && !activeCategoryId){
     activeCategoryId = state.categories[0].id;
   }
@@ -3035,18 +2925,11 @@ window.__cloudReady = function(){
 };
 
 window.__cloudFallbackLocal = function(){
-  // Chiamata da cloud.js se Firebase non risponde entro il timeout
-  const cached = loadStateFromCache();
-  if(cached && cached.categories.length){
-    state = cached;
-    activeCategoryId = state.categories[0].id;
-    console.log('📦 Uso cache locale (offline)');
-  } else {
-    state = buildSeed();
-    activeCategoryId = state.categories[0] ? state.categories[0].id : null;
-    console.log('📦 Uso seed demo (primo avvio offline)');
-  }
+  // CLOUD-ONLY: non leggo mai dal locale. Se il cloud non risponde, mostro stato vuoto.
+  console.log('🔴 Cloud non raggiungibile — nessun dato caricato dal locale');
   cloudReady = true;
+  state = { version: APP_VERSION, meta:{operator:'',lastRevision:new Date().toISOString(),globalMargin:40}, categories: [] };
+  activeCategoryId = null;
   render();
   updateInfoBar();
 };
@@ -3054,15 +2937,18 @@ window.__cloudFallbackLocal = function(){
 (function init(){
   try{
     loadClientMode();
-    // 1) Stato VUOTO
-    loadStateEmpty();
+    // Stato VUOTO — sarà popolato SOLO dal cloud
+    state = { version: APP_VERSION, meta:{operator:'',lastRevision:new Date().toISOString(),globalMargin:40}, categories: [] };
+    activeCategoryId = null;
     cloudReady = false;
-    // 2) Render con spinner di sincronizzazione
+
+    // Render iniziale → spinner
     render();
     updateInfoBar();
     updateUndoButtons();
     initRubrica();
-    // 3) Avvia Firebase — quando risponderà chiamerà __cloudReady()
+
+    // Avvia Firebase
     setTimeout(()=>{
       try{ if(window.cloudInit) window.cloudInit(); }
       catch(e){ console.warn('Cloud init:',e); window.__cloudFallbackLocal(); }
@@ -3071,7 +2957,7 @@ window.__cloudFallbackLocal = function(){
     console.error('Init error:',e);
     alert('Errore avvio: '+e.message);
   }
-  console.log('%cRattazzi Cartellini v3.17 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.18 (CLOUD-ONLY) avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>

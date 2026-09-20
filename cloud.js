@@ -1,11 +1,8 @@
 /* ============================================================================
-   RATTAZZI — Sincronizzazione Firebase (CLOUD-ONLY)
+   RATTAZZI — Cloud SOLO (v3.18)
    ---------------------------------------------------------------------------
-   - All'avvio: pull SEMPRE dal cloud (nessuna scelta utente)
-   - Se cloud risponde → popola state e chiama window.__cloudReady()
-   - Se cloud non risponde entro 8 sec → fallback silenzioso su cache locale
-   - Se cloud è vuoto → push dal locale (o seed) come primo setup
-   - Salvataggio: SEMPRE su cloud + cache locale silenziosa
+   L'app carica SEMPRE e SOLO i dati dal cloud. Nessun confronto.
+   Nessun popup di scelta. Il localStorage non viene mai letto all'avvio.
    ========================================================================== */
 
 const FIREBASE_CONFIG = {
@@ -36,11 +33,11 @@ function cloudStatusSet(text, cls){
 function triggerFallback(){
   if(fb.fallbackDone) return;
   fb.fallbackDone = true;
-  console.warn('☁️ Timeout cloud: uso la cache locale');
-  cloudStatusSet('🟡 Offline — uso cache locale','warn');
+  console.warn('☁️ Timeout cloud');
+  cloudStatusSet('🔴 Offline — ricarica la pagina','err');
   try{
     if(window.__cloudFallbackLocal) window.__cloudFallbackLocal();
-  }catch(e){console.error('Fallback fallito:',e);}
+  }catch(e){}
 }
 
 async function cloudInit(){
@@ -51,9 +48,8 @@ async function cloudInit(){
     return;
   }
 
-  // Timeout di sicurezza: se entro 8 secondi Firebase non risponde, uso la cache locale
   clearTimeout(fb.fallbackTimer);
-  fb.fallbackTimer = setTimeout(triggerFallback, 8000);
+  fb.fallbackTimer = setTimeout(triggerFallback, 10000);
 
   cloudStatusSet('⏳ Connessione...','warn');
 
@@ -95,58 +91,32 @@ async function cloudInit(){
   }
 }
 
-/* Primo sync: SEMPRE dal cloud (nessuna scelta utente) */
+/* Primo sync: SEMPRE e SOLO dal cloud. Nessun confronto. */
 async function cloudFirstSync(){
   if(fb.firstPullDone) return;
   fb.firstPullDone = true;
-  cloudStatusSet('🟡 Sincronizzo...','warn');
+  cloudStatusSet('🟡 Carico dal cloud...','warn');
   try{
     const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
 
-    // Timeout: cancello perché Firebase ha risposto
     clearTimeout(fb.fallbackTimer);
     fb.fallbackDone = true;
 
-    // ---- CASO 1: cloud vuoto → primo setup ----
+    // Cloud vuoto → primo setup, carico seed demo e faccio push
     if(!snap.exists){
-      console.log('☁️ Cloud vuoto: primo setup, carico dati locali');
-      // Provo a recuperare da cache locale
-      let localToUpload = null;
-      try{
-        for(const k of [STORAGE_KEY,...BACKUP_KEYS,...LEGACY_KEYS]){
-          const raw = localStorage.getItem(k);
-          if(!raw) continue;
-          try{
-            const p = JSON.parse(raw);
-            if(p && Array.isArray(p.categories) && p.categories.length){
-              localToUpload = normalizeState(p);
-              break;
-            }
-          }catch(e){}
-        }
-      }catch(e){}
-
-      if(localToUpload){
-        state = localToUpload;
-        activeCategoryId = state.categories[0] ? state.categories[0].id : null;
-        await cloudPush(true);
-      } else {
-        // Nessuna cache → carico seed demo
-        state = buildSeed();
-        activeCategoryId = state.categories[0] ? state.categories[0].id : null;
-        await cloudPush(true);
-      }
+      console.log('☁️ Cloud vuoto: primo setup con dati demo');
+      state = buildSeed();
+      activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+      await cloudPush(true);
       cloudStatusSet('🟢 Pronto','ok');
       if(window.__cloudReady) window.__cloudReady();
       return;
     }
 
-    // ---- CASO 2: cloud ha dati → pull SEMPRE ----
     const remote = snap.data();
     if(!remote || !remote.payload){
-      console.log('☁️ Cloud vuoto (payload mancante): primo setup');
-      // stesso discorso del caso 1
+      console.log('☁️ Cloud senza payload: primo setup con dati demo');
       state = buildSeed();
       activeCategoryId = state.categories[0] ? state.categories[0].id : null;
       await cloudPush(true);
@@ -154,40 +124,26 @@ async function cloudFirstSync(){
       return;
     }
 
-    console.log('☁️ Carico dal cloud...');
-    await cloudPullInternal(remote);
+    // Cloud ha dati → pull SEMPRE. Punto.
+    console.log('☁️ Carico dal cloud (fonte unica)');
+    state = normalizeState(JSON.parse(remote.payload));
+    if(state.categories.length){
+      activeCategoryId = state.categories[0].id;
+    } else {
+      activeCategoryId = null;
+    }
+    // Salvo solo come cache tecnica (mai letta all'avvio)
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+
+    render();
+    updateInfoBar();
     cloudStatusSet('🟢 Caricato da cloud','ok');
     if(window.__cloudReady) window.__cloudReady();
 
   }catch(e){
     console.error('First sync fallito:', e);
-    cloudStatusSet('🔴 Offline — uso cache locale','err');
+    cloudStatusSet('🔴 Offline — ricarica la pagina','err');
     triggerFallback();
-  }
-}
-
-async function cloudPullInternal(remote){
-  try{
-    fb.suppressUntil = Date.now() + 3000;
-    clearTimeout(fb.pushTimer);
-
-    state = normalizeState(JSON.parse(remote.payload));
-    // Salva in cache locale (silenzioso)
-    try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }catch(e){}
-
-    // Aggiorna UI
-    if(state.categories.length && (!activeCategoryId || !state.categories.find(c=>c.id===activeCategoryId))){
-      activeCategoryId = state.categories[0].id;
-    }
-    render();
-
-    console.log('☁️ Pull OK');
-    return true;
-  }catch(e){
-    console.error('Pull fallito:', e);
-    return false;
   }
 }
 
@@ -203,8 +159,8 @@ async function cloudPush(force){
     fb.pushTimer = setTimeout(()=>{
       if(fb.suppressUntil && Date.now() < fb.suppressUntil) return;
       cloudPush(true);
-    }, 2000);
-    cloudStatusSet('🟡 In attesa...','warn');
+    }, 1500);
+    cloudStatusSet('🟡 Salvo...','warn');
     return true;
   }
 
@@ -219,7 +175,7 @@ async function cloudPush(force){
       appVersion: APP_VERSION
     });
     fb.pendingPush = false;
-    cloudStatusSet('🟢 Salvato','ok');
+    cloudStatusSet('🟢 Salvato online','ok');
     console.log('☁️ Push OK ('+Math.round(payload.length/1024)+' KB)');
     return true;
   }catch(e){
@@ -230,36 +186,29 @@ async function cloudPush(force){
   }
 }
 
-/* Pull manuale (dal pulsante nelle Impostazioni) */
 async function cloudPull(){
-  if(!fb.ready){ alert('Firebase non pronto. Riprova tra qualche secondo.'); return false; }
+  if(!fb.ready){ alert('Firebase non pronto.'); return false; }
   try{
     const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
-    if(!snap.exists){
-      alert('☁️ Il cloud è vuoto.');
-      return false;
-    }
+    if(!snap.exists){ alert('☁️ Il cloud è vuoto.'); return false; }
     const remote = snap.data();
-    const ok = await cloudPullInternal(remote);
-    if(ok){
-      cloudStatusSet('🟢 Ricaricato','ok');
-      alert('✅ Dati ricaricati dal cloud.');
+    state = normalizeState(JSON.parse(remote.payload));
+    if(state.categories.length && !state.categories.find(c=>c.id===activeCategoryId)){
+      activeCategoryId = state.categories[0].id;
     }
-    return ok;
+    render();
+    cloudStatusSet('🟢 Ricaricato','ok');
+    return true;
   }catch(e){
-    console.error('Pull manuale fallito:', e);
     alert('❌ Errore: '+e.message);
     return false;
   }
 }
 
 window.addEventListener('online', ()=>{
-  console.log('☁️ Torna online');
   cloudStatusSet('🟡 Riconnessione...','warn');
-  setTimeout(()=>{
-    if(fb.pendingPush) cloudPush(true);
-  }, 1000);
+  setTimeout(()=>{ if(fb.pendingPush) cloudPush(true); }, 800);
 });
 window.addEventListener('offline', ()=>{
   cloudStatusSet('🔴 Offline','err');
@@ -269,22 +218,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const status = document.getElementById('cloudStatus');
   if(status){
     status.addEventListener('click', async ()=>{
-      if(!fb.ready){
-        alert('☁️ Firebase non ancora pronto. Riprova tra qualche secondo.');
-        return;
-      }
-      if(confirm('☁️ Ricaricare i dati dal cloud?')){
-        await cloudPull();
-      }
+      if(!fb.ready){ alert('Firebase non pronto.'); return; }
+      if(confirm('☁️ Ricaricare i dati dal cloud?')){ await cloudPull(); }
     });
   }
   const btnSync = document.getElementById('btnCloudSync');
   if(btnSync){
     btnSync.addEventListener('click', async ()=>{
       if(!fb.ready){ alert('Firebase non pronto.'); return; }
-      if(confirm('☁️ Ricaricare i dati dal cloud?')){
-        await cloudPull();
-      }
+      if(confirm('☁️ Ricaricare i dati dal cloud?')){ await cloudPull(); }
     });
   }
 });
