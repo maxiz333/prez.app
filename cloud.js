@@ -1,5 +1,5 @@
 /* ============================================================================
-   RATTAZZI — Cloud SOLO (v3.18)
+   RATTAZZI — Cloud SOLO (v4.0)
    ---------------------------------------------------------------------------
    L'app carica SEMPRE e SOLO i dati dal cloud. Nessun confronto.
    Nessun popup di scelta. Il localStorage non viene mai letto all'avvio.
@@ -107,7 +107,9 @@ async function cloudFirstSync(){
     if(!snap.exists){
       console.log('☁️ Cloud vuoto: primo setup con dati demo');
       state = buildSeed();
-      activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+      const firstTop = state.categories.find(c=>!c.parentId);
+      activeCategoryId = firstTop ? firstTop.id : null;
+      activeSubCategoryId = null;
       await cloudPush(true);
       cloudStatusSet('🟢 Pronto','ok');
       if(window.__cloudReady) window.__cloudReady();
@@ -118,7 +120,9 @@ async function cloudFirstSync(){
     if(!remote || !remote.payload){
       console.log('☁️ Cloud senza payload: primo setup con dati demo');
       state = buildSeed();
-      activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+      const firstTop = state.categories.find(c=>!c.parentId);
+      activeCategoryId = firstTop ? firstTop.id : null;
+      activeSubCategoryId = null;
       await cloudPush(true);
       if(window.__cloudReady) window.__cloudReady();
       return;
@@ -127,11 +131,10 @@ async function cloudFirstSync(){
     // Cloud ha dati → pull SEMPRE. Punto.
     console.log('☁️ Carico dal cloud (fonte unica)');
     state = normalizeState(JSON.parse(remote.payload));
-    if(state.categories.length){
-      activeCategoryId = state.categories[0].id;
-    } else {
-      activeCategoryId = null;
-    }
+    const firstTop = state.categories.find(c=>!c.parentId);
+    activeCategoryId = firstTop ? firstTop.id : null;
+    activeSubCategoryId = null;
+
     // Salvo solo come cache tecnica (mai letta all'avvio)
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 
@@ -194,9 +197,9 @@ async function cloudPull(){
     if(!snap.exists){ alert('☁️ Il cloud è vuoto.'); return false; }
     const remote = snap.data();
     state = normalizeState(JSON.parse(remote.payload));
-    if(state.categories.length && !state.categories.find(c=>c.id===activeCategoryId)){
-      activeCategoryId = state.categories[0].id;
-    }
+    const firstTop = state.categories.find(c=>!c.parentId);
+    activeCategoryId = firstTop ? firstTop.id : null;
+    activeSubCategoryId = null;
     render();
     cloudStatusSet('🟢 Ricaricato','ok');
     return true;
