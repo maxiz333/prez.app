@@ -1,8 +1,5 @@
-/* ============================================================================
-   Service Worker — Rattazzi Cartellini Prezzi v3.9
-   ========================================================================== */
-
-const CACHE_NAME = 'rattazzi-v3.9';
+/* Service Worker — Rattazzi Cartellini Prezzi v3.10 */
+const CACHE_NAME = 'rattazzi-v3.10';
 const ASSETS = [
   './',
   './index.html',
@@ -37,9 +34,10 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
   // NON cachare le chiamate Firebase/Google (devono sempre andare in rete)
-  if (url.hostname.includes('firebase') || url.hostname.includes('googleapis') ||
+  if (url.hostname.includes('firebase') ||
+      url.hostname.includes('googleapis') ||
       url.hostname.includes('gstatic')) {
-    return; // lascia passare la richiesta senza intercettarla
+    return;
   }
 
   if (url.origin !== location.origin) return;

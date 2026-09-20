@@ -1,9 +1,14 @@
 /* ============================================================================
-   RATTAZZI — Sincronizzazione Firebase (multi-dispositivo + multi-utente)
+   RATTAZZI — Sincronizzazione Firebase (squadra unica, nessun codice)
    ---------------------------------------------------------------------------
-   Tutti i dispositivi con lo stesso "codice squadra" condividono gli stessi dati.
-   Ogni modifica viene spinta su Firebase dopo 2 secondi dall'ultima modifica.
-   Se manca internet, Firestore mette in coda le modifiche e le invia appena torna.
+   - ID squadra fisso: tutti i dispositivi del negozio condividono lo stesso
+   - Autenticazione anonima automatica
+   - Al primo avvio:
+       * Se cloud vuoto → push dei dati locali
+       * Se cloud ha dati più recenti → chiede conferma "vuoi sincronizzare?"
+   - Backup automatico pre-sync: prima di scaricare, salva lo stato locale
+   - Sync automatica dopo ogni salvataggio (debounce 2 sec)
+   - Coda offline gestita da Firestore
    ========================================================================== */
 
 const FIREBASE_CONFIG = {
@@ -15,10 +20,13 @@ const FIREBASE_CONFIG = {
   appId: "1:136522066813:web:73e70b9e8af8acf01c3a14"
 };
 
+// ⚠️ ID squadra FISSO: NON cambiarlo, tutti i dispositivi del negozio usano questo
+const SQUADRA_ID = 'rattazzi-ufficiale';
+
 const fb = {
   ready:false, app:null, db:null, auth:null, uid:null,
-  squadraCode:null, pushTimer:null, pendingPush:false,
-  suppressNextPush:false, status:'init'
+  pushTimer:null, pendingPush:false,
+  suppressNextPush:false, firstPullDone:false
 };
 
 function cloudStatusSet(text, cls){
@@ -62,17 +70,7 @@ async function cloudInit(){
       }
       fb.ready = true;
       console.log('☁️ Firebase pronto, uid:', fb.uid);
-
-      const saved = localStorage.getItem('rattazzi_squadra');
-      if(saved){
-        fb.squadraCode = saved;
-        cloudStatusSet('🟡 Sync...','warn');
-        await cloudPull(true);
-      } else {
-        cloudStatusSet('⚙ Configura squadra','warn');
-      }
-      const inp = document.getElementById('setSquadra');
-      if(inp && fb.squadraCode) inp.value = fb.squadraCode;
+      await cloudFirstSync();
     });
 
   }catch(e){
@@ -81,86 +79,131 @@ async function cloudInit(){
   }
 }
 
-async function cloudSetSquadra(code){
-  code = (code||'').trim().toLowerCase().replace(/[^a-z0-9\-_]/g,'-');
-  if(code.length < 3){
-    alert('Codice squadra troppo corto. Minimo 3 caratteri.');
-    return false;
-  }
-  fb.squadraCode = code;
-  localStorage.setItem('rattazzi_squadra', code);
-  cloudStatusSet('🟡 Sync...','warn');
-  await cloudPull(true);
-  return true;
-}
+/* ============================================================================
+   PRIMO SYNC — logica intelligente anti-perdita dati
+   ========================================================================== */
+async function cloudFirstSync(){
+  if(fb.firstPullDone) return;
+  fb.firstPullDone = true;
 
-async function cloudPull(silent){
-  if(!fb.ready || !fb.squadraCode){
-    if(!silent) alert('Firebase non pronto o codice squadra mancante.');
-    return false;
-  }
-  cloudStatusSet('🟡 Leggo...','warn');
+  cloudStatusSet('🟡 Controllo cloud...','warn');
+
   try{
-    const ref = fb.db.collection('squadre').doc(fb.squadraCode);
+    const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
 
+    // ---- CASO 1: cloud vuoto → push dei dati locali ----
     if(!snap.exists){
+      console.log('☁️ Cloud vuoto: carico i dati locali');
       if(state){
-        console.log('☁️ Nessun dato remoto, eseguo primo upload');
         await cloudPush(true);
-        return true;
+      } else {
+        cloudStatusSet('🟢 Pronto','ok');
       }
-      cloudStatusSet('☁️ Nessun dato remoto','warn');
-      return false;
+      return;
     }
 
+    // ---- CASO 2: cloud ha dati ----
     const remote = snap.data();
     if(!remote || !remote.payload){
-      cloudStatusSet('⚠ Dato remoto vuoto','warn');
-      return false;
+      console.log('☁️ Cloud esiste ma è vuoto: carico i dati locali');
+      if(state) await cloudPush(true);
+      return;
     }
 
     const remoteTime = remote.updatedAt ? new Date(remote.updatedAt).getTime() : 0;
     const localTime  = (state && state.meta && state.meta.lastRevision)
       ? new Date(state.meta.lastRevision).getTime() : 0;
 
-    if(remoteTime > localTime){
-      try{
-        const localBackup = localStorage.getItem(STORAGE_KEY);
-        if(localBackup) localStorage.setItem('rattazzi_pre_cloud_pull', localBackup);
-      }catch(e){}
+    // Conta articoli per il messaggio
+    let remoteCount = 0, localCount = 0;
+    try{
+      const rp = JSON.parse(remote.payload);
+      rp.categories.forEach(c => remoteCount += (c.articles||[]).length);
+    }catch(e){}
+    try{
+      state.categories.forEach(c => localCount += (c.articles||[]).length);
+    }catch(e){}
 
-      fb.suppressNextPush = true;
-      state = normalizeState(JSON.parse(remote.payload));
-      saveState(true);
-      render();
-      setTimeout(()=>{ fb.suppressNextPush = false; }, 500);
-      cloudStatusSet('🟢 Caricato da cloud','ok');
-      console.log('☁️ Pull OK (remoto più recente)');
-      return true;
-    } else if(localTime > remoteTime){
+    // Se non ho dati locali significativi → pull diretto
+    if(localCount === 0){
+      console.log('☁️ Nessun dato locale → pull automatico');
+      await cloudPullInternal(remote);
+      cloudStatusSet('🟢 Sincronizzato','ok');
+      return;
+    }
+
+    // Se remoto è più recente di almeno 10 secondi → chiedi conferma
+    const diffSec = (remoteTime - localTime) / 1000;
+    if(diffSec > 10){
+      const msg = '☁️ Sincronizzazione cloud\n\n' +
+        'Sul cloud ci sono dati PIÙ RECENTI di quelli di questo dispositivo.\n\n' +
+        '  • Cloud: ' + remoteCount + ' articoli\n' +
+        '  • Locale: ' + localCount + ' articoli\n\n' +
+        'Vuoi scaricare i dati dal cloud?\n\n' +
+        'OK = scarica dal cloud (i tuoi dati locali vanno in backup)\n' +
+        'Annulla = tieni i tuoi dati locali e caricali sul cloud';
+      if(confirm(msg)){
+        await cloudPullInternal(remote);
+        cloudStatusSet('🟢 Sincronizzato','ok');
+      } else {
+        console.log('☁️ Utente ha scelto locale → push');
+        await cloudPush(true);
+      }
+      return;
+    }
+
+    // Se locale è più recente → push silenzioso
+    if(localTime > remoteTime){
       console.log('☁️ Locale più recente → push');
       await cloudPush(true);
-      return true;
-    } else {
-      cloudStatusSet('🟢 Sincronizzato','ok');
-      return true;
+      return;
     }
+
+    // Se sono sincronizzati → niente da fare
+    console.log('☁️ Già sincronizzato');
+    cloudStatusSet('🟢 Salvato','ok');
+
+  }catch(e){
+    console.error('First sync fallito:', e);
+    cloudStatusSet('🔴 Offline','err');
+  }
+}
+
+/* Pull interno (senza conferma — la conferma è già stata data) */
+async function cloudPullInternal(remote){
+  try{
+    // Backup automatico dello stato attuale prima di sovrascrivere
+    try{
+      const localBackup = localStorage.getItem(STORAGE_KEY);
+      if(localBackup){
+        const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+        localStorage.setItem('rattazzi_pre_cloud_pull', localBackup);
+        localStorage.setItem('rattazzi_pre_cloud_pull_date', stamp);
+        console.log('💾 Backup pre-sync salvato ('+stamp+')');
+      }
+    }catch(e){}
+
+    fb.suppressNextPush = true;
+    state = normalizeState(JSON.parse(remote.payload));
+    saveState(true);
+    render();
+    setTimeout(()=>{ fb.suppressNextPush = false; }, 1000);
+
+    console.log('☁️ Pull OK');
+    cloudStatusSet('🟢 Caricato da cloud','ok');
+    return true;
   }catch(e){
     console.error('Pull fallito:', e);
-    cloudStatusSet('🔴 Offline','err');
     return false;
   }
 }
 
+/* Push su Firebase */
 async function cloudPush(force){
-  if(!fb.ready || !fb.squadraCode){
-    fb.pendingPush = true;
-    return false;
-  }
+  if(!fb.ready){ fb.pendingPush = true; return false; }
   if(!state) return false;
 
-  // Blocco durante un pull per non creare loop
   if(fb.suppressNextPush){
     fb.suppressNextPush = false;
     return false;
@@ -176,7 +219,7 @@ async function cloudPush(force){
 
   cloudStatusSet('🟡 Salvo...','warn');
   try{
-    const ref = fb.db.collection('squadre').doc(fb.squadraCode);
+    const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const payload = JSON.stringify(state);
     await ref.set({
       payload,
@@ -196,55 +239,93 @@ async function cloudPush(force){
   }
 }
 
+/* Pull manuale (dal click sull'indicatore stato o dal pulsante Impostazioni) */
+async function cloudPull(){
+  if(!fb.ready){ alert('Firebase non pronto. Riprova tra qualche secondo.'); return false; }
+  try{
+    const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
+    const snap = await ref.get();
+    if(!snap.exists){
+      alert('☁️ Il cloud è vuoto. Non c\'è niente da scaricare.');
+      return false;
+    }
+    const remote = snap.data();
+    const ok = await cloudPullInternal(remote);
+    if(ok) alert('✅ Dati scaricati dal cloud.\n\nSe hai problemi, il backup pre-sync è in Impostazioni.');
+    return ok;
+  }catch(e){
+    console.error('Pull manuale fallito:', e);
+    alert('❌ Errore: '+e.message);
+    return false;
+  }
+}
+
+/* Ripristina il backup pre-cloud-pull */
+function cloudRestorePrePullBackup(){
+  const backup = localStorage.getItem('rattazzi_pre_cloud_pull');
+  if(!backup){
+    alert('Nessun backup pre-sync disponibile.');
+    return false;
+  }
+  const dateStr = localStorage.getItem('rattazzi_pre_cloud_pull_date') || 'sconosciuta';
+  if(!confirm('Ripristinare il backup del '+dateStr+'?\n\nSovrascriverà i dati attuali.')){
+    return false;
+  }
+  try{
+    state = normalizeState(JSON.parse(backup));
+    saveState(true);
+    render();
+    alert('✅ Backup ripristinato.');
+    return true;
+  }catch(e){
+    alert('❌ Errore: '+e.message);
+    return false;
+  }
+}
+
 window.addEventListener('online', ()=>{
   console.log('☁️ Torna online');
   cloudStatusSet('🟡 Riconnessione...','warn');
   setTimeout(()=>{
     if(fb.pendingPush) cloudPush(true);
-    else cloudPull(true);
   }, 1000);
 });
 window.addEventListener('offline', ()=>{
   cloudStatusSet('🔴 Offline','err');
 });
 
+/* Collega i pulsanti */
 document.addEventListener('DOMContentLoaded', ()=>{
-  const b1 = document.getElementById('btnCloudSync');
-  if(b1) b1.addEventListener('click', async ()=>{
-    if(!fb.squadraCode){
-      const code = prompt('Inserisci il codice squadra (uguale su tutti i dispositivi):');
-      if(code){ await cloudSetSquadra(code); }
-      return;
-    }
-    await cloudPush(true);
-    alert('✅ Sincronizzato.');
-  });
-
-  const b2 = document.getElementById('btnCloudPull');
-  if(b2) b2.addEventListener('click', async ()=>{
-    if(!fb.squadraCode){
-      const code = prompt('Inserisci il codice squadra:');
-      if(!code) return;
-      if(!(await cloudSetSquadra(code))) return;
-    }
-    if(confirm('Sovrascrivere i dati locali con quelli del cloud?')){
-      await cloudPull(false);
-      alert('✅ Dati caricati dal cloud.');
-    }
-  });
-
-  const b3 = document.getElementById('btnSetSquadra');
-  if(b3) b3.addEventListener('click', async ()=>{
-    const inp = document.getElementById('setSquadra');
-    const code = inp ? inp.value : '';
-    if(await cloudSetSquadra(code)){
-      alert('✅ Codice squadra impostato: '+fb.squadraCode+
-            '\n\nOra questo dispositivo sincronizza con la squadra.');
-    }
-  });
+  // Click sull'indicatore stato → pull manuale
+  const status = document.getElementById('cloudStatus');
+  if(status){
+    status.addEventListener('click', async ()=>{
+      if(!fb.ready){
+        alert('☁️ Firebase non ancora pronto. Riprova tra qualche secondo.');
+        return;
+      }
+      if(confirm('☁️ Scaricare i dati dal cloud?\n\nI dati attuali verranno salvati come backup.')){
+        await cloudPull();
+      }
+    });
+  }
+  // Pulsante "Sincronizza ora" nelle Impostazioni
+  const btnSync = document.getElementById('btnCloudSync');
+  if(btnSync){
+    btnSync.addEventListener('click', async ()=>{
+      if(!fb.ready){ alert('Firebase non pronto.'); return; }
+      await cloudPush(true);
+      alert('✅ Sincronizzato con il cloud.');
+    });
+  }
+  // Pulsante "Ripristina backup pre-sync"
+  const btnRestore = document.getElementById('btnRestorePrePull');
+  if(btnRestore){
+    btnRestore.addEventListener('click', cloudRestorePrePullBackup);
+  }
 });
 
 window.cloudInit = cloudInit;
 window.cloudPush = cloudPush;
 window.cloudPull = cloudPull;
-window.cloudSetSquadra = cloudSetSquadra;
+window.cloudRestorePrePullBackup = cloudRestorePrePullBackup;

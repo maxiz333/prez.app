@@ -790,16 +790,14 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
     </div>
     <div class="modal-body">
       <div class="field">
-        <label>☁️ Codice squadra (per sincronizzare tra dispositivi)</label>
-        <input type="text" id="setSquadra" placeholder="Es. rattazzi-2025" autocomplete="off">
+        <label>☁️ Sincronizzazione cloud</label>
         <div class="field-hint">
-          Metti lo stesso codice su tutti i dispositivi che vuoi sincronizzare.
-          Senza codice, l'app funziona solo in locale.
+          L'app si sincronizza <b style="color:var(--yellow)">automaticamente</b> su tutti i dispositivi che la aprono.
+          Clicca l'indicatore di stato in alto a destra per scaricare manualmente i dati dal cloud.
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn btn-yellow btn-sm" id="btnSetSquadra" type="button">Imposta codice</button>
           <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Sincronizza ora</button>
-          <button class="btn btn-sm" id="btnCloudPull" type="button">⬇ Scarica da cloud</button>
+          <button class="btn btn-sm" id="btnRestorePrePull" type="button" style="color:var(--amber)">↺ Ripristina backup pre-sync</button>
         </div>
       </div>
       <div class="field"><label>Nome operatore</label><input type="text" id="setOperator"></div>
