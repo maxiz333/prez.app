@@ -319,6 +319,12 @@ body.drag-active main.content{overflow:hidden;}
 
 .empty-state{padding:60px 20px;text-align:center;color:var(--text-mute);}
 .empty-state .big{font-size:42px;margin-bottom:12px;opacity:.35;}
+.empty-state .sync-spinner{
+  display:inline-block;width:38px;height:38px;border-radius:50%;
+  border:3px solid rgba(255,204,0,.2);border-top-color:var(--yellow);
+  animation:spin 1s linear infinite;margin-bottom:16px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
 
 .bottom-nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#0d0d0d;
   border-top:1px solid var(--border);padding:6px 0 calc(6px + env(safe-area-inset-bottom));z-index:20;}
@@ -479,7 +485,7 @@ body.drag-active main.content{overflow:hidden;}
   font-size:9px;font-weight:800;padding:1px 5px;border-radius:20px;min-width:16px;text-align:center;}
 
 /* =========================================================
-   STAMPA A4 — header con settore grande + lista adattiva
+   STAMPA A4 — titolo grande + riempimento totale
    ========================================================= */
 #printArea{display:none;}
 @media print{
@@ -490,39 +496,29 @@ body.drag-active main.content{overflow:hidden;}
 }
 #printArea{
   background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;
-}
-/* Header: settore a sinistra (grande) + data a destra */
-#printArea .print-header{
-  display:grid;
-  grid-template-columns:1fr auto;
-  align-items:end;
-  gap:8mm;
-  padding-bottom:3mm;
-  margin-bottom:15mm;
-  border-bottom:2.5px solid #000;
-}
-#printArea .print-sector{
+  min-height:277mm;      /* A4 (297) - margin top/bottom (8+8) - 4mm tolleranza */
   display:flex;
   flex-direction:column;
-  gap:1mm;
-  min-width:0;
 }
-#printArea .print-sector-prefix{
-  font-size:9pt;
-  font-weight:700;
-  color:#666;
-  text-transform:uppercase;
-  letter-spacing:2px;
-  line-height:1;
+#printArea .print-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:8mm;
+  padding-bottom:3mm;
+  margin-bottom:8mm;
+  border-bottom:3px solid #000;
 }
-#printArea .print-sector-name{
-  font-size:20pt;
+#printArea .print-title{
+  font-size:18pt;
   font-weight:900;
   color:#000;
-  letter-spacing:1.5px;
+  letter-spacing:2px;
   line-height:1.1;
   text-transform:uppercase;
   word-wrap:break-word;
+  flex:1;
+  min-width:0;
 }
 #printArea .print-date-line{
   font-size:11pt;
@@ -541,11 +537,12 @@ body.drag-active main.content{overflow:hidden;}
   height:1em;
   vertical-align:baseline;
 }
-/* Lista articoli */
+/* Lista articoli: prende tutto lo spazio rimanente */
 #printArea .articoli-list{
   display:flex;
   flex-direction:column;
   gap:2mm;
+  flex:1;
 }
 #printArea .articolo{
   display:flex;
@@ -556,6 +553,8 @@ body.drag-active main.content{overflow:hidden;}
   padding:2mm 3mm;
   page-break-inside:avoid;
   background:#fff;
+  flex:1;              /* <-- ogni articolo cresce per riempire */
+  min-height:10mm;     /* ma non meno di 10mm */
 }
 #printArea .art-info{
   flex:1;
@@ -572,7 +571,7 @@ body.drag-active main.content{overflow:hidden;}
   color:#000;
   word-wrap:break-word;
 }
-#printArea .articoli-list.compact .art-nome{font-size:12pt;}
+#printArea .articoli-list.compact .art-nome{font-size:11pt;}
 #printArea .art-code-inline{
   display:inline-block;
   font-size:11pt;
@@ -588,7 +587,7 @@ body.drag-active main.content{overflow:hidden;}
   vertical-align:middle;
   white-space:nowrap;
 }
-#printArea .articoli-list.compact .art-code-inline{font-size:10pt;}
+#printArea .articoli-list.compact .art-code-inline{font-size:9.5pt;}
 #printArea .art-prezzo-box{
   width:55mm;
   flex-shrink:0;
@@ -623,7 +622,6 @@ body.drag-active main.content{overflow:hidden;}
   color:#666;
   margin-top:1mm;
 }
-/* Compact mode: articoli piccoli */
 #printArea .articoli-list.compact .art-prezzo-label{
   font-size:7pt;
   letter-spacing:.8px;
@@ -1033,13 +1031,11 @@ body.drag-active main.content{overflow:hidden;}
       <div class="field">
         <label>☁️ Sincronizzazione cloud</label>
         <div class="field-hint">
-          Alla apertura l'app carica <b style="color:var(--yellow)">automaticamente</b> i dati dal cloud.
-          Il locale è solo cache di sicurezza per l'uso offline.
+          Alla apertura l'app carica <b style="color:var(--yellow)">sempre</b> i dati dal cloud.
+          Il salvataggio avviene automaticamente online.
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Carica dal cloud ora</button>
-          <button class="btn btn-sm" id="btnCloudPush" type="button">⬆ Forza invio al cloud</button>
-          <button class="btn btn-sm" id="btnRestorePrePull" type="button" style="color:var(--amber)">↺ Ripristina backup pre-sync</button>
+          <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Ricarica dal cloud</button>
         </div>
       </div>
       <div class="field"><label>Nome operatore</label><input type="text" id="setOperator"></div>
@@ -1048,21 +1044,20 @@ body.drag-active main.content{overflow:hidden;}
       <div style="background:#131313;border:1px solid var(--border);border-radius:8px;padding:12px;
         font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px">
         <strong style="color:var(--yellow)">🛡️ Sicurezza dati</strong><br>
-        3 backup automatici a rotazione + verifica integrità ad ogni scrittura.<br><br>
+        Tutto il salvataggio è <b style="color:var(--yellow)">online su Firebase</b>. Non ci sono
+        duplicati locali da gestire. Se manca internet, l'app continua a funzionare
+        e sincronizza appena torna la connessione.<br><br>
         <strong style="color:var(--yellow)">👁 Modalità Cliente</strong><br>
         Clicca il logo RZ in alto a sinistra per nascondere costo e margine.<br><br>
         <strong style="color:var(--yellow)">🔗 Correlati</strong><br>
         Nella scheda articolo, tab "🔗 Correlati" per collegare prodotti complementari
         con prezzo modificabile al volo.<br><br>
-        <strong style="color:var(--yellow)">📦 Storage utilizzato</strong><br>
-        <span id="setStorageInfo">—</span><br><br>
         <strong style="color:var(--yellow)">↩️ Undo / Redo</strong><br>
         Ctrl+Z = annulla · Ctrl+Y = ripeti. Conserva le ultime 15 modifiche.
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn" data-close>Annulla</button>
-      <button class="btn" id="btnClean" style="color:var(--amber)">🧹 Pulisci storage</button>
       <button class="btn btn-yellow" id="setSave">Salva</button>
     </div>
   </div>
@@ -1080,13 +1075,12 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.16
+   RATTAZZI CARTELLINI PREZZI v3.17
    ---------------------------------------------------------------------------
-   Novità v3.16:
-     - Fix stampa: settore visibile in alto a sinistra (grid layout)
-     - Stampa adattiva: riempi la pagina senza spazi bianchi (max 62mm per riga)
-     - Gap 15mm tra header e articoli
-     - Fix tremolio compact header con rotella (freeze al fondo + conferma doppia)
+   Novità v3.17:
+     - Stampa con titolo grande (no "Settore:") + riempimento totale foglio
+     - Cloud-only: nessuna scelta tra locale e online, sempre dal cloud
+     - All'avvio: attesa cloud con spinner, poi render
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -1300,7 +1294,7 @@ function compressImage(file,maxPx=MAX_PHOTO_PX,quality=PHOTO_QUALITY){
   });
 }
 
-/* -------- SEED -------- */
+/* -------- SEED (solo primissimo avvio, quando cloud è vuoto) -------- */
 function buildSeed(){
   return {
     version:APP_VERSION,
@@ -1347,47 +1341,53 @@ function mkArt(name,price,cost,unit,updatedAt,notes,purchases,sconti,code){
   };
 }
 
-/* -------- STORAGE SICURO -------- */
+/* ============================================================================
+   STORAGE — ora è solo CACHE SILENZIOSA per l'offline
+   ========================================================================== */
 function saveState(silent=false){
   try{
     const json=JSON.stringify(state);
-    localStorage.setItem(TEMP_KEY,json);
-    if(localStorage.getItem(TEMP_KEY)!==json) throw new Error('Verifica integrità fallita');
-    for(let i=BACKUP_KEYS.length-1;i>0;i--){
-      const prev=localStorage.getItem(BACKUP_KEYS[i-1]);
-      if(prev!==null) localStorage.setItem(BACKUP_KEYS[i],prev);
-    }
-    const cur=localStorage.getItem(STORAGE_KEY);
-    if(cur!==null) localStorage.setItem(BACKUP_KEYS[0],cur);
-    localStorage.setItem(STORAGE_KEY,json);
+    // Cache locale per uso offline (silenziosa)
+    localStorage.setItem(STORAGE_KEY, json);
+    localStorage.setItem(TEMP_KEY, json);
     localStorage.removeItem(TEMP_KEY);
-    updateStorageInfo();
-    setInfo('save','● Dati salvati '+new Date().toLocaleTimeString('it-IT'),'ok');
+
+    // Sync su cloud (obbligatoria)
     try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
+
+    updateStorageInfo();
+    setInfo('save','● Salvato online '+new Date().toLocaleTimeString('it-IT'),'ok');
     return true;
   }catch(e){
     console.error('Save error:',e);
-    const quota=e.name==='QuotaExceededError'||/quota/i.test(e.message);
-    if(quota){
-      try{
-        if(localStorage.getItem(BACKUP_KEYS[2])){
-          localStorage.removeItem(BACKUP_KEYS[2]);
-          localStorage.removeItem(TEMP_KEY);
-          return saveState(silent);
-        }
-        if(localStorage.getItem(TEMP_KEY)){
-          localStorage.removeItem(TEMP_KEY);
-          return saveState(silent);
-        }
-      }catch(e2){}
-    }
-    setInfo('save','● ERRORE: '+(quota?'Storage pieno':'Salvataggio fallito'),'err');
-    if(!silent){
-      if(quota) alert('⚠️ STORAGE PIENO\n\nRimuovi foto o usa "🧹 Pulisci storage" nelle Impostazioni.');
-      else alert('⚠️ ERRORE SALVATAGGIO\n'+e.message);
-    }
-    return false;
+    // Anche se il locale fallisce, il cloud push parte comunque
+    try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
+    setInfo('save','● Salvataggio online in corso...','warn');
+    return true;
   }
+}
+
+/* Legge lo stato SOLO dalla cache locale (per fallback offline) */
+function loadStateFromCache(){
+  const keys=[STORAGE_KEY,...BACKUP_KEYS,...LEGACY_KEYS];
+  for(const k of keys){
+    const raw=localStorage.getItem(k);if(!raw)continue;
+    try{
+      const p=JSON.parse(raw);
+      return normalizeState(p);
+    }catch(err){console.warn('Cache non valida in',k,err);}
+  }
+  return null;
+}
+
+/* Inizializza state VUOTO — sarà riempito dal cloud */
+function loadStateEmpty(){
+  state = {
+    version: APP_VERSION,
+    meta: {operator:'', lastRevision:new Date().toISOString(), globalMargin:40},
+    categories: []
+  };
+  activeCategoryId = null;
 }
 
 function normalizeState(p){
@@ -1431,35 +1431,6 @@ function normalizeState(p){
   return p;
 }
 
-function loadState(){
-  const keys=[STORAGE_KEY,...BACKUP_KEYS,...LEGACY_KEYS];
-  let restored=null,from=null;
-  for(const k of keys){
-    const raw=localStorage.getItem(k);if(!raw)continue;
-    try{
-      const p=JSON.parse(raw);
-      restored=normalizeState(p);
-      from=k;
-      break;
-    }catch(err){console.warn('Dati non validi in',k,err);}
-  }
-  if(restored){
-    state=restored;
-    if(from!==STORAGE_KEY){
-      const ok=saveState(true);
-      if(ok) setInfo('save','● Recupero da '+from,'warn');
-    } else {
-      setInfo('save','● Dati caricati correttamente','ok');
-    }
-  } else {
-    state=buildSeed();
-    const ok=saveState(true);
-    if(ok) setInfo('save','● Primo avvio: dati demo caricati','ok');
-  }
-  activeCategoryId=state.categories[0]?state.categories[0].id:null;
-  updateStorageInfo();
-}
-
 let _storageUpdateTimer = null;
 function updateStorageInfo(){
   clearTimeout(_storageUpdateTimer);
@@ -1467,9 +1438,8 @@ function updateStorageInfo(){
     let ourTxt='—', totalTxt='—';
     try{
       let bytes=0;
-      for(const k of [STORAGE_KEY,...BACKUP_KEYS,TEMP_KEY]){
-        const v=localStorage.getItem(k);if(v)bytes+=v.length*2;
-      }
+      const v = localStorage.getItem(STORAGE_KEY);
+      if(v) bytes += v.length*2;
       const kb=bytes/1024;
       ourTxt = kb>=1024 ? (kb/1024).toFixed(2)+' MB' : kb.toFixed(1)+' KB';
     }catch(e){}
@@ -1482,16 +1452,13 @@ function updateStorageInfo(){
       }
     }catch(e){}
     const el=$('#infoStorage');
-    if(el) el.textContent = 'App: '+ourTxt+' · Origine: '+totalTxt;
-    const el2=$('#setStorageInfo');
-    if(el2) el2.innerHTML =
-      '<b>Questa app:</b> '+ourTxt+'<br>'+
-      '<b>Totale origine:</b> '+totalTxt+'<br>'+
-      '<span style="color:var(--amber)">⚠️ Se l\'origine è oltre il 90%, i salvataggi falliranno.</span>';
+    if(el) el.textContent = 'Cache: '+ourTxt+' · Origine: '+totalTxt;
   }, 200);
 }
 
-/* -------- STATO -------- */
+/* ============================================================================
+   STATO
+   ========================================================================== */
 let state=null;
 let activeCategoryId=null;
 let activeFilter='all';
@@ -1500,6 +1467,7 @@ let selectedArticles=new Set();
 let selectionMode=false;
 let editingArticleId=null;
 let pendingPhoto=null;
+let cloudReady=false;   // diventa true quando il cloud ha risposto
 
 /* -------- UNDO/REDO -------- */
 let undoStack=[];
@@ -1624,6 +1592,19 @@ function renderTabs(){
 
 function renderTable(){
   const tbody=$('#tableBody');tbody.innerHTML='';
+
+  // Se il cloud non ha ancora risposto → spinner
+  if(!cloudReady){
+    tbody.innerHTML='<tr><td colspan="10"><div class="empty-state">'+
+      '<div class="sync-spinner"></div>'+
+      '<strong>☁️ Sincronizzazione in corso...</strong>'+
+      '<p>Sto caricando i dati dal cloud. Attendi qualche secondo.</p>'+
+      '</div></td></tr>';
+    updateSelectionBar();
+    updateSearchBar();
+    return;
+  }
+
   const articles=getFilteredArticles();
   const isSearching = !!searchQuery.trim();
   if(!articles.length){
@@ -2233,7 +2214,7 @@ $('#linkedList').addEventListener('click', e=>{
 /* -------- AZIONI -------- */
 function deleteArticle(id){
   const art=findArticle(id);if(!art)return;
-  if(!confirm('Eliminare "'+art.name+'"'+(art.code?' ('+art.code+')':'')+'?\n\nRecuperabile con Ctrl+Z oppure da backup.'))return;
+  if(!confirm('Eliminare "'+art.name+'"'+(art.code?' ('+art.code+')':'')+'?'))return;
   pushUndo('Elimina "'+art.name+'"');
   for(const c of state.categories){
     const i=c.articles.findIndex(x=>x.id===id);
@@ -2494,7 +2475,7 @@ $('#btnSaveArt').addEventListener('click',()=>{
   art.supplierCode=$('#edSupplierCode').value.trim().slice(0,100);
   art.notes=$('#edNotes').value.trim().slice(0,1000);
   art.photo=pendingPhoto||'';
-  if(!saveState()){ if(!confirm('Salvataggio fallito. Chiudere comunque?'))return; }
+  saveState();
   closeModal('#modalArticle');
   editingArticleId=null;pendingPhoto=null;
   render();
@@ -2579,22 +2560,6 @@ $('#setSave').addEventListener('click',()=>{
   state.meta.globalMargin=Math.max(0,parseFloat($('#setGlobalMargin').value)||40);
   saveState();updateInfoBar();closeModal('#modalSettings');
 });
-$('#btnClean').addEventListener('click',()=>{
-  if(!confirm('Pulire i backup vecchi e le chiavi di versioni precedenti?\n\nI tuoi dati attuali NON verranno toccati.')) return;
-  let freed=0;
-  for(const k of LEGACY_KEYS){
-    const v=localStorage.getItem(k);
-    if(v){freed+=v.length*2;localStorage.removeItem(k);}
-  }
-  for(let i=1;i<BACKUP_KEYS.length;i++){
-    const v=localStorage.getItem(BACKUP_KEYS[i]);
-    if(v){freed+=v.length*2;localStorage.removeItem(BACKUP_KEYS[i]);}
-  }
-  const t=localStorage.getItem(TEMP_KEY);
-  if(t){freed+=t.length*2;localStorage.removeItem(TEMP_KEY);}
-  updateStorageInfo();
-  alert('✅ Liberati circa '+(freed/1024).toFixed(1)+' KB.');
-});
 
 /* -------- EXPORT / IMPORT -------- */
 $('#btnExport').addEventListener('click',()=>{
@@ -2608,7 +2573,6 @@ $('#btnExport').addEventListener('click',()=>{
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(url);
     setInfo('save','● Backup scaricato','ok');
-    try{localStorage.setItem('rattazzi_last_export',String(Date.now()));}catch(e){}
   }catch(e){alert('Errore export: '+e.message);}
 });
 $('#btnImport').addEventListener('click',()=>{
@@ -2623,7 +2587,6 @@ $('#btnImport').addEventListener('click',()=>{
         const normalized=normalizeState(p);
         if(!confirm('Sovrascrivere i dati attuali?'))return;
         pushUndo('Import backup');
-        try{const cur=localStorage.getItem(STORAGE_KEY);if(cur)localStorage.setItem(BACKUP_KEYS[0],cur);}catch(e){}
         state=normalized;
         activeCategoryId=state.categories[0]?state.categories[0].id:null;
         selectedArticles.clear();
@@ -2689,19 +2652,13 @@ $('#checkAllHead').addEventListener('change',e=>{
 });
 
 /* ============================================================================
-   STAMPA A4 — settore visibile + dimensione adattiva per riempire la pagina
+   STAMPA A4 — titolo grande + riempimento totale
    ============================================================================
-   Formato A4: 297mm altezza - 16mm margini = 281mm utilizzabili
-   - Header (settore + data): ~15mm
-   - Gap 15mm (richiesta utente)
-   - Rimangono ~250mm per gli articoli
-   Regole altezza righe:
-     - n=1 → max 62mm (non troppo gigante)
-     - n=2 → max 62mm
-     - n=3 → max 62mm
-     - n=4 → ~60mm (riempe la pagina)
-     - n=5..16 → adattivo per riempire
-     - n=17+ → compact (12.5mm minimo)
+   Layout:
+     - Header: titolo (18pt, bold) a sinistra + "Data: ______" a destra
+     - Gap: 8mm
+     - Lista: flex:1 su ogni articolo → gli articoli si espandono per
+       riempire tutto lo spazio rimanente. Con 4 articoli la pagina è piena.
    ========================================================================== */
 function doActualPrint(){
   const isSearching = !!searchQuery.trim();
@@ -2715,19 +2672,26 @@ function doActualPrint(){
   if(!articles.length)return alert('Nessun articolo da stampare.');
 
   const n = articles.length;
-  const USABLE = 248;   // mm disponibili per la lista
-  const GAP = 2;        // mm tra le righe
-  let hRow = (USABLE - (n-1)*GAP) / n;
-  hRow = Math.max(12.5, Math.min(62, hRow));
-  const hRowPx = hRow + 'mm';
-  const compact = hRow < 16;
+  const compact = n > 16;   // sotto i 16mm per riga → font compatto
+
+  // Riferimento altezza: con più di 16 articoli uso min-height per farli entrare in 1 pagina
+  // Altrimenti lascio flex:1 fare il suo lavoro (riempimento automatico)
+  let minHeightStyle = '';
+  if(n > 16){
+    // Calcolo altezza minima per far stare tutti in 1 pagina
+    const usableMM = 245;      // spazio disponibile per la lista
+    const gapMM = 2 * (n-1);
+    let hRow = (usableMM - gapMM) / n;
+    hRow = Math.max(9, hRow); // minimo assoluto 9mm
+    minHeightStyle = ` style="min-height:${hRow}mm"`;
+  }
 
   const rowsHtml = articles.map(a=>{
     const codeHtml = a.code
       ? ' <span class="art-code-inline">'+esc(a.code)+'</span>'
       : '';
     return `
-      <div class="articolo" style="min-height:${hRowPx}">
+      <div class="articolo"${minHeightStyle}>
         <div class="art-info">
           <div class="art-nome">${esc(a.name)}${codeHtml}</div>
         </div>
@@ -2739,16 +2703,13 @@ function doActualPrint(){
       </div>`;
   }).join('');
 
-  const sectorLabel = isSearching
-    ? 'Ricerca: "'+searchQuery.trim()+'"'
+  const titleText = isSearching
+    ? 'Ricerca: '+searchQuery.trim()
     : (cat ? cat.name : 'Articoli');
 
   $('#printArea').innerHTML = `
     <div class="print-header">
-      <div class="print-sector">
-        <span class="print-sector-prefix">Settore</span>
-        <span class="print-sector-name">${esc(sectorLabel)}</span>
-      </div>
+      <div class="print-title">${esc(titleText)}</div>
       <div class="print-date-line">Data: <span class="print-date-blank"></span></div>
     </div>
     <div class="articoli-list ${compact?'compact':''}">
@@ -2978,7 +2939,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ============================================================================
-   COMPACT HEADER ON SCROLL — versione anti-tremolio con freeze al fondo
+   COMPACT HEADER ON SCROLL — anti-tremolio
    ========================================================================== */
 (function initCompactHeader(){
   const content=document.querySelector('#mainContent');
@@ -2995,7 +2956,7 @@ document.addEventListener('keydown',e=>{
   const ENTER_DELTA=70;
   const EXIT_DELTA=-30;
   const TOP_THRESHOLD=20;
-  const BOTTOM_THRESHOLD=50;   // se vicino al fondo, FREEZE
+  const BOTTOM_THRESHOLD=50;
   const ENTER_MIN_Y=100;
   const MIN_ABS_DIFF=4;
   const CONFIRM_COUNT=2;
@@ -3006,46 +2967,30 @@ document.addEventListener('keydown',e=>{
     const maxScroll=content.scrollHeight - content.clientHeight;
     const distFromBottom = maxScroll - y;
 
-    // In cima: sempre espanso
     if(y < TOP_THRESHOLD){
-      if(isCompact){
-        isCompact=false;
-        document.body.classList.remove('compact');
-      }
-      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false;
-      return;
+      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
+      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false; return;
     }
 
-    // Vicino al fondo: FREEZE (qui era il tremolio)
     if(distFromBottom < BOTTOM_THRESHOLD){
-      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false;
-      return;
+      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false; return;
     }
 
-    // Cooldown
     if((now - lastToggleTime) < COOLDOWN_MS){
       lastScroll=y; ticking=false; return;
     }
 
     const diff = y - lastScroll;
-
-    // Micro-movimento: ignora
     if(Math.abs(diff) < MIN_ABS_DIFF){
       lastDirection=0; consecutiveCount=0;
       lastScroll=y; ticking=false; return;
     }
 
     const dir = diff > 0 ? 1 : -1;
-
-    // Serve conferma: 2 eventi consecutivi nella stessa direzione
-    if(dir === lastDirection){
-      consecutiveCount++;
-    } else {
-      lastDirection = dir;
-      consecutiveCount = 1;
-      lastScroll = y;
-      ticking = false;
-      return;
+    if(dir === lastDirection){ consecutiveCount++; }
+    else {
+      lastDirection = dir; consecutiveCount = 1;
+      lastScroll = y; ticking = false; return;
     }
 
     if(consecutiveCount < CONFIRM_COUNT){
@@ -3053,63 +2998,80 @@ document.addEventListener('keydown',e=>{
     }
 
     if(!isCompact && lastDirection === 1 && diff > ENTER_DELTA && y > ENTER_MIN_Y){
-      isCompact=true;
-      document.body.classList.add('compact');
-      lastToggleTime=now;
-      consecutiveCount=0;
+      isCompact=true; document.body.classList.add('compact');
+      lastToggleTime=now; consecutiveCount=0;
     } else if(isCompact && lastDirection === -1 && diff < EXIT_DELTA){
-      isCompact=false;
-      document.body.classList.remove('compact');
-      lastToggleTime=now;
-      consecutiveCount=0;
+      isCompact=false; document.body.classList.remove('compact');
+      lastToggleTime=now; consecutiveCount=0;
     }
 
-    lastScroll=y;
-    ticking=false;
+    lastScroll=y; ticking=false;
   }
 
   content.addEventListener('scroll',()=>{
-    if(!ticking){
-      requestAnimationFrame(update);
-      ticking=true;
-    }
+    if(!ticking){requestAnimationFrame(update);ticking=true;}
   }, { passive: true });
 
   window.__resetCompact=function(){
     document.body.classList.remove('compact');
-    isCompact=false;
-    lastScroll=0;
-    lastToggleTime=0;
-    lastDirection=0;
-    consecutiveCount=0;
+    isCompact=false; lastScroll=0; lastToggleTime=0;
+    lastDirection=0; consecutiveCount=0;
   };
 })();
 
-/* -------- AVVIO -------- */
+/* ============================================================================
+   AVVIO — CLOUD-ONLY: aspetta Firebase, poi mostra i dati
+   ========================================================================== */
+window.__cloudReady = function(){
+  // Chiamata da cloud.js quando il pull dal cloud è completato
+  cloudReady = true;
+  // Seleziona primo settore
+  if(state.categories.length && !activeCategoryId){
+    activeCategoryId = state.categories[0].id;
+  }
+  render();
+  updateInfoBar();
+  console.log('☁️ App pronta con dati cloud');
+};
+
+window.__cloudFallbackLocal = function(){
+  // Chiamata da cloud.js se Firebase non risponde entro il timeout
+  const cached = loadStateFromCache();
+  if(cached && cached.categories.length){
+    state = cached;
+    activeCategoryId = state.categories[0].id;
+    console.log('📦 Uso cache locale (offline)');
+  } else {
+    state = buildSeed();
+    activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+    console.log('📦 Uso seed demo (primo avvio offline)');
+  }
+  cloudReady = true;
+  render();
+  updateInfoBar();
+};
+
 (function init(){
   try{
     loadClientMode();
-    loadState();
+    // 1) Stato VUOTO
+    loadStateEmpty();
+    cloudReady = false;
+    // 2) Render con spinner di sincronizzazione
     render();
     updateInfoBar();
     updateUndoButtons();
     initRubrica();
+    // 3) Avvia Firebase — quando risponderà chiamerà __cloudReady()
+    setTimeout(()=>{
+      try{ if(window.cloudInit) window.cloudInit(); }
+      catch(e){ console.warn('Cloud init:',e); window.__cloudFallbackLocal(); }
+    }, 300);
   }catch(e){
     console.error('Init error:',e);
-    alert('Errore avvio: '+e.message+'\n\nProva a ricaricare.');
+    alert('Errore avvio: '+e.message);
   }
-  try{
-    const lastExp=localStorage.getItem('rattazzi_last_export');
-    const days=lastExp?Math.floor((Date.now()-Number(lastExp))/86400000):999;
-    if(days>30){
-      setTimeout(()=>{
-        if(confirm('⚠️ Non scarichi un backup da '+(days===999?'molto tempo':days+' giorni')+
-                   '.\n\nVuoi scaricarne uno adesso?')){$('#btnExport').click();}
-      },1800);
-    }
-  }catch(e){}
-  console.log('%cRattazzi Cartellini v3.16 avviato','color:#ffcc00;font-weight:bold');
-  setTimeout(()=>{ try{ if(window.cloudInit) window.cloudInit(); }catch(e){console.warn('Cloud init:',e);} }, 1500);
+  console.log('%cRattazzi Cartellini v3.17 avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>

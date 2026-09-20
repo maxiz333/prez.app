@@ -1,9 +1,11 @@
 /* ============================================================================
-   RATTAZZI — Sincronizzazione Firebase
+   RATTAZZI — Sincronizzazione Firebase (CLOUD-ONLY)
    ---------------------------------------------------------------------------
-   Logica: all'avvio si carica SEMPRE la versione dal cloud.
-   Il localStorage è solo cache di sicurezza per l'uso offline.
-   Se il locale è più recente del cloud di >10 sec → chiedi (hai lavorato offline).
+   - All'avvio: pull SEMPRE dal cloud (nessuna scelta utente)
+   - Se cloud risponde → popola state e chiama window.__cloudReady()
+   - Se cloud non risponde entro 8 sec → fallback silenzioso su cache locale
+   - Se cloud è vuoto → push dal locale (o seed) come primo setup
+   - Salvataggio: SEMPRE su cloud + cache locale silenziosa
    ========================================================================== */
 
 const FIREBASE_CONFIG = {
@@ -20,7 +22,8 @@ const SQUADRA_ID = 'rattazzi-ufficiale';
 const fb = {
   ready:false, app:null, db:null, auth:null, uid:null,
   pushTimer:null, pendingPush:false,
-  suppressUntil:0, firstPullDone:false
+  suppressUntil:0, firstPullDone:false,
+  fallbackTimer:null, fallbackDone:false
 };
 
 function cloudStatusSet(text, cls){
@@ -30,13 +33,30 @@ function cloudStatusSet(text, cls){
   el.className = 'cloud-status ' + (cls||'');
 }
 
+function triggerFallback(){
+  if(fb.fallbackDone) return;
+  fb.fallbackDone = true;
+  console.warn('☁️ Timeout cloud: uso la cache locale');
+  cloudStatusSet('🟡 Offline — uso cache locale','warn');
+  try{
+    if(window.__cloudFallbackLocal) window.__cloudFallbackLocal();
+  }catch(e){console.error('Fallback fallito:',e);}
+}
+
 async function cloudInit(){
   if(typeof firebase === 'undefined'){
     console.warn('Firebase SDK non caricato');
     cloudStatusSet('🔴 Firebase assente','err');
+    triggerFallback();
     return;
   }
+
+  // Timeout di sicurezza: se entro 8 secondi Firebase non risponde, uso la cache locale
+  clearTimeout(fb.fallbackTimer);
+  fb.fallbackTimer = setTimeout(triggerFallback, 8000);
+
   cloudStatusSet('⏳ Connessione...','warn');
+
   try{
     fb.app  = firebase.initializeApp(FIREBASE_CONFIG);
     fb.auth = firebase.auth();
@@ -60,6 +80,7 @@ async function cloudInit(){
       }catch(e){
         console.error('Auth fallita:', e);
         cloudStatusSet('🔴 Auth fallita','err');
+        triggerFallback();
         return;
       }
       fb.ready = true;
@@ -70,10 +91,11 @@ async function cloudInit(){
   }catch(e){
     console.error('Init Firebase fallita:', e);
     cloudStatusSet('🔴 Errore Firebase','err');
+    triggerFallback();
   }
 }
 
-/* Primo sync: SEMPRE dal cloud (con protezione se locale più recente) */
+/* Primo sync: SEMPRE dal cloud (nessuna scelta utente) */
 async function cloudFirstSync(){
   if(fb.firstPullDone) return;
   fb.firstPullDone = true;
@@ -82,71 +104,83 @@ async function cloudFirstSync(){
     const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
 
-    // Cloud vuoto → primo setup, carico i locali
+    // Timeout: cancello perché Firebase ha risposto
+    clearTimeout(fb.fallbackTimer);
+    fb.fallbackDone = true;
+
+    // ---- CASO 1: cloud vuoto → primo setup ----
     if(!snap.exists){
-      console.log('☁️ Cloud vuoto: carico i dati locali');
-      if(state) await cloudPush(true);
-      else cloudStatusSet('🟢 Pronto','ok');
-      return;
-    }
+      console.log('☁️ Cloud vuoto: primo setup, carico dati locali');
+      // Provo a recuperare da cache locale
+      let localToUpload = null;
+      try{
+        for(const k of [STORAGE_KEY,...BACKUP_KEYS,...LEGACY_KEYS]){
+          const raw = localStorage.getItem(k);
+          if(!raw) continue;
+          try{
+            const p = JSON.parse(raw);
+            if(p && Array.isArray(p.categories) && p.categories.length){
+              localToUpload = normalizeState(p);
+              break;
+            }
+          }catch(e){}
+        }
+      }catch(e){}
 
-    const remote = snap.data();
-    if(!remote || !remote.payload){
-      console.log('☁️ Cloud vuoto: carico i dati locali');
-      if(state) await cloudPush(true);
-      return;
-    }
-
-    const remoteTime = remote.updatedAt ? new Date(remote.updatedAt).getTime() : 0;
-    const localTime = (state && state.meta && state.meta.lastRevision)
-      ? new Date(state.meta.lastRevision).getTime() : 0;
-
-    // Se il locale è significativamente più recente (>10 sec) → chiedi
-    if(localTime > remoteTime + 10000){
-      const msg = '⚠️ Sincronizzazione cloud\n\n' +
-        'I tuoi dati LOCALI sono più recenti di quelli del cloud.\n\n' +
-        'Sembra che tu abbia lavorato offline o su un altro dispositivo.\n\n' +
-        '  • Locale: ' + new Date(localTime).toLocaleString('it-IT') + '\n' +
-        '  • Cloud:  ' + new Date(remoteTime).toLocaleString('it-IT') + '\n\n' +
-        'OK = CARICA i tuoi dati locali sul cloud (sovrascrive il cloud)\n' +
-        'Annulla = SCARICA i dati dal cloud (perdi le modifiche locali)';
-      if(confirm(msg)){
+      if(localToUpload){
+        state = localToUpload;
+        activeCategoryId = state.categories[0] ? state.categories[0].id : null;
         await cloudPush(true);
       } else {
-        await cloudPullInternal(remote);
+        // Nessuna cache → carico seed demo
+        state = buildSeed();
+        activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+        await cloudPush(true);
       }
+      cloudStatusSet('🟢 Pronto','ok');
+      if(window.__cloudReady) window.__cloudReady();
       return;
     }
 
-    // Altrimenti: pull diretto dal cloud (comportamento principale)
+    // ---- CASO 2: cloud ha dati → pull SEMPRE ----
+    const remote = snap.data();
+    if(!remote || !remote.payload){
+      console.log('☁️ Cloud vuoto (payload mancante): primo setup');
+      // stesso discorso del caso 1
+      state = buildSeed();
+      activeCategoryId = state.categories[0] ? state.categories[0].id : null;
+      await cloudPush(true);
+      if(window.__cloudReady) window.__cloudReady();
+      return;
+    }
+
     console.log('☁️ Carico dal cloud...');
     await cloudPullInternal(remote);
     cloudStatusSet('🟢 Caricato da cloud','ok');
+    if(window.__cloudReady) window.__cloudReady();
+
   }catch(e){
     console.error('First sync fallito:', e);
-    cloudStatusSet('🔴 Offline — uso locale','err');
+    cloudStatusSet('🔴 Offline — uso cache locale','err');
+    triggerFallback();
   }
 }
 
 async function cloudPullInternal(remote){
   try{
-    // Backup pre-sync
-    try{
-      const localBackup = localStorage.getItem(STORAGE_KEY);
-      if(localBackup){
-        const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
-        localStorage.setItem('rattazzi_pre_cloud_pull', localBackup);
-        localStorage.setItem('rattazzi_pre_cloud_pull_date', stamp);
-        console.log('💾 Backup pre-sync salvato ('+stamp+')');
-      }
-    }catch(e){}
-
-    // Sopprimi push per 3 secondi
     fb.suppressUntil = Date.now() + 3000;
     clearTimeout(fb.pushTimer);
 
     state = normalizeState(JSON.parse(remote.payload));
-    saveState(true);
+    // Salva in cache locale (silenzioso)
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){}
+
+    // Aggiorna UI
+    if(state.categories.length && (!activeCategoryId || !state.categories.find(c=>c.id===activeCategoryId))){
+      activeCategoryId = state.categories[0].id;
+    }
     render();
 
     console.log('☁️ Pull OK');
@@ -196,46 +230,25 @@ async function cloudPush(force){
   }
 }
 
+/* Pull manuale (dal pulsante nelle Impostazioni) */
 async function cloudPull(){
   if(!fb.ready){ alert('Firebase non pronto. Riprova tra qualche secondo.'); return false; }
   try{
     const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
     if(!snap.exists){
-      alert('☁️ Il cloud è vuoto. Non c\'è niente da scaricare.');
+      alert('☁️ Il cloud è vuoto.');
       return false;
     }
     const remote = snap.data();
     const ok = await cloudPullInternal(remote);
     if(ok){
-      cloudStatusSet('🟢 Caricato da cloud','ok');
-      alert('✅ Dati scaricati dal cloud.');
+      cloudStatusSet('🟢 Ricaricato','ok');
+      alert('✅ Dati ricaricati dal cloud.');
     }
     return ok;
   }catch(e){
     console.error('Pull manuale fallito:', e);
-    alert('❌ Errore: '+e.message);
-    return false;
-  }
-}
-
-function cloudRestorePrePullBackup(){
-  const backup = localStorage.getItem('rattazzi_pre_cloud_pull');
-  if(!backup){
-    alert('Nessun backup pre-sync disponibile.');
-    return false;
-  }
-  const dateStr = localStorage.getItem('rattazzi_pre_cloud_pull_date') || 'sconosciuta';
-  if(!confirm('Ripristinare il backup del '+dateStr+'?\n\nSovrascriverà i dati attuali.')){
-    return false;
-  }
-  try{
-    state = normalizeState(JSON.parse(backup));
-    saveState(true);
-    render();
-    alert('✅ Backup ripristinato.');
-    return true;
-  }catch(e){
     alert('❌ Errore: '+e.message);
     return false;
   }
@@ -260,40 +273,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
         alert('☁️ Firebase non ancora pronto. Riprova tra qualche secondo.');
         return;
       }
-      if(confirm('☁️ Scaricare i dati dal cloud?\n\nI dati attuali verranno salvati come backup.')){
+      if(confirm('☁️ Ricaricare i dati dal cloud?')){
         await cloudPull();
       }
     });
   }
-  // Pulsante "Carica dal cloud ora"
   const btnSync = document.getElementById('btnCloudSync');
   if(btnSync){
     btnSync.addEventListener('click', async ()=>{
       if(!fb.ready){ alert('Firebase non pronto.'); return; }
-      if(confirm('☁️ Scaricare i dati dal cloud?\n\nI dati locali andranno in backup.')){
+      if(confirm('☁️ Ricaricare i dati dal cloud?')){
         await cloudPull();
       }
     });
-  }
-  // Pulsante "Forza invio al cloud"
-  const btnPush = document.getElementById('btnCloudPush');
-  if(btnPush){
-    btnPush.addEventListener('click', async ()=>{
-      if(!fb.ready){ alert('Firebase non pronto.'); return; }
-      if(confirm('⬆ Inviare i dati locali al cloud?\n\nIl cloud verrà sovrascritto.')){
-        await cloudPush(true);
-        alert('✅ Dati inviati al cloud.');
-      }
-    });
-  }
-  // Pulsante ripristino backup pre-sync
-  const btnRestore = document.getElementById('btnRestorePrePull');
-  if(btnRestore){
-    btnRestore.addEventListener('click', cloudRestorePrePullBackup);
   }
 });
 
 window.cloudInit = cloudInit;
 window.cloudPush = cloudPush;
 window.cloudPull = cloudPull;
-window.cloudRestorePrePullBackup = cloudRestorePrePullBackup;
