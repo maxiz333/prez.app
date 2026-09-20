@@ -183,7 +183,6 @@ tr.dragging td{background:transparent !important;}
 body.drag-active{cursor:grabbing;user-select:none;-webkit-user-select:none;}
 body.drag-active main.content{overflow:hidden;}
 
-/* Correlati — badge nella tabella */
 .linked-btn{
   display:inline-flex;align-items:center;gap:3px;
   background:rgba(255,180,0,.15);
@@ -229,6 +228,35 @@ body.drag-active main.content{overflow:hidden;}
 }
 .li-req  {background:rgba(239,68,68,.18);color:#f87171;}
 .li-opt  {background:rgba(34,197,94,.15);color:#4ade80;}
+
+/* Correlati — prezzo modificabile */
+.linked-price-wrap{
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+  flex-shrink:0;margin-right:4px;
+}
+.linked-price-input{
+  width:92px;
+  background:#0d0d0d;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:6px 8px;
+  font-size:14px;
+  font-weight:700;
+  color:var(--yellow);
+  font-variant-numeric:tabular-nums;
+  text-align:right;
+  font-family:var(--mono);
+}
+.linked-price-input:focus{
+  border-color:var(--yellow);
+  background:#111;
+}
+.linked-price-unit{
+  font-size:9.5px;
+  color:var(--text-mute);
+  font-weight:700;
+  letter-spacing:.3px;
+}
 
 .linked-empty{
   padding:20px;text-align:center;color:var(--text-mute);
@@ -513,6 +541,7 @@ body.drag-active main.content{overflow:hidden;}
   .art-name{font-size:14px;line-height:1.35;}
   .art-code-badge{font-size:10px;padding:1px 6px;margin-left:4px;}
   .linked-btn{font-size:10px;padding:1px 6px;}
+  .linked-price-input{width:78px;font-size:13px;padding:5px 6px;}
   .age-badge{font-size:9.5px;padding:2px 6px;}
   .sconto-badge{font-size:9px;padding:1px 5px;}
   .unit-pill{font-size:10px;padding:2px 6px;}
@@ -536,6 +565,7 @@ body.drag-active main.content{overflow:hidden;}
   .art-name{font-size:13.5px;}
   .art-code-badge{font-size:9px;padding:1px 5px;}
   .linked-btn{font-size:9px;padding:1px 5px;margin-left:3px;}
+  .linked-price-input{width:70px;font-size:12.5px;padding:4px 6px;}
   .age-badge{font-size:9px;padding:1px 5px;margin-left:4px;}
   .cloud-status{padding:4px 6px;font-size:9.5px;max-width:100px;overflow:hidden;text-overflow:ellipsis;}
   .client-indicator{padding:3px 6px;font-size:8.5px;}
@@ -739,7 +769,7 @@ body.drag-active main.content{overflow:hidden;}
           Aggiungi articoli <b style="color:var(--text)">correlati</b> a questo prodotto.
           Es. per una botte inox: galleggiante, pompetta, ecc.<br>
           Puoi indicare se sono <b style="color:#f87171">obbligatori</b> o
-          <b style="color:#4ade80">opzionali</b>, e aggiungere una nota.
+          <b style="color:#4ade80">opzionali</b>, aggiungere una nota e <b style="color:var(--yellow)">modificare il prezzo</b> direttamente.
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <strong style="font-size:12.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">
@@ -896,7 +926,8 @@ body.drag-active main.content{overflow:hidden;}
         <strong style="color:var(--yellow)">👁 Modalità Cliente</strong><br>
         Clicca il logo RZ in alto a sinistra per nascondere costo e margine.<br><br>
         <strong style="color:var(--yellow)">🔗 Correlati</strong><br>
-        Nella scheda articolo, tab "🔗 Correlati" per collegare prodotti complementari.<br><br>
+        Nella scheda articolo, tab "🔗 Correlati" per collegare prodotti complementari
+        con prezzo modificabile al volo.<br><br>
         <strong style="color:var(--yellow)">📦 Storage utilizzato</strong><br>
         <span id="setStorageInfo">—</span><br><br>
         <strong style="color:var(--yellow)">↩️ Undo / Redo</strong><br>
@@ -923,14 +954,12 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.13
+   RATTAZZI CARTELLINI PREZZI v3.14
    ---------------------------------------------------------------------------
-   Novità v3.13:
-     - Articoli correlati (completabili con): badge 🔗 in tabella, tab dedicata,
-       picker di ricerca, visualizzazione nel walkthrough
-     - Modalità Cliente (click sul logo RZ)
-     - Stampa A4 minimal
-     - Drag & drop degli articoli
+   Novità v3.14:
+     - Correlati con prezzo modificabile inline
+     - Ricerca intelligente: accent-insensitive, multi-parola AND, fuzzy leggero
+     - Ordinamento risultati per rilevanza
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -967,7 +996,54 @@ const unitSuffix=u=>'/'+(UNIT_LBL[u]||u||'pz');
 function scontoLabel(s,u){return 'da '+num(s.minQty)+' '+(UNIT_LBL[u]||'pz')+' → -'+num(s.discountPct)+'%';}
 
 /* ============================================================================
-   MODALITÀ CLIENTE — toggle con click sul logo
+   RICERCA INTELLIGENTE (accent-insensitive, multi-parola, fuzzy)
+   ========================================================================== */
+function normalizeStr(s){
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9\s]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function tokenMatch(token, hayWords, hayFull){
+  if(!token) return true;
+  if(hayFull.includes(token)) return true;
+  if(token.length < 4) return false;
+  const stem = token.replace(/[aeiou]$/,'');
+  if(stem.length < 3) return false;
+  return hayWords.some(w => w.startsWith(stem));
+}
+
+function smartMatch(hay, query){
+  if(!query) return true;
+  const tokens = query.split(/\s+/).filter(Boolean);
+  if(!tokens.length) return true;
+  const hayWords = hay.split(/\s+/);
+  return tokens.every(t => tokenMatch(t, hayWords, hay));
+}
+
+function smartScore(hay, query){
+  if(!query) return 0;
+  const tokens = query.split(/\s+/).filter(Boolean);
+  const hayWords = hay.split(/\s+/);
+  let score = 0;
+  tokens.forEach(t => {
+    if(hay.startsWith(t)) score += 50;
+    else if(hayWords.some(w => w === t)) score += 30;
+    else if(hayWords.some(w => w.startsWith(t))) score += 20;
+    else if(hay.includes(t)) score += 5;
+    else {
+      const stem = t.replace(/[aeiou]$/,'');
+      if(stem.length >= 3 && hayWords.some(w => w.startsWith(stem))) score += 3;
+    }
+  });
+  if(hay.length < 30) score += 5;
+  return score;
+}
+
+/* ============================================================================
+   MODALITÀ CLIENTE
    ========================================================================== */
 function setClientMode(on){
   if(on){
@@ -992,18 +1068,24 @@ function loadClientMode(){
 
 /* -------- RUBRICA -------- */
 function getRubrica(){return Array.isArray(window.RUBRICA_ARTICOLI)?window.RUBRICA_ARTICOLI:[];}
+
 function searchRubrica(query){
-  const q=query.trim().toLowerCase();
-  if(q.length<2)return [];
-  const rub=getRubrica();const out=[];
-  for(let i=0;i<rub.length && out.length<20;i++){
-    const r=rub[i];if(!r)continue;
-    const cod=String(r.cod||'').toLowerCase();
-    const nome=String(r.nome||'').toLowerCase();
-    if(cod.includes(q)||nome.includes(q)) out.push(r);
+  const q = normalizeStr(query);
+  if(q.length < 2) return [];
+  const rub = getRubrica();
+  const matches = [];
+  for(let i=0; i<rub.length; i++){
+    const r = rub[i];
+    if(!r) continue;
+    const hay = normalizeStr((r.cod||'') + ' ' + (r.nome||''));
+    if(smartMatch(hay, q)){
+      matches.push({r, score: smartScore(hay, q)});
+    }
   }
-  return out;
+  matches.sort((a,b) => b.score - a.score);
+  return matches.slice(0, 50).map(x => x.r);
 }
+
 function renderRubricaResults(results){
   const box=$('#rubricaResults');if(!box)return;
   if(!results.length){box.style.display='none';box.innerHTML='';return;}
@@ -1046,7 +1128,7 @@ function initRubrica(){
           hint.textContent=res.length+' risultati trovati';
         }
       }
-    },120);
+    },150);
   });
   document.addEventListener('click',e=>{
     const box=$('#rubricaResults');if(!box)return;
@@ -1361,20 +1443,23 @@ function getActiveCategory(){return state.categories.find(c=>c.id===activeCatego
 function findArticle(id){for(const c of state.categories){const a=c.articles.find(x=>x.id===id);if(a)return a;}return null;}
 
 function getFilteredArticles(){
-  const q=searchQuery.trim().toLowerCase();
+  const q = normalizeStr(searchQuery);
   if(q){
-    const results=[];
+    const results = [];
     state.categories.forEach(cat=>{
       cat.articles.forEach(a=>{
-        const hay=(a.name+' '+(a.code||'')+' '+(a.notes||'')+' '
-                  +(a.supplier||'')+' '+(a.supplierCode||'')).toLowerCase();
-        if(!hay.includes(q)) return;
+        const hay = normalizeStr(a.name + ' ' + (a.code||'') + ' ' + (a.notes||'') + ' ' + (a.supplier||'') + ' ' + (a.supplierCode||''));
+        if(!smartMatch(hay, q)) return;
         if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return;
-        if(activeFilter==='12'&& monthsSince(a.updatedAt)<12)return;
-        results.push(Object.assign({},a,{_searchCatName:cat.name,_searchCatId:cat.id}));
+        if(activeFilter==='12' && monthsSince(a.updatedAt)<12) return;
+        results.push({
+          a: Object.assign({}, a, {_searchCatName:cat.name, _searchCatId:cat.id}),
+          score: smartScore(hay, q)
+        });
       });
     });
-    return results;
+    results.sort((a,b) => b.score - a.score);
+    return results.map(x => x.a);
   }
   const cat=getActiveCategory();if(!cat)return [];
   return cat.articles.filter(a=>{
@@ -1790,6 +1875,13 @@ function renderLinked(){
         <div class="li-name">${esc(linked.name)}</div>
         ${la.note ? '<div class="li-note">'+esc(la.note)+'</div>' : ''}
       </div>
+      <div class="linked-price-wrap">
+        <input type="number" step="0.01" min="0" class="linked-price-input"
+               data-linkprice-id="${linked.id}"
+               value="${linked.price.toFixed(2)}"
+               title="Prezzo di vendita — modificabile">
+        <span class="linked-price-unit">€/${esc(linked.unit||'pz')}</span>
+      </div>
       ${badge}
       <button class="btn btn-sm" data-remlinked="${idx}" style="color:var(--red)" title="Rimuovi">🗑</button>
     </div>`;
@@ -1808,20 +1900,20 @@ function openLinkPicker(){
 }
 
 function searchAllArticles(query){
-  const q = query.trim().toLowerCase();
+  const q = normalizeStr(query);
   if(q.length < 2) return [];
-  const out = [];
+  const matches = [];
   for(const cat of state.categories){
     for(const a of cat.articles){
       if(a.id === editingArticleId) continue;
-      const hay = (a.name + ' ' + (a.code||'')).toLowerCase();
-      if(hay.includes(q)){
-        out.push({article:a, category:cat});
-        if(out.length >= 20) return out;
+      const hay = normalizeStr(a.name + ' ' + (a.code||''));
+      if(smartMatch(hay, q)){
+        matches.push({article:a, category:cat, score: smartScore(hay, q)});
       }
     }
   }
-  return out;
+  matches.sort((a,b) => b.score - a.score);
+  return matches.slice(0, 40);
 }
 
 function renderLinkResults(results){
@@ -1900,7 +1992,7 @@ $('#linkSearch').addEventListener('input', e=>{
   timer = setTimeout(()=>{
     const res = searchAllArticles(v);
     renderLinkResults(res);
-  }, 120);
+  }, 150);
 });
 
 $('#btnLinkConfirm').addEventListener('click', ()=>{
@@ -1924,6 +2016,38 @@ $('#btnLinkConfirm').addEventListener('click', ()=>{
   updateLinkedBadgeInTable(art.id);
   closeModal('#modalLinkPicker');
   pendingLinkArticleId = null;
+});
+
+/* Modifica prezzo correlato direttamente nella lista */
+$('#linkedList').addEventListener('change', e=>{
+  const inp = e.target.closest('[data-linkprice-id]');
+  if(!inp) return;
+  const linkedId = inp.dataset.linkpriceId;
+  const linkedArt = findArticle(linkedId);
+  if(!linkedArt) return;
+  const newPrice = parseFloat(inp.value);
+  if(isNaN(newPrice) || newPrice < 0){
+    inp.value = linkedArt.price.toFixed(2);
+    return;
+  }
+  if(linkedArt.price === newPrice) return;
+
+  pushUndo('Modifica prezzo correlato "' + linkedArt.name + '"');
+  const oldPrice = linkedArt.price;
+  linkedArt.price = newPrice;
+  linkedArt.history.push({
+    date: new Date().toISOString(),
+    price: newPrice,
+    cost: linkedArt.cost,
+    prevPrice: oldPrice,
+    prevCost: linkedArt.cost,
+    operator: state.meta.operator || ''
+  });
+  linkedArt.updatedAt = new Date().toISOString();
+  state.meta.lastRevision = linkedArt.updatedAt;
+  saveState();
+  refreshRow(linkedArt);
+  setInfo('save', '● Prezzo correlato aggiornato', 'ok');
 });
 
 $('#linkedList').addEventListener('click', e=>{
@@ -2365,7 +2489,7 @@ $('#searchInput').addEventListener('input',e=>{
     searchQuery=e.target.value;
     if(searchQuery.trim() && selectionMode) exitSelectionMode();
     renderTable();
-  },120);
+  },180);
 });
 $('#btnClearSearch').addEventListener('click',()=>{
   searchQuery='';
@@ -2580,6 +2704,7 @@ function renderWalkCard(){
         <div class="li-name">${esc(l.name)}</div>
         ${la.note?'<div class="li-note">'+esc(la.note)+'</div>':''}
       </div>
+      <div style="font-size:14px;font-weight:800;color:var(--yellow);white-space:nowrap">${fmtEuro(l.price)}</div>
       ${badge}
     </div>`;
   }).filter(Boolean).join('');
@@ -2728,7 +2853,7 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-  console.log('%cRattazzi Cartellini v3.13 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.14 avviato','color:#ffcc00;font-weight:bold');
   setTimeout(()=>{ try{ if(window.cloudInit) window.cloudInit(); }catch(e){console.warn('Cloud init:',e);} }, 1500);
 })();
 </script>
