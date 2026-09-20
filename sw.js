@@ -1,23 +1,24 @@
-/* =========================================================
-   Service Worker — Rattazzi Cartellini Prezzi
-   Cache offline minimale: la pagina index.html viene servita
-   dalla cache se la rete non è disponibile.
-   ========================================================= */
+/* ============================================================================
+   Service Worker — Rattazzi Cartellini Prezzi v3.7
+   Strategia: stale-while-revalidate
+   ========================================================================== */
 
-const CACHE_NAME = 'rattazzi-v3.1';
+const CACHE_NAME = 'rattazzi-v3.7';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './rubrica.js'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => Promise.all(
+        ASSETS.map(url => cache.add(url).catch(err => console.warn('SW: skip', url, err)))
+      ))
       .then(() => self.skipWaiting())
-      .catch(err => console.warn('SW install cache error:', err))
   );
 });
 
@@ -32,27 +33,21 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Ignora richieste non GET
   if (event.request.method !== 'GET') return;
-
-  // Non cachare richieste esterne (es. CDN)
   const url = new URL(event.request.url);
   if (url.origin !== location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      // Network first con fallback su cache
-      const network = fetch(event.request)
-        .then(response => {
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.match(event.request).then(cached => {
+        const fetchPromise = fetch(event.request).then(response => {
           if (response && response.status === 200 && response.type === 'basic') {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(c => c.put(event.request, copy)).catch(()=>{});
+            cache.put(event.request, response.clone()).catch(()=>{});
           }
           return response;
-        })
-        .catch(() => caches.match('./index.html'));
-
-      return cached || network;
+        }).catch(() => cached || caches.match('./index.html'));
+        return cached || fetchPromise;
+      });
     })
   );
 });

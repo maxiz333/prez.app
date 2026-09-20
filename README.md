@@ -1,62 +1,48 @@
 # Rattazzi — Cartellini Prezzi
 
-Applicazione web per la gestione dei listini di ferramenta con articoli a rotazione lenta.
-Pensata per desktop e iPhone/tablet, funziona **offline** dopo il primo caricamento.
+App web leggera per listini ferramenta. PWA installabile su iPhone.
+Funziona offline dopo il primo caricamento.
 
-## 🚀 Come usarla
+## 🚀 Uso
 
-### Su PC
-Apri il link della tua GitHub Pages nel browser.
+- **PC**: apri il link nel browser.
+- **iPhone**: Safari → Condividi → Aggiungi a Home.
 
-### Su iPhone (installazione come app)
-1. Apri il link in **Safari**
-2. Tocca il pulsante **Condividi** (quadrato con freccia)
-3. Tocca **Aggiungi a Home**
-4. L'icona gialla "RZ" apparirà sulla schermata iniziale
-5. Si aprirà a schermo intero, come un'app nativa
+## 💾 Sicurezza dati
 
-## 💾 Sicurezza dei dati
+- Salvataggio locale (localStorage) con 3 backup a rotazione
+- Verifica integrità ad ogni scrittura
+- Auto-recovery su storage pieno
+- Backup JSON manuale settimanale (pulsante ⬇)
 
-- I dati sono salvati **localmente nel browser** (localStorage)
-- **3 backup automatici** a rotazione ad ogni salvataggio
-- **Verifica integrità** ad ogni scrittura
-- **Recupero automatico** da backup in caso di dati corrotti
+## 📋 Funzioni
 
-### ⚠️ Regola d'oro: BACKUP JSON SETTIMANALE
+- Settori (tab) con articoli a misura
+- Lotti multipli con costo ultimo/medio
+- Prezzo suggerito da margine target
+- Sconti quantità (es. da 10 pz → -5%)
+- Giro in magazzino (solo prezzo visibile, no costo né margine)
+- Undo/Redo (Ctrl+Z / Ctrl+Y)
+- Foto articolo
+- Fornitore + codice articolo
+- Stampa A4 pulita con nome, codice e spazio per il prezzo a matita
+- Ricerca globale + filtri urgenza (>6 / >12 mesi)
+- Rubrica articoli (`rubrica.js`) per inserimento rapido
 
-**Una volta a settimana**:
-1. Clicca il pulsante **⬇** in alto a destra
-2. Salva il file `.json` su Google Drive / Dropbox / chiavetta USB
+## 📄 Stampa A4
 
-Il file JSON è l'unica vera rete di sicurezza se si cancella la cache del browser
-o se cambi dispositivo.
+Il foglio stampato contiene:
+- Titolo "RATTAZZI — Cartellini Prezzi"
+- Settore
+- Numero articoli
+- Etichetta "Data: ______" (da scrivere a matita)
+- Per ogni articolo: nome grande + codice + spazio vuoto per il prezzo
 
-### Ripristinare un backup
-1. Clicca il pulsante **⬆** in alto a destra
-2. Seleziona il file `.json` scaricato in precedenza
-3. Conferma
+**Niente costo, niente margine, niente data precompilata.**
 
-## 🎯 Funzionalità principali
+## 🔧 Stack
 
-- **Settori merceologici** (tab) con articoli a misura
-- **Lotti multipli** per articolo con costo ultimo e medio ponderato
-- **Prezzo suggerito** in base al margine target del settore
-- **Sconti quantità** (es. da 10 pz → -5%)
-- **Giro in magazzino** (walkthrough a schermo intero, bloccato di default)
-- **Undo / Redo** (Ctrl+Z / Ctrl+Y) per le ultime 15 modifiche
-- **Foto articolo** con compressione automatica
-- **Unità di misura** (pz / m / m² / kg / lt / cf)
-- **Fornitore + codice articolo fornitore**
-- **Stampa A4 pulita** con colonna "Nuovo prezzo ✏️" per la matita
-- **Ricerca globale** su articolo, fornitore, codice, note
-- **Filtri urgenza** (>6 mesi, >12 mesi)
-
-## 🔧 Stack tecnico
-
-- HTML5 + CSS3 + JavaScript vanilla
-- localStorage con tripla ridondanza
-- PWA installabile (manifest + service worker)
-- Nessuna dipendenza esterna
+HTML5 + CSS3 + JS vanilla + PWA + localStorage.
 
 ## 📄 Licenza
 

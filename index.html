@@ -33,12 +33,20 @@ html,body{height:100%;background:var(--bg);color:var(--text);
 button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit;outline:none;}
 button{cursor:pointer;border:none;background:none;}
 
-/* FIX: vh prima, dvh dopo → dvh vince dove supportato */
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;padding-top:env(safe-area-inset-top);}
 
 .app-header{display:flex;align-items:center;justify-content:space-between;
   padding:10px 14px;background:linear-gradient(180deg,#1a1a1a,#141414);
-  border-bottom:1px solid var(--border);flex-shrink:0;}
+  border-bottom:1px solid var(--border);flex-shrink:0;
+  max-height:80px;overflow:hidden;
+  transition:max-height .28s cubic-bezier(.4,0,.2,1),
+             padding .28s cubic-bezier(.4,0,.2,1),
+             border-width .28s cubic-bezier(.4,0,.2,1),
+             opacity .2s ease;}
+body.compact .app-header{
+  max-height:0;padding-top:0;padding-bottom:0;
+  border-bottom-width:0;opacity:0;
+}
 .brand{display:flex;align-items:center;gap:10px;}
 .brand-badge{width:38px;height:38px;background:var(--yellow);color:#111;border-radius:8px;
   display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;}
@@ -52,13 +60,26 @@ button{cursor:pointer;border:none;background:none;}
 .icon-btn:disabled{opacity:.35;cursor:not-allowed;}
 
 .info-bar{display:flex;flex-wrap:wrap;gap:14px;padding:6px 14px;background:#0e0e0e;
-  border-bottom:1px solid var(--border);font-size:11px;color:var(--text-mute);flex-shrink:0;}
+  border-bottom:1px solid var(--border);font-size:11px;color:var(--text-mute);flex-shrink:0;
+  max-height:50px;overflow:hidden;
+  transition:max-height .28s cubic-bezier(.4,0,.2,1),
+             padding .28s cubic-bezier(.4,0,.2,1),
+             border-width .28s cubic-bezier(.4,0,.2,1),
+             opacity .2s ease;}
+body.compact .info-bar{
+  max-height:0;padding-top:0;padding-bottom:0;
+  border-bottom-width:0;opacity:0;
+}
 .info-bar .ok{color:var(--green);}.info-bar .warn{color:var(--amber);}.info-bar .err{color:var(--red);}
 
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--bg-2);
-  border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;}
+  border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;
+  transition:padding .25s ease;}
+body.compact .toolbar{padding-top:6px;padding-bottom:6px;}
 .search-box{flex:1 1 200px;min-width:160px;display:flex;align-items:center;gap:8px;
-  background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:38px;}
+  background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:38px;
+  transition:height .25s ease;}
+body.compact .search-box{height:34px;}
 .search-box span{color:var(--text-mute);}.search-box input{flex:1;border:none;background:none;height:100%;}
 .filters{display:flex;gap:4px;}
 .chip{padding:8px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);
@@ -77,8 +98,24 @@ button{cursor:pointer;border:none;background:none;}
 .btn-sm{height:30px;padding:0 10px;font-size:11.5px;}
 .btn-walk{background:rgba(255,204,0,.12);border-color:var(--yellow-dk);color:var(--yellow);}
 
+.selection-bar{display:none;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 14px;background:rgba(255,204,0,.08);border-bottom:1px solid var(--yellow-dk);
+  font-size:12.5px;font-weight:600;color:var(--yellow);flex-shrink:0;flex-wrap:wrap;}
+body.selection-mode .selection-bar{display:flex;}
+.selection-bar .sb-info{display:flex;align-items:center;gap:6px;}
+.selection-bar .sb-info b{font-size:15px;color:var(--yellow);}
+.selection-bar .sb-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+.td-check{display:none !important;}
+body.selection-mode #mainTable thead th.td-check{display:table-cell !important;}
+body.selection-mode #mainTable tbody td.td-check{display:table-cell !important;}
+body.selection-mode #mainTable tbody tr{cursor:pointer;}
+body.selection-mode #mainTable tbody tr:hover{background:rgba(255,204,0,.04);}
+
 .tabs{display:flex;gap:4px;padding:0 14px;background:var(--bg-2);border-bottom:1px solid var(--border);
-  overflow-x:auto;flex-shrink:0;scrollbar-width:thin;}
+  overflow-x:auto;flex-shrink:0;scrollbar-width:thin;
+  transition:padding .25s ease;}
+body.compact .tabs{padding:0 10px;}
 .tabs::-webkit-scrollbar{height:4px;}.tabs::-webkit-scrollbar-thumb{background:#333;border-radius:4px;}
 .tab{padding:11px 14px;font-size:13px;font-weight:600;color:var(--text-dim);
   border-bottom:3px solid transparent;white-space:nowrap;transition:.15s;
@@ -169,7 +206,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .modal-close{width:32px;height:32px;border-radius:8px;color:var(--text-dim);font-size:18px;}
 .modal-close:hover{background:var(--card-2);color:var(--red);}
 .modal-body{padding:16px 18px;overflow:auto;flex:1;}
-.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;}
 
 .modal-tabs{display:flex;gap:4px;padding:10px 18px 0;background:#181818;border-bottom:1px solid var(--border);
   overflow-x:auto;}
@@ -186,6 +223,15 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--yellow);}
 .field-row{display:flex;gap:12px;}.field-row .field{flex:1;}
 .field-hint{font-size:10.5px;color:var(--text-mute);margin-top:4px;}
+
+#rubricaResults{margin-top:6px;max-height:240px;overflow:auto;background:#131313;
+  border:1px solid var(--border);border-radius:8px;display:none;}
+.rubrica-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);
+  font-size:13px;transition:.12s;}
+.rubrica-item:last-child{border-bottom:none;}
+.rubrica-item:hover{background:#1e1e1e;}
+.rubrica-item .rb-name{font-weight:600;color:var(--text);}
+.rubrica-item .rb-meta{font-size:11px;color:var(--text-mute);margin-top:2px;}
 
 .lotti-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .lotto-row{display:grid;grid-template-columns:110px 1fr 80px 90px 32px;gap:8px;align-items:center;
@@ -262,18 +308,16 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .walk-name{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:4px;letter-spacing:-.3px;}
 .walk-meta{font-size:12.5px;color:var(--text-mute);margin-bottom:20px;}
 .walk-meta .sep{margin:0 6px;color:#333;}
-.walk-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.walk-price-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;}
 .walk-price-cell{background:#131313;border:1px solid var(--border);border-radius:10px;
-  padding:12px 14px;display:flex;flex-direction:column;gap:4px;}
-.walk-price-cell .lbl{font-size:10px;color:var(--text-mute);text-transform:uppercase;font-weight:700;letter-spacing:.6px;}
-.walk-price-cell .val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px;}
-.walk-price-cell .val.good{color:var(--green);}
-.walk-price-cell .val.warn{color:var(--amber);}
-.walk-price-cell .val.bad{color:var(--red);}
+  padding:16px 18px;display:flex;flex-direction:column;gap:6px;}
+.walk-price-cell .lbl{font-size:11px;color:var(--text-mute);text-transform:uppercase;font-weight:700;letter-spacing:.6px;}
+.walk-price-cell .val{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.5px;
+  color:var(--yellow);}
 .walk-price-cell.editable .val{display:none;}
 .walk-price-cell.editable .edit-input{display:block;}
 .walk-price-cell .edit-input{display:none;width:100%;background:#0a0a0a;border:1px solid var(--yellow-dk);
-  border-radius:6px;padding:8px 10px;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;}
+  border-radius:6px;padding:10px 12px;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;}
 .walk-price-cell .edit-input:focus{border-color:var(--yellow);}
 .walk-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
 .walk-section .stitle{font-size:10.5px;color:var(--text-mute);text-transform:uppercase;font-weight:700;
@@ -301,49 +345,188 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .undo-badge{position:absolute;top:-4px;right:-4px;background:var(--yellow);color:#111;
   font-size:9px;font-weight:800;padding:1px 5px;border-radius:20px;min-width:16px;text-align:center;}
 
+/* =========================================================
+   STAMPA A4 — foglio grande, semplificato, senza data
+   ========================================================= */
 #printArea{display:none;}
+
 @media print{
   body{background:#fff !important;color:#000 !important;overflow:visible;}
-  #app,.modal-overlay,.bottom-nav,.walkthrough{display:none !important;}
+  #app,.modal-overlay,.bottom-nav,.walkthrough,.selection-bar{display:none !important;}
   #printArea{display:block !important;}
-  @page{size:A4;margin:12mm;}
+  @page{size:A4;margin:10mm;}
 }
-#printArea{background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;font-size:11pt;padding:0;}
-#printArea h1{font-size:18pt;margin-bottom:2px;border-bottom:2px solid #000;padding-bottom:6px;}
-#printArea .print-meta{display:flex;justify-content:space-between;font-size:9pt;color:#333;margin:6px 0 14px;}
-#printArea table{width:100%;border-collapse:collapse;font-size:10pt;}
-#printArea th,#printArea td{border:1px solid #333;padding:6px 8px;text-align:left;vertical-align:top;}
-#printArea th{background:#eee;font-weight:700;text-transform:uppercase;font-size:8.5pt;letter-spacing:.4px;}
-#printArea td.num{text-align:right;}
-#printArea .pencil-col{width:80px;background:#fafafa;}
-#printArea .print-footer{margin-top:14px;font-size:8.5pt;color:#555;border-top:1px solid #999;
-  padding-top:6px;display:flex;justify-content:space-between;}
-#printArea .disc-line{font-size:8.5pt;color:#555;margin-top:2px;}
+
+#printArea{
+  background:#fff;
+  color:#000;
+  font-family:Arial,Helvetica,sans-serif;
+  padding:0;
+  display:none;
+}
+#printArea .print-header{
+  text-align:center;
+  border-bottom:4px solid #000;
+  padding-bottom:4mm;
+  margin-bottom:5mm;
+}
+#printArea h1{
+  font-size:36pt;
+  font-weight:900;
+  letter-spacing:3px;
+  line-height:1;
+  margin:0;
+  color:#000;
+}
+#printArea .print-sub{
+  font-size:16pt;
+  font-weight:700;
+  margin-top:3mm;
+  color:#000;
+}
+#printArea .print-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  font-size:10pt;
+  margin-top:3mm;
+  color:#333;
+  font-weight:600;
+}
+#printArea .print-date-line{
+  font-size:12pt;
+  font-weight:800;
+  color:#000;
+  display:inline-flex;
+  align-items:baseline;
+  gap:3mm;
+}
+#printArea .print-date-blank{
+  display:inline-block;
+  min-width:50mm;
+  border-bottom:2px solid #000;
+  height:1em;
+}
+#printArea .articoli-list{
+  display:flex;
+  flex-direction:column;
+  gap:4mm;
+}
+#printArea .articolo{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  border:3px solid #000;
+  border-radius:3mm;
+  padding:4mm 5mm;
+  page-break-inside:avoid;
+  background:#fff;
+}
+#printArea .art-info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-right:5mm;
+  min-width:0;
+}
+#printArea .art-nome{
+  font-size:22pt;
+  font-weight:800;
+  line-height:1.1;
+  color:#000;
+  word-wrap:break-word;
+}
+#printArea .art-cod{
+  font-size:12pt;
+  font-weight:700;
+  color:#444;
+  margin-top:2mm;
+  letter-spacing:.5px;
+}
+#printArea .art-prezzo-box{
+  width:60mm;
+  flex-shrink:0;
+  border-left:3px dashed #888;
+  padding-left:5mm;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+#printArea .art-prezzo-label{
+  font-size:10pt;
+  font-weight:800;
+  text-transform:uppercase;
+  color:#000;
+  letter-spacing:1.5px;
+  margin-bottom:2mm;
+}
+#printArea .art-prezzo-empty{
+  width:100%;
+  flex:1;
+  min-height:15mm;
+  border-bottom:2px solid #000;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  padding-bottom:1mm;
+}
+#printArea .art-prezzo-unit{
+  font-size:10pt;
+  font-weight:700;
+  color:#666;
+  margin-top:2mm;
+}
 
 @media (max-width:900px){
   #mainTable th:nth-child(6),#mainTable td:nth-child(6){display:none;}
 }
 @media (max-width:720px){
-  .app-header{padding:8px 10px;}.toolbar{padding:8px 10px;gap:6px;}
-  .tabs{padding:0 10px;}.info-bar{font-size:10px;padding:5px 10px;}
-  #mainTable th:nth-child(8),#mainTable td:nth-child(8){display:none;}
-  #mainTable thead th{font-size:9.5px;padding:9px 7px;}
-  #mainTable tbody td{padding:7px 7px;}
-  .field-row{flex-direction:column;gap:0;}
-  .lotto-row{grid-template-columns:1fr 1fr 60px;gap:6px;}
-  .lotto-row>:nth-child(4){display:none;}
-  .history-item{grid-template-columns:80px 1fr;font-size:12px;}
-  .walk-nav{width:44px;font-size:26px;}
-  .walk-name{font-size:20px;}
-  .walk-price-grid{grid-template-columns:1fr 1fr;}
-  .walk-price-cell .val{font-size:16px;}
-  .walk-bottom{padding:10px;}
-  .walk-nav-btn{height:46px;font-size:12px;}
+  .app-header{padding:6px 10px;gap:6px;max-height:70px;}
+  .brand-badge{width:32px;height:32px;font-size:14px;border-radius:6px;}
+  .brand-name{font-size:12.5px;letter-spacing:.3px;}
+  .brand-sub{font-size:9px;letter-spacing:.8px;}
+  .icon-btn{width:32px;height:32px;font-size:14px;}
+  .header-actions{gap:4px;}
+  .info-bar{padding:4px 10px;font-size:10px;gap:10px;max-height:40px;
+    overflow-x:auto;white-space:nowrap;flex-wrap:nowrap;}
+  #infoRevision,#infoOperator{display:none;}
+  .toolbar{padding:6px 10px;gap:6px;}
+  .search-box{height:34px;flex-basis:100%;order:-1;padding:0 8px;}
+  .search-box input{font-size:12.5px;}
+  .filters{gap:3px;overflow-x:auto;flex-shrink:0;}
+  .chip{padding:6px 10px;font-size:11.5px;border-radius:6px;}
+  .btn{height:34px;padding:0 10px;font-size:12px;gap:4px;}
+  .btn-sm{height:28px;padding:0 8px;font-size:11px;}
+  #btnAddCat,#btnAddArt{display:none;}
+  .tabs{padding:0 10px;gap:2px;}
+  .tab{padding:9px 12px;font-size:12.5px;gap:4px;}
+  .tab .count{font-size:10px;padding:1px 6px;}
+  #mainTable thead th{font-size:9.5px;padding:8px 8px;letter-spacing:.5px;}
+  #mainTable tbody td{padding:12px 8px;}
+  .art-name{font-size:14px;line-height:1.35;}
+  .age-badge{font-size:9.5px;padding:2px 6px;}
+  .sconto-badge{font-size:9px;padding:1px 5px;}
+  .unit-pill{font-size:10px;padding:2px 6px;}
+  .cell-input{padding:6px 6px;font-size:13px;}
+  .selection-bar{padding:6px 10px;font-size:11.5px;gap:6px;}
+  .selection-bar .sb-info b{font-size:14px;}
+  .selection-bar .sb-actions{gap:4px;}
 }
 @media (max-width:520px){
   #mainTable th:nth-child(3),#mainTable td:nth-child(3){display:none;}
   .photo-thumb,.photo-ph{width:28px;height:28px;}
-  .brand-name{font-size:13px;}.brand-sub{font-size:9px;}
+  .brand-name{font-size:12px;}
+  .brand-sub{font-size:8.5px;letter-spacing:.5px;}
+  .toolbar{padding:5px 8px;gap:5px;}
+  .search-box{height:32px;}
+  .chip{padding:5px 9px;font-size:11px;}
+  .btn{padding:0 8px;font-size:11.5px;height:32px;}
+  .tab{padding:8px 10px;font-size:12px;}
+  #mainTable tbody td{padding:11px 6px;}
+  .art-name{font-size:13.5px;}
+  .age-badge{font-size:9px;padding:1px 5px;margin-left:4px;}
 }
 </style>
 </head>
@@ -385,15 +568,22 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
       <button class="chip danger" data-filter="12">&gt; 12 mesi</button>
     </div>
     <button class="btn btn-walk" id="btnWalk" title="Giro in magazzino">🚶 Giro</button>
-    <button class="btn btn-ghost" id="btnSelAll" title="Seleziona tutto">☐ Tutti</button>
     <button class="btn btn-ghost" id="btnAddCat">+ Settore</button>
     <button class="btn btn-yellow" id="btnAddArt">+ Articolo</button>
-    <button class="btn" id="btnPrint">🖨 Stampa <span id="printCount"></span></button>
+    <button class="btn" id="btnPrint">🖨 Stampa</button>
+  </div>
+
+  <div class="selection-bar" id="selectionBar">
+    <div class="sb-info">☑ <b id="selBarCount">0</b> selezionati</div>
+    <div class="sb-actions">
+      <button class="btn btn-sm" id="btnSelAllBar">Seleziona tutti</button>
+      <button class="btn btn-yellow btn-sm" id="btnSelPrint">🖨 Stampa tutto</button>
+    </div>
   </div>
 
   <div class="tabs" id="tabs"></div>
 
-  <main class="content">
+  <main class="content" id="mainContent">
     <div class="table-wrap">
       <table id="mainTable">
         <thead>
@@ -558,6 +748,12 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
       <button class="modal-close" data-close>✕</button>
     </div>
     <div class="modal-body">
+      <div class="field">
+        <label>🔍 Cerca in rubrica (codice o nome)</label>
+        <input type="text" id="rubricaSearch" placeholder="Es. 1980008 o vite m8..." autocomplete="off">
+        <div id="rubricaResults"></div>
+        <div class="field-hint" id="rubricaHint">Caricamento rubrica...</div>
+      </div>
       <div class="field"><label>Nome / Misura *</label><input type="text" id="naName"></div>
       <div class="field-row">
         <div class="field"><label>Unità</label>
@@ -621,6 +817,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
     </div>
     <div class="modal-footer">
       <button class="btn" data-close>Annulla</button>
+      <button class="btn" id="btnClean" style="color:var(--amber)">🧹 Pulisci storage</button>
       <button class="btn btn-yellow" id="setSave">Salva</button>
     </div>
   </div>
@@ -628,24 +825,26 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 
 <div id="printArea"></div>
 
+<script src="./rubrica.js"></script>
+
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.1 — Versione stabile
-   Fix: dvh, SW esterno, walkthrough senza saveState su input,
-        snapshot undo corretto, migrazione da versioni precedenti
+   RATTAZZI CARTELLINI PREZZI v3.7 — Versione stabile per GitHub Pages
+   ---------------------------------------------------------------------------
+   Novità v3.7:
+     - Stampa A4: rimossa la data automatica
+     - Al suo posto: "Data: __________" (da scrivere a matita)
    ========================================================================== */
 
-/* -------- COSTANTI -------- */
 const STORAGE_KEY='rattazzi_cartellini_v3';
 const TEMP_KEY='rattazzi_cartellini_temp';
 const BACKUP_KEYS=['rattazzi_cartellini_bk1','rattazzi_cartellini_bk2','rattazzi_cartellini_bk3'];
-const LEGACY_KEYS=['rattazzi_cartellini_v2','rattazzi_cartellini_v1']; // migrazione
+const LEGACY_KEYS=['rattazzi_cartellini_v2','rattazzi_cartellini_v1'];
 const APP_VERSION=3;
 const MAX_PHOTO_PX=500;
 const PHOTO_QUALITY=0.72;
 const MAX_UNDO=15;
 
-/* -------- UTILITY -------- */
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 const uid=()=>'id_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
@@ -668,6 +867,86 @@ function ageInfo(iso){const m=monthsSince(iso);
 const UNIT_LBL={pz:'pz',m:'m',m2:'m²',kg:'kg',lt:'lt',cf:'cf'};
 const unitSuffix=u=>'/'+(UNIT_LBL[u]||u||'pz');
 function scontoLabel(s,u){return 'da '+num(s.minQty)+' '+(UNIT_LBL[u]||'pz')+' → -'+num(s.discountPct)+'%';}
+
+/* -------- RUBRICA -------- */
+function getRubrica(){return Array.isArray(window.RUBRICA_ARTICOLI)?window.RUBRICA_ARTICOLI:[];}
+function searchRubrica(query){
+  const q=query.trim().toLowerCase();
+  if(q.length<2)return [];
+  const rub=getRubrica();const out=[];
+  for(let i=0;i<rub.length && out.length<20;i++){
+    const r=rub[i];if(!r)continue;
+    const cod=String(r.cod||'').toLowerCase();
+    const nome=String(r.nome||'').toLowerCase();
+    if(cod.includes(q)||nome.includes(q)) out.push(r);
+  }
+  return out;
+}
+function renderRubricaResults(results){
+  const box=$('#rubricaResults');if(!box)return;
+  if(!results.length){box.style.display='none';box.innerHTML='';return;}
+  box.style.display='block';
+  box.innerHTML=results.map((r,i)=>`
+    <div class="rubrica-item" data-idx="${i}">
+      <div class="rb-name">${esc(r.nome)}</div>
+      <div class="rb-meta">Cod: ${esc(r.cod)} · Unità: ${esc(r.unit||'pz')}</div>
+    </div>`).join('');
+  box.querySelectorAll('.rubrica-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const idx=parseInt(el.dataset.idx,10);
+      const r=results[idx];if(!r)return;
+      $('#naName').value=r.nome||'';
+      $('#naUnit').value=(r.unit && UNIT_LBL[r.unit])?r.unit:'pz';
+      $('#naSupplierCode').value=r.cod||'';
+      box.style.display='none';
+      $('#rubricaSearch').value=r.cod+' — '+r.nome;
+      setTimeout(()=>$('#naPrice').focus(),50);
+    });
+  });
+}
+function initRubrica(){
+  const inp=$('#rubricaSearch');if(!inp)return;
+  let timer=null;
+  inp.addEventListener('input',e=>{
+    clearTimeout(timer);
+    const val=e.target.value;
+    timer=setTimeout(()=>{
+      const res=searchRubrica(val);
+      renderRubricaResults(res);
+      const hint=$('#rubricaHint');
+      if(hint){
+        const tot=getRubrica().length;
+        if(val.length<2){
+          hint.textContent=tot?'Cerca tra '+tot.toLocaleString('it-IT')+' articoli di magazzino':'Rubrica vuota (carica rubrica.js)';
+        } else if(!res.length){
+          hint.textContent='Nessun risultato per "'+val+'"';
+        } else {
+          hint.textContent=res.length+' risultati trovati';
+        }
+      }
+    },120);
+  });
+  document.addEventListener('click',e=>{
+    const box=$('#rubricaResults');if(!box)return;
+    if(!e.target.closest('#rubricaResults') && e.target.id!=='rubricaSearch'){
+      box.style.display='none';
+    }
+  });
+  const hint=$('#rubricaHint');
+  if(hint){
+    const tot=getRubrica().length;
+    hint.textContent=tot?'Cerca tra '+tot.toLocaleString('it-IT')+' articoli di magazzino':'Rubrica vuota (carica rubrica.js)';
+  }
+}
+function resetRubrica(){
+  const rb=$('#rubricaSearch');if(rb)rb.value='';
+  const rbr=$('#rubricaResults');if(rbr){rbr.innerHTML='';rbr.style.display='none';}
+  const rbh=$('#rubricaHint');
+  if(rbh){
+    const tot=getRubrica().length;
+    rbh.textContent=tot?'Cerca tra '+tot.toLocaleString('it-IT')+' articoli di magazzino':'Rubrica vuota (carica rubrica.js)';
+  }
+}
 
 /* -------- COMPRESSIONE FOTO -------- */
 function compressImage(file,maxPx=MAX_PHOTO_PX,quality=PHOTO_QUALITY){
@@ -757,9 +1036,22 @@ function saveState(silent=false){
   }catch(e){
     console.error('Save error:',e);
     const quota=e.name==='QuotaExceededError'||/quota/i.test(e.message);
+    if(quota){
+      try{
+        if(localStorage.getItem(BACKUP_KEYS[2])){
+          localStorage.removeItem(BACKUP_KEYS[2]);
+          localStorage.removeItem(TEMP_KEY);
+          return saveState(silent);
+        }
+        if(localStorage.getItem(TEMP_KEY)){
+          localStorage.removeItem(TEMP_KEY);
+          return saveState(silent);
+        }
+      }catch(e2){}
+    }
     setInfo('save','● ERRORE: '+(quota?'Storage pieno':'Salvataggio fallito'),'err');
     if(!silent){
-      if(quota) alert('⚠️ STORAGE PIENO\n\nRimuovi alcune foto o esporta/importa dopo pulizia.');
+      if(quota) alert('⚠️ STORAGE PIENO\n\nRimuovi foto o usa "🧹 Pulisci storage" nelle Impostazioni.');
       else alert('⚠️ ERRORE SALVATAGGIO\n'+e.message);
     }
     return false;
@@ -786,8 +1078,7 @@ function normalizeState(p){
       a.supplier=String(a.supplier||'').slice(0,200);
       a.supplierCode=String(a.supplierCode||'').slice(0,100);
       a.notes=String(a.notes||'').slice(0,1000);
-      a.price=num(a.price);
-      a.cost=num(a.cost);
+      a.price=num(a.price);a.cost=num(a.cost);
       a.margin=(typeof a.margin==='number'&&!isNaN(a.margin))?a.margin:null;
       a.purchases=Array.isArray(a.purchases)?a.purchases:[];
       a.purchases.forEach(pp=>{pp.id=pp.id||uid();pp.cost=num(pp.cost);pp.qty=num(pp.qty);
@@ -816,31 +1107,49 @@ function loadState(){
   if(restored){
     state=restored;
     if(from!==STORAGE_KEY){
-      setInfo('save','● Recupero da '+from,'warn');
-      saveState(true);
+      const ok=saveState(true);
+      if(ok) setInfo('save','● Recupero da '+from,'warn');
     } else {
       setInfo('save','● Dati caricati correttamente','ok');
     }
   } else {
     state=buildSeed();
-    saveState(true);
-    setInfo('save','● Primo avvio: dati demo caricati','ok');
+    const ok=saveState(true);
+    if(ok) setInfo('save','● Primo avvio: dati demo caricati','ok');
   }
   activeCategoryId=state.categories[0]?state.categories[0].id:null;
   updateStorageInfo();
 }
 
+let _storageUpdateTimer = null;
 function updateStorageInfo(){
-  try{
-    let bytes=0;
-    for(const k of [STORAGE_KEY,...BACKUP_KEYS,TEMP_KEY]){
-      const v=localStorage.getItem(k);if(v)bytes+=v.length;
-    }
-    const kb=bytes/1024,mb=kb/1024;
-    const txt=mb>=1?mb.toFixed(2)+' MB':kb.toFixed(1)+' KB';
-    const el=$('#infoStorage');if(el)el.textContent='Storage: '+txt;
-    const el2=$('#setStorageInfo');if(el2)el2.textContent=txt+' usati (limite ~5 MB)';
-  }catch(e){}
+  clearTimeout(_storageUpdateTimer);
+  _storageUpdateTimer = setTimeout(async () => {
+    let ourTxt='—', totalTxt='—';
+    try{
+      let bytes=0;
+      for(const k of [STORAGE_KEY,...BACKUP_KEYS,TEMP_KEY]){
+        const v=localStorage.getItem(k);if(v)bytes+=v.length*2;
+      }
+      const kb=bytes/1024;
+      ourTxt = kb>=1024 ? (kb/1024).toFixed(2)+' MB' : kb.toFixed(1)+' KB';
+    }catch(e){}
+    try{
+      if(navigator.storage && navigator.storage.estimate){
+        const est=await navigator.storage.estimate();
+        const used=est.usage||0, quota=est.quota||0;
+        const pct = quota>0 ? ((used/quota)*100).toFixed(1) : '?';
+        totalTxt = (used/1024/1024).toFixed(2)+' MB / '+(quota/1024/1024).toFixed(0)+' MB ('+pct+'%)';
+      }
+    }catch(e){}
+    const el=$('#infoStorage');
+    if(el) el.textContent = 'App: '+ourTxt+' · Origine: '+totalTxt;
+    const el2=$('#setStorageInfo');
+    if(el2) el2.innerHTML =
+      '<b>Questa app:</b> '+ourTxt+'<br>'+
+      '<b>Totale origine:</b> '+totalTxt+'<br>'+
+      '<span style="color:var(--amber)">⚠️ Se l\'origine è oltre il 90%, i salvataggi falliranno.</span>';
+  }, 200);
 }
 
 /* -------- STATO -------- */
@@ -849,6 +1158,7 @@ let activeCategoryId=null;
 let activeFilter='all';
 let searchQuery='';
 let selectedArticles=new Set();
+let selectionMode=false;
 let editingArticleId=null;
 let pendingPhoto=null;
 
@@ -869,7 +1179,6 @@ function undo(){
   try{
     redoStack.push({label:entry.label,snapshot:JSON.stringify(state)});
     state=normalizeState(JSON.parse(entry.snapshot));
-    // mantieni una categoria attiva valida
     if(!state.categories.find(c=>c.id===activeCategoryId)){
       activeCategoryId=state.categories[0]?state.categories[0].id:null;
     }
@@ -940,7 +1249,13 @@ function renderTabs(){
     b.className='tab'+(cat.id===activeCategoryId?' active':'');
     b.dataset.cat=cat.id;
     b.innerHTML=esc(cat.name)+' <span class="count">'+cat.articles.length+'</span>';
-    b.addEventListener('click',()=>{activeCategoryId=cat.id;selectedArticles.clear();render();});
+    b.addEventListener('click',()=>{
+      activeCategoryId=cat.id;
+      selectedArticles.clear();
+      if(selectionMode) exitSelectionMode();
+      updateSelectionBar();
+      render();
+    });
     b.addEventListener('contextmenu',e=>{e.preventDefault();renameCategory(cat.id);});
     tabs.appendChild(b);
   });
@@ -954,7 +1269,7 @@ function renderTable(){
       '<strong>Nessun articolo da mostrare</strong><p>'+
       (searchQuery?'Nessun risultato.':'Aggiungi il primo articolo con "+ Articolo".')+
       '</p></div></td></tr>';
-    updatePrintCount();return;
+    updateSelectionBar();return;
   }
   const frag=document.createDocumentFragment();
   articles.forEach(a=>{
@@ -1007,7 +1322,7 @@ function renderTable(){
     frag.appendChild(tr);
   });
   tbody.appendChild(frag);
-  updatePrintCount();
+  updateSelectionBar();
   updateCheckAllState();
 }
 
@@ -1028,16 +1343,52 @@ function refreshRow(art){
   tr.querySelector('.cost-in').value=art.cost.toFixed(2);
 }
 
-function updatePrintCount(){
+function updateSelectionBar(){
   const n=selectedArticles.size;
-  $('#printCount').textContent=n>0?'('+n+')':'';
+  const cnt=$('#selBarCount');if(cnt)cnt.textContent=n;
+  const btn=$('#btnSelPrint');
+  if(btn)btn.textContent = n>0 ? '🖨 Stampa ('+n+')' : '🖨 Stampa tutto';
+  const arts=getFilteredArticles();
+  const allSel=arts.length>0 && arts.every(a=>selectedArticles.has(a.id));
+  const btnAll=$('#btnSelAllBar');
+  if(btnAll) btnAll.textContent = allSel ? 'Deseleziona tutti' : 'Seleziona tutti';
 }
+
 function updateCheckAllState(){
   const boxes=$$('#tableBody input[data-check]');
   const all=boxes.length>0 && Array.from(boxes).every(b=>b.checked);
   const head=$('#checkAllHead');if(head)head.checked=all;
 }
-function render(){renderTabs();renderTable();updateInfoBar();}
+
+function render(){
+  renderTabs();
+  renderTable();
+  updateInfoBar();
+  if(window.__resetCompact) window.__resetCompact();
+}
+
+/* -------- SELEZIONE -------- */
+function enterSelectionMode(){
+  selectionMode=true;
+  selectedArticles.clear();
+  document.body.classList.add('selection-mode');
+  const btn=$('#btnPrint');
+  btn.innerHTML='✕ Annulla';
+  btn.classList.remove('btn-yellow');
+  renderTable();
+  updateSelectionBar();
+  const btnAll=$('#btnSelAllBar');
+  if(btnAll) btnAll.textContent='Seleziona tutti';
+}
+function exitSelectionMode(){
+  selectionMode=false;
+  selectedArticles.clear();
+  document.body.classList.remove('selection-mode');
+  const btn=$('#btnPrint');
+  btn.innerHTML='🖨 Stampa';
+  btn.classList.add('btn');
+  renderTable();
+}
 
 /* -------- MODIFICHE INLINE -------- */
 let editSnapshotTaken=false;
@@ -1050,7 +1401,6 @@ $('#tableBody').addEventListener('input',e=>{
   if(!inp.dataset||!inp.dataset.field)return;
   const art=findArticle(inp.dataset.id);if(!art)return;
   const fld=inp.dataset.field;
-
   if(fld==='price'||fld==='cost'){
     const val=parseFloat(inp.value);if(isNaN(val)||val<0)return;
     const old=art[fld];if(old===val)return;
@@ -1085,7 +1435,8 @@ $('#tableBody').addEventListener('change',e=>{
     if(inp.checked)selectedArticles.add(inp.dataset.check);
     else selectedArticles.delete(inp.dataset.check);
     const tr=inp.closest('tr');if(tr)tr.classList.toggle('row-selected',inp.checked);
-    updatePrintCount();updateCheckAllState();
+    updateSelectionBar();
+    updateCheckAllState();
   }
 });
 
@@ -1094,6 +1445,24 @@ $('#tableBody').addEventListener('keydown',e=>{
 });
 
 $('#tableBody').addEventListener('click',e=>{
+  if(selectionMode){
+    const tr=e.target.closest('tr');
+    if(tr && tr.dataset.art && !e.target.closest('button')){
+      if(e.target.tagName==='INPUT'){
+        if(e.target.dataset.check) return;
+        return;
+      }
+      const id=tr.dataset.art;
+      if(selectedArticles.has(id)) selectedArticles.delete(id);
+      else selectedArticles.add(id);
+      tr.classList.toggle('row-selected', selectedArticles.has(id));
+      const cb=tr.querySelector('input[data-check]');
+      if(cb) cb.checked = selectedArticles.has(id);
+      updateSelectionBar();
+      updateCheckAllState();
+      return;
+    }
+  }
   const openBtn=e.target.closest('[data-open]');
   if(openBtn){openArticleModal(openBtn.dataset.open);return;}
   const delBtn=e.target.closest('[data-del]');
@@ -1117,11 +1486,9 @@ function deleteArticle(id){
 function openArticleModal(id){
   const art=findArticle(id);if(!art)return;
   editingArticleId=id;pendingPhoto=art.photo||'';
-
   $('#artTitle').textContent=art.name;
   const cat=getActiveCategory();
   $('#artSub').textContent=cat?'Settore: '+cat.name:'';
-
   $('#edName').value=art.name;
   $('#edUnit').value=art.unit||'pz';
   $('#edPrice').value=art.price.toFixed(2);
@@ -1130,14 +1497,11 @@ function openArticleModal(id){
   $('#edSupplier').value=art.supplier||'';
   $('#edSupplierCode').value=art.supplierCode||'';
   $('#edNotes').value=art.notes||'';
-
   updateUnitLabels();renderSconti();renderLotti();renderPhotoPanel();renderHistory();updateSuggestBox();
-
   $$('.modal-tab').forEach(t=>t.classList.remove('active'));
   document.querySelector('.modal-tab[data-mtab="base"]').classList.add('active');
   $$('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelector('.panel[data-panel="base"]').classList.add('active');
-
   openModal('#modalArticle');
 }
 
@@ -1183,7 +1547,7 @@ $('#edApplySuggest').addEventListener('click',()=>{
 });
 $('#edUnit').addEventListener('change',()=>{updateUnitLabels();updateSuggestBox();});
 
-/* -------- SCONTI QUANTITÀ -------- */
+/* -------- SCONTI -------- */
 function renderSconti(){
   const art=findArticle(editingArticleId);if(!art)return;
   const list=$('#scontiList');
@@ -1240,7 +1604,6 @@ function renderLotti(){
   const avg=totalQty>0?purchases.reduce((s,p)=>s+num(p.cost)*num(p.qty),0)/totalQty:0;
   $('#lottoLast').textContent=last>0?fmtEuro(last):'—';
   $('#lottoAvg').textContent =avg>0?fmtEuro(avg):'—';
-
   if(!purchases.length){
     list.innerHTML='<div style="text-align:center;color:var(--text-mute);padding:16px 0;font-size:12.5px">'+
       'Nessun acquisto registrato.</div>';
@@ -1301,10 +1664,8 @@ function renderPhotoPanel(){
 $('#btnPhotoPick').addEventListener('click',()=>$('#photoInput').click());
 $('#photoInput').addEventListener('change',async e=>{
   const f=e.target.files[0];if(!f)return;
-  try{
-    pendingPhoto=await compressImage(f);
-    renderPhotoPanel();
-  }catch(err){alert('Errore immagine: '+err.message);}
+  try{pendingPhoto=await compressImage(f);renderPhotoPanel();}
+  catch(err){alert('Errore immagine: '+err.message);}
   finally{e.target.value='';}
 });
 $('#btnPhotoDel').addEventListener('click',()=>{pendingPhoto='';renderPhotoPanel();});
@@ -1340,13 +1701,10 @@ $('#btnSaveArt').addEventListener('click',()=>{
   const art=findArticle(editingArticleId);if(!art)return;
   const newName=$('#edName').value.trim();
   if(!newName)return alert('Inserisci un nome valido.');
-
   const newPrice=num($('#edPrice').value);
   const newCost=num($('#edCost').value);
   const newMargin=parseFloat($('#edMargin').value);
-
   pushUndo('Modifica "'+art.name+'"');
-
   if(newPrice!==art.price || newCost!==art.cost){
     art.history.push({
       date:new Date().toISOString(),price:newPrice,cost:newCost,
@@ -1365,7 +1723,6 @@ $('#btnSaveArt').addEventListener('click',()=>{
   art.supplierCode=$('#edSupplierCode').value.trim().slice(0,100);
   art.notes=$('#edNotes').value.trim().slice(0,1000);
   art.photo=pendingPhoto||'';
-
   if(!saveState()){ if(!confirm('Salvataggio fallito. Chiudere comunque?'))return; }
   closeModal('#modalArticle');
   editingArticleId=null;pendingPhoto=null;
@@ -1379,8 +1736,9 @@ $('#btnAddArt').addEventListener('click',()=>{
   $('#naName').value='';$('#naPrice').value='';$('#naCost').value='';
   $('#naSupplier').value='';$('#naSupplierCode').value='';$('#naNotes').value='';
   $('#naUnit').value='pz';
+  resetRubrica();
   openModal('#modalNewArt');
-  setTimeout(()=>$('#naName').focus(),100);
+  setTimeout(()=>$('#rubricaSearch').focus(),100);
 });
 $('#btnCreateArt').addEventListener('click',()=>{
   const cat=getActiveCategory();if(!cat)return;
@@ -1448,6 +1806,22 @@ $('#setSave').addEventListener('click',()=>{
   state.meta.globalMargin=Math.max(0,parseFloat($('#setGlobalMargin').value)||40);
   saveState();updateInfoBar();closeModal('#modalSettings');
 });
+$('#btnClean').addEventListener('click',()=>{
+  if(!confirm('Pulire i backup vecchi e le chiavi di versioni precedenti?\n\nI tuoi dati attuali NON verranno toccati.')) return;
+  let freed=0;
+  for(const k of LEGACY_KEYS){
+    const v=localStorage.getItem(k);
+    if(v){freed+=v.length*2;localStorage.removeItem(k);}
+  }
+  for(let i=1;i<BACKUP_KEYS.length;i++){
+    const v=localStorage.getItem(BACKUP_KEYS[i]);
+    if(v){freed+=v.length*2;localStorage.removeItem(BACKUP_KEYS[i]);}
+  }
+  const t=localStorage.getItem(TEMP_KEY);
+  if(t){freed+=t.length*2;localStorage.removeItem(TEMP_KEY);}
+  updateStorageInfo();
+  alert('✅ Liberati circa '+(freed/1024).toFixed(1)+' KB.');
+});
 
 /* -------- EXPORT / IMPORT -------- */
 $('#btnExport').addEventListener('click',()=>{
@@ -1464,7 +1838,6 @@ $('#btnExport').addEventListener('click',()=>{
     try{localStorage.setItem('rattazzi_last_export',String(Date.now()));}catch(e){}
   }catch(e){alert('Errore export: '+e.message);}
 });
-
 $('#btnImport').addEventListener('click',()=>{
   const inp=document.createElement('input');
   inp.type='file';inp.accept='.json,application/json';
@@ -1477,7 +1850,6 @@ $('#btnImport').addEventListener('click',()=>{
         const normalized=normalizeState(p);
         if(!confirm('Sovrascrivere i dati attuali?'))return;
         pushUndo('Import backup');
-        // backup di sicurezza dell'attuale
         try{const cur=localStorage.getItem(STORAGE_KEY);if(cur)localStorage.setItem(BACKUP_KEYS[0],cur);}catch(e){}
         state=normalized;
         activeCategoryId=state.categories[0]?state.categories[0].id:null;
@@ -1507,307 +1879,85 @@ $('#searchInput').addEventListener('input',e=>{
   searchTimer=setTimeout(()=>{searchQuery=e.target.value;renderTable();},120);
 });
 
-/* -------- SELEZIONE MULTIPLA -------- */
-$('#checkAllHead').addEventListener('change',e=>{
-  const arts=getFilteredArticles();
-  if(e.target.checked) arts.forEach(a=>selectedArticles.add(a.id));
-  else arts.forEach(a=>selectedArticles.delete(a.id));
-  renderTable();
+/* -------- SELEZIONE: pulsanti barra -------- */
+$('#btnPrint').addEventListener('click',()=>{
+  if(selectionMode) exitSelectionMode();
+  else enterSelectionMode();
 });
-$('#btnSelAll').addEventListener('click',()=>{
+$('#btnSelAllBar').addEventListener('click',()=>{
   const arts=getFilteredArticles();
   const allSel=arts.length>0 && arts.every(a=>selectedArticles.has(a.id));
   if(allSel) arts.forEach(a=>selectedArticles.delete(a.id));
   else arts.forEach(a=>selectedArticles.add(a.id));
   renderTable();
+  updateSelectionBar();
+});
+$('#btnSelPrint').addEventListener('click',()=>{
+  doActualPrint();
+  exitSelectionMode();
+});
+$('#checkAllHead').addEventListener('change',e=>{
+  const arts=getFilteredArticles();
+  if(e.target.checked) arts.forEach(a=>selectedArticles.add(a.id));
+  else arts.forEach(a=>selectedArticles.delete(a.id));
+  renderTable();
+  updateSelectionBar();
 });
 
 /* ============================================================================
-   WALKTHROUGH — "GIRO IN MAGAZZINO"
+   STAMPA A4 — senza data (da scrivere a matita)
    ========================================================================== */
-let walkArticles=[];
-let walkIndex=0;
-let walkUnlocked=false;
-let walkUndoSnapshot=null;
-
-function openWalkthrough(){
-  const articles=getFilteredArticles();
-  if(!articles.length) return alert('Nessun articolo da mostrare nel giro.');
-  walkArticles=articles.map(a=>a.id);
-  walkIndex=0;
-  walkUnlocked=false;
-  walkUndoSnapshot=null;
-  updateWalkLockUI();
-  renderWalkCard();
-  $('#walkthrough').classList.add('open');
-}
-function closeWalkthrough(){
-  walkUndoSnapshot=null;
-  $('#walkthrough').classList.remove('open');
-}
-function walkCurrentArticle(){
-  if(!walkArticles.length) return null;
-  return findArticle(walkArticles[walkIndex]);
-}
-function walkNext(){
-  if(walkIndex < walkArticles.length-1){
-    walkUndoSnapshot=null;
-    walkIndex++;
-    renderWalkCard();
-  }
-}
-function walkPrev(){
-  if(walkIndex > 0){
-    walkUndoSnapshot=null;
-    walkIndex--;
-    renderWalkCard();
-  }
-}
-function updateWalkLockUI(){
-  const btn=$('#walkLock');
-  if(walkUnlocked){
-    btn.classList.add('unlocked');
-    btn.innerHTML='🔓 Modifica attiva — tocca per bloccare';
-  } else {
-    btn.classList.remove('unlocked');
-    btn.innerHTML='🔒 Bloccato — tocca per modificare';
-  }
-}
-function renderWalkCard(){
-  const a=walkCurrentArticle();
-  const wrap=$('#walkCardWrap');
-  if(!a){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text-mute)">Articolo non trovato.</div>';return;}
-
-  $('#walkIdx').textContent=walkIndex+1;
-  $('#walkTot').textContent=walkArticles.length;
-
-  $('#walkPrev').classList.toggle('disabled',walkIndex===0);
-  $('#walkNext').classList.toggle('disabled',walkIndex>=walkArticles.length-1);
-  $('#walkPrevBtn').disabled=walkIndex===0;
-  $('#walkNextBtn').disabled=walkIndex>=walkArticles.length-1;
-
-  const marginPct=a.price>0?((a.price-a.cost)/a.price*100):0;
-  const marginCls=a.price<a.cost?'bad':(marginPct<15?'warn':'good');
-  const isLoss=a.price<a.cost && a.cost>0;
-  const age=ageInfo(a.updatedAt);
-
-  const photoHtml = a.photo ? '<div class="walk-photo"><img src="'+esc(a.photo)+'" alt=""></div>' : '';
-  const supLine = [a.supplier,a.supplierCode].filter(Boolean).join(' • ');
-
-  const scontiHtml = a.quantityDiscounts && a.quantityDiscounts.length
-    ? a.quantityDiscounts.slice().sort((x,y)=>x.minQty-y.minQty)
-        .map(s=>'<span class="walk-sconto-pill">'+esc(scontoLabel(s,a.unit))+'</span>').join('')
-    : '<span style="color:var(--text-mute);font-size:13px">Nessuno sconto quantità</span>';
-
-  const purchases=[...a.purchases].sort((x,y)=>new Date(y.date)-new Date(x.date)).slice(0,4);
-  const purchasesHtml = purchases.length
-    ? '<div class="walk-purchases">'+purchases.map(p=>
-        '<div class="walk-purchase">'+
-          '<span class="dp">'+fmtDate(p.date)+'</span>'+
-          '<span class="pp">'+fmtEuro(p.cost)+'</span>'+
-          '<span class="pp">'+num(p.qty)+' '+esc(a.unit||'pz')+'</span>'+
-        '</div>').join('')+'</div>'
-    : '<span style="color:var(--text-mute);font-size:13px">Nessun acquisto registrato</span>';
-
-  const notesHtml = a.notes
-    ? '<div class="scont">'+esc(a.notes)+'</div>'
-    : '<span style="color:var(--text-mute);font-size:13px">Nessuna nota</span>';
-
-  const priceCellClass = 'walk-price-cell' + (walkUnlocked?' editable':'');
-  const costCellClass  = 'walk-price-cell' + (walkUnlocked?' editable':'');
-
-  wrap.innerHTML = `
-    <div class="walk-card">
-      ${photoHtml}
-      <div class="walk-name">${esc(a.name)}</div>
-      <div class="walk-meta">
-        <span class="age-badge ${age.cls}" style="margin-left:0">${age.label}</span>
-        <span class="sep">•</span>Unità: <b style="color:var(--text)">${esc(a.unit||'pz')}</b>
-        ${supLine?'<span class="sep">•</span>'+esc(supLine):''}
-      </div>
-      <div class="walk-price-grid">
-        <div class="${priceCellClass}" data-cell="price">
-          <span class="lbl">Prezzo vendita</span>
-          <span class="val">${fmtEuro(a.price)}${esc(unitSuffix(a.unit))}</span>
-          <input type="number" step="0.01" min="0" class="edit-input" data-wf="price" value="${a.price.toFixed(2)}">
-        </div>
-        <div class="${costCellClass}" data-cell="cost">
-          <span class="lbl">Costo acquisto</span>
-          <span class="val">${fmtEuro(a.cost)}</span>
-          <input type="number" step="0.01" min="0" class="edit-input" data-wf="cost" value="${a.cost.toFixed(2)}">
-        </div>
-        <div class="walk-price-cell">
-          <span class="lbl">Margine</span>
-          <span class="val ${marginCls}">${isLoss?'⚠ ':''}${marginPct.toFixed(1)}%</span>
-        </div>
-      </div>
-      <div class="walk-section">
-        <div class="stitle">💰 Sconti quantità</div>
-        <div class="walk-sconti-list">${scontiHtml}</div>
-      </div>
-      <div class="walk-section">
-        <div class="stitle">📦 Ultimi acquisti</div>
-        ${purchasesHtml}
-      </div>
-      <div class="walk-section">
-        <div class="stitle">📝 Note magazzino</div>
-        ${notesHtml}
-      </div>
-    </div>`;
-
-  if(walkUnlocked){
-    const inp=wrap.querySelector('.edit-input');
-    if(inp) setTimeout(()=>inp.focus(),50);
-  }
-}
-
-$('#btnWalk').addEventListener('click',openWalkthrough);
-$('#walkClose').addEventListener('click',closeWalkthrough);
-$('#walkPrev').addEventListener('click',()=>{if(walkIndex>0)walkPrev();});
-$('#walkNext').addEventListener('click',()=>{if(walkIndex<walkArticles.length-1)walkNext();});
-$('#walkPrevBtn').addEventListener('click',walkPrev);
-$('#walkNextBtn').addEventListener('click',walkNext);
-
-$('#walkLock').addEventListener('click',()=>{
-  walkUnlocked=!walkUnlocked;
-  walkUndoSnapshot=null;
-  updateWalkLockUI();
-  renderWalkCard();
-});
-
-// Salva snapshot per undo quando entro in un campo
-$('#walkCardWrap').addEventListener('focusin',e=>{
-  if(e.target.classList.contains('edit-input')){
-    walkUndoSnapshot=JSON.stringify(state);
-  }
-});
-
-// NIENTE saveState su 'input': aspetto il blur
-// (così non scrivo 4 chiavi ad ogni carattere digitato)
-$('#walkCardWrap').addEventListener('input',e=>{
-  if(!e.target.classList.contains('edit-input'))return;
-  if(!walkUnlocked) return;
-  // Non facciamo nulla: l'utente sta ancora scrivendo.
-  // Il valore verrà applicato e salvato al blur (change).
-});
-
-// Al blur (change) applico e salvo
-$('#walkCardWrap').addEventListener('change',e=>{
-  if(!e.target.classList.contains('edit-input'))return;
-  if(!walkUnlocked) return;
-  const a=walkCurrentArticle();if(!a)return;
-  const f=e.target.dataset.wf;
-  const newVal=num(e.target.value);
-  const oldVal=a[f];
-  if(oldVal===newVal){walkUndoSnapshot=null;return;}
-
-  // Push undo con lo snapshot catturato al focus
-  if(walkUndoSnapshot){
-    try{
-      undoStack.push({label:'Modifica '+(f==='price'?'prezzo':'costo')+' in giro',snapshot:walkUndoSnapshot});
-      if(undoStack.length>MAX_UNDO) undoStack.shift();
-      redoStack=[];
-      updateUndoButtons();
-    }catch(err){}
-    walkUndoSnapshot=null;
-  }
-
-  a[f]=newVal;
-  a.history.push({
-    date:new Date().toISOString(),
-    price:a.price, cost:a.cost,
-    prevPrice: f==='price'?oldVal:a.price,
-    prevCost:  f==='cost' ?oldVal:a.cost,
-    operator:state.meta.operator||''
-  });
-  a.updatedAt=new Date().toISOString();
-  state.meta.lastRevision=a.updatedAt;
-
-  saveState();
-  renderWalkCard();
-  refreshRow(a);
-});
-
-// Tastiera
-document.addEventListener('keydown',e=>{
-  if(!$('#walkthrough').classList.contains('open'))return;
-  if(e.key==='Escape'){closeWalkthrough();return;}
-  // Non intercettare frecce se sto scrivendo in un input
-  const tag=document.activeElement && document.activeElement.tagName;
-  if(tag==='INPUT'||tag==='TEXTAREA') return;
-  if(e.key==='ArrowRight'){ if(walkIndex<walkArticles.length-1)walkNext(); e.preventDefault();}
-  if(e.key==='ArrowLeft'){  if(walkIndex>0)walkPrev(); e.preventDefault();}
-});
-
-/* ============================================================================
-   STAMPA
-   ========================================================================== */
-$('#btnPrint').addEventListener('click',()=>{
+function doActualPrint(){
   const cat=getActiveCategory();
   if(!cat)return alert('Nessun settore selezionato.');
-
   let articles=getFilteredArticles();
-  if(selectedArticles.size>0) articles=articles.filter(a=>selectedArticles.has(a.id));
+  if(selectionMode && selectedArticles.size>0){
+    articles=articles.filter(a=>selectedArticles.has(a.id));
+  }
   if(!articles.length)return alert('Nessun articolo da stampare.');
 
-  const meta=state.meta||{};
-  const now=new Date();
+  // Altezza riga proporzionale per riempire il foglio A4
+  const n = articles.length;
+  const usable = 225;
+  const gap = 4;
+  let hRow = (usable - (n-1)*gap) / n;
+  hRow = Math.max(14, Math.min(42, hRow));
+  const hRowPx = hRow + 'mm';
 
-  const rows=articles.map(a=>{
-    const sup=[a.supplier,a.supplierCode].filter(Boolean).join(' • ');
-    const scontiTxt=a.quantityDiscounts && a.quantityDiscounts.length
-      ? '<div class="disc-line">Sconti: '+
-          a.quantityDiscounts.slice().sort((x,y)=>x.minQty-y.minQty)
-          .map(s=>esc(scontoLabel(s,a.unit))).join(' · ')+'</div>'
-      : '';
+  const rowsHtml = articles.map(a=>{
+    const cod = a.supplierCode ? 'Cod. ' + esc(a.supplierCode) : '';
     return `
-      <tr>
-        <td>${esc(a.name)}${sup?'<br><span style="font-size:8pt;color:#666">'+esc(sup)+'</span>':''}${scontiTxt}</td>
-        <td style="text-align:center">${esc(a.unit||'pz')}</td>
-        <td class="num">${a.cost.toFixed(2)} €</td>
-        <td class="num">${a.price.toFixed(2)} €</td>
-        <td>${fmtDate(a.updatedAt)}</td>
-        <td style="font-size:9pt">${esc(a.notes||'')}</td>
-        <td class="pencil-col"></td>
-      </tr>`;
+      <div class="articolo" style="min-height:${hRowPx}">
+        <div class="art-info">
+          <div class="art-nome">${esc(a.name)}</div>
+          ${cod ? `<div class="art-cod">${cod}</div>` : ''}
+        </div>
+        <div class="art-prezzo-box">
+          <div class="art-prezzo-label">Prezzo</div>
+          <div class="art-prezzo-empty"></div>
+          <div class="art-prezzo-unit">€/${esc(a.unit||'pz')}</div>
+        </div>
+      </div>`;
   }).join('');
 
-  const filteredNote=activeFilter!=='all'?' — <em>Filtro: oltre '+activeFilter+' mesi</em>':'';
-  const selectedNote=selectedArticles.size>0?' — <em>Solo selezionati ('+articles.length+')</em>':'';
+  const filterNote = activeFilter!=='all' ? ' — <em>filtro &gt;'+activeFilter+' mesi</em>' : '';
+  const selNote = (selectionMode && selectedArticles.size>0) ? ' — <em>solo '+articles.length+' selezionati</em>' : '';
 
-  $('#printArea').innerHTML=`
-    <h1>RATTAZZI — Cartellini Prezzi</h1>
-    <div class="print-meta">
-      <div>
-        <strong>Settore:</strong> ${esc(cat.name)} &nbsp;•&nbsp;
-        <strong>Articoli:</strong> ${articles.length}${filteredNote}${selectedNote}
-      </div>
-      <div>
-        Stampato il ${fmtDate(now.toISOString())} ${now.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}
-        ${meta.operator?' &nbsp;•&nbsp; Op.: '+esc(meta.operator):''}
+  $('#printArea').innerHTML = `
+    <div class="print-header">
+      <h1>RATTAZZI</h1>
+      <div class="print-sub">Cartellini Prezzi — ${esc(cat.name)}</div>
+      <div class="print-meta">
+        <span>${articles.length} articoli${filterNote}${selNote}</span>
+        <span class="print-date-line">Data: <span class="print-date-blank"></span></span>
       </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Articolo / Misura</th>
-          <th style="text-align:center">Unità</th>
-          <th class="num">Costo</th>
-          <th class="num">Prezzo attuale</th>
-          <th>Ultimo agg.</th>
-          <th>Note</th>
-          <th class="pencil-col">Nuovo prezzo ✏️</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="print-footer">
-      <div>Aggiornare a matita la colonna "Nuovo prezzo".</div>
-      <div>Rattazzi — Cartellini Prezzi</div>
+    <div class="articoli-list">
+      ${rowsHtml}
     </div>`;
 
   setTimeout(()=>window.print(),80);
-});
+}
 
 /* -------- MODALI (utility) -------- */
 function openModal(sel){$(sel).classList.add('open');}
@@ -1827,6 +1977,7 @@ $$('.nav-item').forEach(b=>{
     if(act==='stampa'){  $('#btnPrint').click();return;}
     if(act==='backup'){  $('#btnExport').click();return;}
     if(act==='walk'){    openWalkthrough();return;}
+    document.body.classList.remove('compact');
     document.querySelector('main.content').scrollTo({top:0,behavior:'smooth'});
   });
 });
@@ -1838,7 +1989,6 @@ document.addEventListener('keydown',e=>{
   }
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='n'){e.preventDefault();$('#btnAddArt').click();}
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='p'){e.preventDefault();$('#btnPrint').click();}
-
   const tag=document.activeElement && document.activeElement.tagName;
   const inInput=(tag==='INPUT'||tag==='TEXTAREA');
   if(!inInput){
@@ -1849,9 +1999,8 @@ document.addEventListener('keydown',e=>{
       e.preventDefault();redo();
     }
   }
-
   if(e.key==='Escape'){
-    // Non chiudere walkthrough con Esc se non è aperto
+    if(selectionMode){ exitSelectionMode(); return; }
     $$('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
   }
 });
@@ -1867,6 +2016,195 @@ document.addEventListener('keydown',e=>{
   });
 })();
 
+/* ============================================================================
+   WALKTHROUGH — solo prezzo vendita (no costo, no margine)
+   ========================================================================== */
+let walkArticles=[];
+let walkIndex=0;
+let walkUnlocked=false;
+let walkUndoSnapshot=null;
+
+function openWalkthrough(){
+  if(selectionMode) exitSelectionMode();
+  const articles=getFilteredArticles();
+  if(!articles.length) return alert('Nessun articolo da mostrare nel giro.');
+  walkArticles=articles.map(a=>a.id);
+  walkIndex=0;
+  walkUnlocked=false;
+  walkUndoSnapshot=null;
+  updateWalkLockUI();
+  renderWalkCard();
+  $('#walkthrough').classList.add('open');
+}
+function closeWalkthrough(){walkUndoSnapshot=null;$('#walkthrough').classList.remove('open');}
+function walkCurrentArticle(){if(!walkArticles.length)return null;return findArticle(walkArticles[walkIndex]);}
+function walkNext(){if(walkIndex<walkArticles.length-1){walkUndoSnapshot=null;walkIndex++;renderWalkCard();}}
+function walkPrev(){if(walkIndex>0){walkUndoSnapshot=null;walkIndex--;renderWalkCard();}}
+function updateWalkLockUI(){
+  const btn=$('#walkLock');
+  if(walkUnlocked){btn.classList.add('unlocked');btn.innerHTML='🔓 Modifica attiva — tocca per bloccare';}
+  else{btn.classList.remove('unlocked');btn.innerHTML='🔒 Bloccato — tocca per modificare';}
+}
+function renderWalkCard(){
+  const a=walkCurrentArticle();
+  const wrap=$('#walkCardWrap');
+  if(!a){wrap.innerHTML='<div style="padding:40px;text-align:center;color:var(--text-mute)">Articolo non trovato.</div>';return;}
+  $('#walkIdx').textContent=walkIndex+1;
+  $('#walkTot').textContent=walkArticles.length;
+  $('#walkPrev').classList.toggle('disabled',walkIndex===0);
+  $('#walkNext').classList.toggle('disabled',walkIndex>=walkArticles.length-1);
+  $('#walkPrevBtn').disabled=walkIndex===0;
+  $('#walkNextBtn').disabled=walkIndex>=walkArticles.length-1;
+
+  const age=ageInfo(a.updatedAt);
+  const photoHtml=a.photo?'<div class="walk-photo"><img src="'+esc(a.photo)+'" alt=""></div>':'';
+  const supLine=[a.supplier,a.supplierCode].filter(Boolean).join(' • ');
+
+  const scontiHtml=a.quantityDiscounts && a.quantityDiscounts.length
+    ?a.quantityDiscounts.slice().sort((x,y)=>x.minQty-y.minQty)
+      .map(s=>'<span class="walk-sconto-pill">'+esc(scontoLabel(s,a.unit))+'</span>').join('')
+    :'<span style="color:var(--text-mute);font-size:13px">Nessuno sconto quantità</span>';
+
+  const purchases=[...a.purchases].sort((x,y)=>new Date(y.date)-new Date(x.date)).slice(0,4);
+  const purchasesHtml=purchases.length
+    ?'<div class="walk-purchases">'+purchases.map(p=>
+      '<div class="walk-purchase">'+
+        '<span class="dp">'+fmtDate(p.date)+'</span>'+
+        '<span class="pp">'+fmtEuro(p.cost)+'</span>'+
+        '<span class="pp">'+num(p.qty)+' '+esc(a.unit||'pz')+'</span>'+
+      '</div>').join('')+'</div>'
+    :'<span style="color:var(--text-mute);font-size:13px">Nessun acquisto registrato</span>';
+
+  const notesHtml=a.notes
+    ?'<div class="scont">'+esc(a.notes)+'</div>'
+    :'<span style="color:var(--text-mute);font-size:13px">Nessuna nota</span>';
+
+  const priceCellClass='walk-price-cell'+(walkUnlocked?' editable':'');
+
+  wrap.innerHTML=`
+    <div class="walk-card">
+      ${photoHtml}
+      <div class="walk-name">${esc(a.name)}</div>
+      <div class="walk-meta">
+        <span class="age-badge ${age.cls}" style="margin-left:0">${age.label}</span>
+        <span class="sep">•</span>Unità: <b style="color:var(--text)">${esc(a.unit||'pz')}</b>
+        ${supLine?'<span class="sep">•</span>'+esc(supLine):''}
+      </div>
+
+      <div class="walk-price-grid">
+        <div class="${priceCellClass}" data-cell="price">
+          <span class="lbl">Prezzo vendita</span>
+          <span class="val">${fmtEuro(a.price)}${esc(unitSuffix(a.unit))}</span>
+          <input type="number" step="0.01" min="0" class="edit-input" data-wf="price" value="${a.price.toFixed(2)}">
+        </div>
+      </div>
+
+      <div class="walk-section"><div class="stitle">💰 Sconti quantità</div>
+        <div class="walk-sconti-list">${scontiHtml}</div></div>
+      <div class="walk-section"><div class="stitle">📦 Ultimi acquisti</div>${purchasesHtml}</div>
+      <div class="walk-section"><div class="stitle">📝 Note magazzino</div>${notesHtml}</div>
+    </div>`;
+  if(walkUnlocked){
+    const inp=wrap.querySelector('.edit-input');
+    if(inp) setTimeout(()=>inp.focus(),50);
+  }
+}
+$('#btnWalk').addEventListener('click',openWalkthrough);
+$('#walkClose').addEventListener('click',closeWalkthrough);
+$('#walkPrev').addEventListener('click',()=>{if(walkIndex>0)walkPrev();});
+$('#walkNext').addEventListener('click',()=>{if(walkIndex<walkArticles.length-1)walkNext();});
+$('#walkPrevBtn').addEventListener('click',walkPrev);
+$('#walkNextBtn').addEventListener('click',walkNext);
+$('#walkLock').addEventListener('click',()=>{
+  walkUnlocked=!walkUnlocked;walkUndoSnapshot=null;
+  updateWalkLockUI();renderWalkCard();
+});
+$('#walkCardWrap').addEventListener('focusin',e=>{
+  if(e.target.classList.contains('edit-input')) walkUndoSnapshot=JSON.stringify(state);
+});
+$('#walkCardWrap').addEventListener('change',e=>{
+  if(!e.target.classList.contains('edit-input'))return;
+  if(!walkUnlocked) return;
+  const a=walkCurrentArticle();if(!a)return;
+  const f=e.target.dataset.wf;
+  const newVal=num(e.target.value);
+  const oldVal=a[f];
+  if(oldVal===newVal){walkUndoSnapshot=null;return;}
+  if(walkUndoSnapshot){
+    try{
+      undoStack.push({label:'Modifica '+(f==='price'?'prezzo':'costo')+' in giro',snapshot:walkUndoSnapshot});
+      if(undoStack.length>MAX_UNDO) undoStack.shift();
+      redoStack=[];updateUndoButtons();
+    }catch(err){}
+    walkUndoSnapshot=null;
+  }
+  a[f]=newVal;
+  a.history.push({
+    date:new Date().toISOString(),price:a.price,cost:a.cost,
+    prevPrice:f==='price'?oldVal:a.price,prevCost:f==='cost'?oldVal:a.cost,
+    operator:state.meta.operator||''
+  });
+  a.updatedAt=new Date().toISOString();
+  state.meta.lastRevision=a.updatedAt;
+  saveState();renderWalkCard();refreshRow(a);
+});
+document.addEventListener('keydown',e=>{
+  if(!$('#walkthrough').classList.contains('open'))return;
+  if(e.key==='Escape'){closeWalkthrough();return;}
+  const tag=document.activeElement && document.activeElement.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  if(e.key==='ArrowRight'){if(walkIndex<walkArticles.length-1)walkNext();e.preventDefault();}
+  if(e.key==='ArrowLeft'){ if(walkIndex>0)walkPrev();e.preventDefault();}
+});
+
+/* ============================================================================
+   COMPACT HEADER ON SCROLL
+   ========================================================================== */
+(function initCompactHeader(){
+  const content=document.querySelector('#mainContent');
+  if(!content) return;
+  let lastScroll=0;
+  let ticking=false;
+  let isCompact=false;
+  const DOWN_THRESHOLD=40;
+  const TOP_THRESHOLD=20;
+  const DELTA=8;
+
+  function update(){
+    const y=content.scrollTop;
+    if(y < TOP_THRESHOLD){
+      if(isCompact){
+        isCompact=false;
+        document.body.classList.remove('compact');
+      }
+      lastScroll=y;
+      ticking=false;
+      return;
+    }
+    const diff = y - lastScroll;
+    if(diff > DELTA && y > DOWN_THRESHOLD){
+      if(!isCompact){isCompact=true;document.body.classList.add('compact');}
+    } else if(diff < -DELTA){
+      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
+    }
+    lastScroll=y;
+    ticking=false;
+  }
+
+  content.addEventListener('scroll',()=>{
+    if(!ticking){
+      requestAnimationFrame(update);
+      ticking=true;
+    }
+  }, { passive: true });
+
+  window.__resetCompact=function(){
+    document.body.classList.remove('compact');
+    isCompact=false;
+    lastScroll=0;
+  };
+})();
+
 /* -------- AVVIO -------- */
 (function init(){
   try{
@@ -1874,12 +2212,11 @@ document.addEventListener('keydown',e=>{
     render();
     updateInfoBar();
     updateUndoButtons();
+    initRubrica();
   }catch(e){
     console.error('Init error:',e);
     alert('Errore avvio: '+e.message+'\n\nProva a ricaricare.');
   }
-
-  // Promemoria backup esterno
   try{
     const lastExp=localStorage.getItem('rattazzi_last_export');
     const days=lastExp?Math.floor((Date.now()-Number(lastExp))/86400000):999;
@@ -1890,8 +2227,7 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-
-  console.log('%cRattazzi Cartellini v3.1 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.7 avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>
