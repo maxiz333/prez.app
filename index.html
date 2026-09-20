@@ -487,18 +487,22 @@ body.drag-active main.content{overflow:hidden;}
 /* =========================================================
    STAMPA A4 — titolo grande + riempimento totale
    ========================================================= */
-#printArea{display:none;}
+   #printArea{display:none;}
 @media print{
   body{background:#fff !important;color:#000 !important;overflow:visible;}
   #app,.modal-overlay,.bottom-nav,.walkthrough,.selection-bar,.search-info{display:none !important;}
-  #printArea{display:block !important;}
   @page{size:A4;margin:8mm;}
-}
-#printArea{
-  background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;
-  min-height:277mm;
-  display:flex;
-  flex-direction:column;
+
+  /* La printArea DEVE essere flex per far crescere gli articoli e riempire la pagina */
+  #printArea{
+    display:flex !important;
+    flex-direction:column;
+    min-height:277mm;
+    background:#fff;
+    color:#000;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:0;
+  }
 }
 #printArea .print-header{
   display:flex;

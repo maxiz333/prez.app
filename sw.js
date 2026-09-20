@@ -1,5 +1,5 @@
 /* Service Worker — Rattazzi Cartellini Prezzi v3.18 */
-const CACHE_NAME = 'rattazzi-v3.18';
+const CACHE_NAME = 'rattazzi-v3.19';
 const ASSETS = [
   './',
   './index.html',
