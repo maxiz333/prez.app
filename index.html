@@ -16,9 +16,6 @@
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 
 <style>
-/* =========================================================
-   RESET + VARIABILI
-   ========================================================= */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
   --bg:#121212;--bg-2:#181818;--card:#1e1e1e;--card-2:#252525;--border:#2e2e2e;
@@ -26,6 +23,7 @@
   --yellow:#ffcc00;--yellow-dk:#d9ad00;
   --green:#22c55e;--lime:#84cc16;--amber:#f59e0b;--red:#ef4444;
   --shadow:0 4px 14px rgba(0,0,0,.45);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 html,body{height:100%;background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -74,11 +72,13 @@ body.compact .info-bar{
 
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;background:var(--bg-2);
   border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;
-  transition:padding .25s ease;}
+  transition:padding .25s ease,background .2s ease,border-bottom-color .2s ease;}
 body.compact .toolbar{padding-top:6px;padding-bottom:6px;}
+body.searching .toolbar{background:rgba(255,204,0,.05);border-bottom-color:var(--yellow-dk);}
 .search-box{flex:1 1 200px;min-width:160px;display:flex;align-items:center;gap:8px;
   background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:38px;
-  transition:height .25s ease;}
+  transition:height .25s ease,border-color .15s;}
+body.searching .search-box{border-color:var(--yellow-dk);}
 body.compact .search-box{height:34px;}
 .search-box span{color:var(--text-mute);}.search-box input{flex:1;border:none;background:none;height:100%;}
 .filters{display:flex;gap:4px;}
@@ -105,6 +105,14 @@ body.selection-mode .selection-bar{display:flex;}
 .selection-bar .sb-info{display:flex;align-items:center;gap:6px;}
 .selection-bar .sb-info b{font-size:15px;color:var(--yellow);}
 .selection-bar .sb-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* Barra info ricerca globale */
+.search-info{display:none;align-items:center;justify-content:space-between;gap:10px;
+  padding:6px 14px;background:rgba(255,204,0,.06);
+  border-bottom:1px solid var(--yellow-dk);font-size:12px;color:var(--yellow);
+  flex-shrink:0;flex-wrap:wrap;}
+body.searching .search-info{display:flex;}
+.search-info b{color:var(--yellow);font-size:13px;}
 
 .td-check{display:none !important;}
 body.selection-mode #mainTable thead th.td-check{display:table-cell !important;}
@@ -140,7 +148,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 
 .td-check{width:34px;text-align:center;}
 .td-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--yellow);cursor:pointer;}
-.td-name{min-width:200px;}
+.td-name{min-width:220px;}
 .row-head{display:flex;align-items:center;gap:8px;}
 .photo-thumb{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;
   border:1px solid var(--border);background:#111;}
@@ -150,6 +158,14 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .art-name{font-weight:600;color:var(--text);cursor:pointer;border-bottom:1px dashed transparent;
   transition:.15s;display:inline-block;}
 .art-name:hover{color:var(--yellow);border-bottom-color:var(--yellow-dk);}
+/* CODICE ARTICOLO — ben visibile accanto al nome */
+.art-code-badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;
+  margin-left:6px;border-radius:4px;background:rgba(255,204,0,.13);
+  color:var(--yellow);border:1px solid var(--yellow-dk);
+  font-family:var(--mono);letter-spacing:.5px;vertical-align:middle;}
+.search-cat-badge{display:inline-block;font-size:9.5px;font-weight:700;
+  padding:1px 6px;margin-left:4px;border-radius:4px;
+  background:#252525;color:var(--text-dim);border:1px solid #333;vertical-align:middle;}
 .art-sub{font-size:10.5px;color:var(--text-mute);margin-top:2px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .art-sub .sup{color:var(--text-dim);}
@@ -222,6 +238,8 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--yellow);}
 .field-row{display:flex;gap:12px;}.field-row .field{flex:1;}
+.field-row .field.code-field{flex:0 0 160px;}
+.field input.mono{font-family:var(--mono);letter-spacing:.5px;}
 .field-hint{font-size:10.5px;color:var(--text-mute);margin-top:4px;}
 
 #rubricaResults{margin-top:6px;max-height:240px;overflow:auto;background:#131313;
@@ -232,6 +250,9 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .rubrica-item:hover{background:#1e1e1e;}
 .rubrica-item .rb-name{font-weight:600;color:var(--text);}
 .rubrica-item .rb-meta{font-size:11px;color:var(--text-mute);margin-top:2px;}
+.rubrica-item .rb-code{display:inline-block;font-family:var(--mono);font-weight:700;
+  color:var(--yellow);background:rgba(255,204,0,.12);
+  padding:0 6px;border-radius:4px;margin-right:6px;font-size:11.5px;}
 
 .lotti-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .lotto-row{display:grid;grid-template-columns:110px 1fr 80px 90px 32px;gap:8px;align-items:center;
@@ -305,7 +326,12 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   overflow:hidden;display:flex;align-items:center;justify-content:center;
   color:var(--text-mute);font-size:44px;border:1px solid var(--border);}
 .walk-photo img{width:100%;height:100%;object-fit:cover;}
-.walk-name{font-size:24px;font-weight:800;line-height:1.2;margin-bottom:4px;letter-spacing:-.3px;}
+.walk-name-row{display:flex;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
+.walk-name{font-size:24px;font-weight:800;line-height:1.2;letter-spacing:-.3px;margin:0;}
+.walk-code{display:inline-block;font-size:15px;font-weight:800;padding:4px 10px;
+  border-radius:6px;background:rgba(255,204,0,.15);color:var(--yellow);
+  border:1px solid var(--yellow-dk);font-family:var(--mono);
+  letter-spacing:1px;vertical-align:middle;white-space:nowrap;}
 .walk-meta{font-size:12.5px;color:var(--text-mute);margin-bottom:20px;}
 .walk-meta .sep{margin:0 6px;color:#333;}
 .walk-price-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;}
@@ -349,134 +375,70 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
    STAMPA A4 — foglio grande, semplificato, senza data
    ========================================================= */
 #printArea{display:none;}
-
 @media print{
   body{background:#fff !important;color:#000 !important;overflow:visible;}
-  #app,.modal-overlay,.bottom-nav,.walkthrough,.selection-bar{display:none !important;}
+  #app,.modal-overlay,.bottom-nav,.walkthrough,.selection-bar,.search-info{display:none !important;}
   #printArea{display:block !important;}
   @page{size:A4;margin:10mm;}
 }
-
-#printArea{
-  background:#fff;
-  color:#000;
-  font-family:Arial,Helvetica,sans-serif;
-  padding:0;
-  display:none;
-}
+#printArea{background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;}
 #printArea .print-header{
-  text-align:center;
-  border-bottom:4px solid #000;
-  padding-bottom:4mm;
-  margin-bottom:5mm;
+  text-align:center;border-bottom:4px solid #000;
+  padding-bottom:4mm;margin-bottom:5mm;
 }
 #printArea h1{
-  font-size:36pt;
-  font-weight:900;
-  letter-spacing:3px;
-  line-height:1;
-  margin:0;
-  color:#000;
+  font-size:36pt;font-weight:900;letter-spacing:3px;line-height:1;margin:0;color:#000;
 }
 #printArea .print-sub{
-  font-size:16pt;
-  font-weight:700;
-  margin-top:3mm;
-  color:#000;
+  font-size:16pt;font-weight:700;margin-top:3mm;color:#000;
 }
 #printArea .print-meta{
-  display:flex;
-  justify-content:space-between;
-  align-items:baseline;
-  font-size:10pt;
-  margin-top:3mm;
-  color:#333;
-  font-weight:600;
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-size:10pt;margin-top:3mm;color:#333;font-weight:600;
 }
 #printArea .print-date-line{
-  font-size:12pt;
-  font-weight:800;
-  color:#000;
-  display:inline-flex;
-  align-items:baseline;
-  gap:3mm;
+  font-size:12pt;font-weight:800;color:#000;
+  display:inline-flex;align-items:baseline;gap:3mm;
 }
 #printArea .print-date-blank{
-  display:inline-block;
-  min-width:50mm;
-  border-bottom:2px solid #000;
-  height:1em;
+  display:inline-block;min-width:50mm;
+  border-bottom:2px solid #000;height:1em;
 }
-#printArea .articoli-list{
-  display:flex;
-  flex-direction:column;
-  gap:4mm;
-}
+#printArea .articoli-list{display:flex;flex-direction:column;gap:4mm;}
 #printArea .articolo{
-  display:flex;
-  align-items:stretch;
-  justify-content:space-between;
-  border:3px solid #000;
-  border-radius:3mm;
-  padding:4mm 5mm;
-  page-break-inside:avoid;
-  background:#fff;
+  display:flex;align-items:stretch;justify-content:space-between;
+  border:3px solid #000;border-radius:3mm;padding:4mm 5mm;
+  page-break-inside:avoid;background:#fff;
 }
 #printArea .art-info{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  padding-right:5mm;
-  min-width:0;
+  flex:1;display:flex;flex-direction:column;justify-content:center;
+  padding-right:5mm;min-width:0;
 }
 #printArea .art-nome{
-  font-size:22pt;
-  font-weight:800;
-  line-height:1.1;
-  color:#000;
+  font-size:22pt;font-weight:800;line-height:1.15;color:#000;
   word-wrap:break-word;
 }
-#printArea .art-cod{
-  font-size:12pt;
-  font-weight:700;
-  color:#444;
-  margin-top:2mm;
-  letter-spacing:.5px;
+#printArea .art-code-inline{
+  display:inline-block;font-size:14pt;font-weight:900;color:#000;
+  background:#fff;border:2px solid #000;border-radius:2mm;
+  padding:1mm 3mm;margin-left:3mm;
+  font-family:"Courier New",Courier,monospace;
+  letter-spacing:1px;vertical-align:middle;white-space:nowrap;
 }
 #printArea .art-prezzo-box{
-  width:60mm;
-  flex-shrink:0;
-  border-left:3px dashed #888;
-  padding-left:5mm;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
+  width:60mm;flex-shrink:0;border-left:3px dashed #888;padding-left:5mm;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
 }
 #printArea .art-prezzo-label{
-  font-size:10pt;
-  font-weight:800;
-  text-transform:uppercase;
-  color:#000;
-  letter-spacing:1.5px;
-  margin-bottom:2mm;
+  font-size:10pt;font-weight:800;text-transform:uppercase;color:#000;
+  letter-spacing:1.5px;margin-bottom:2mm;
 }
 #printArea .art-prezzo-empty{
-  width:100%;
-  flex:1;
-  min-height:15mm;
-  border-bottom:2px solid #000;
-  display:flex;
-  align-items:flex-end;
-  justify-content:flex-end;
-  padding-bottom:1mm;
+  width:100%;flex:1;min-height:15mm;border-bottom:2px solid #000;
+  display:flex;align-items:flex-end;justify-content:flex-end;padding-bottom:1mm;
 }
 #printArea .art-prezzo-unit{
-  font-size:10pt;
-  font-weight:700;
-  color:#666;
-  margin-top:2mm;
+  font-size:10pt;font-weight:700;color:#666;margin-top:2mm;
 }
 
 @media (max-width:900px){
@@ -506,6 +468,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   #mainTable thead th{font-size:9.5px;padding:8px 8px;letter-spacing:.5px;}
   #mainTable tbody td{padding:12px 8px;}
   .art-name{font-size:14px;line-height:1.35;}
+  .art-code-badge{font-size:10px;padding:1px 6px;margin-left:4px;}
   .age-badge{font-size:9.5px;padding:2px 6px;}
   .sconto-badge{font-size:9px;padding:1px 5px;}
   .unit-pill{font-size:10px;padding:2px 6px;}
@@ -513,6 +476,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   .selection-bar{padding:6px 10px;font-size:11.5px;gap:6px;}
   .selection-bar .sb-info b{font-size:14px;}
   .selection-bar .sb-actions{gap:4px;}
+  .field-row .field.code-field{flex:0 0 130px;}
 }
 @media (max-width:520px){
   #mainTable th:nth-child(3),#mainTable td:nth-child(3){display:none;}
@@ -526,6 +490,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   .tab{padding:8px 10px;font-size:12px;}
   #mainTable tbody td{padding:11px 6px;}
   .art-name{font-size:13.5px;}
+  .art-code-badge{font-size:9px;padding:1px 5px;}
   .age-badge{font-size:9px;padding:1px 5px;margin-left:4px;}
 }
 </style>
@@ -560,7 +525,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   <div class="toolbar">
     <div class="search-box">
       <span>🔍</span>
-      <input type="search" id="searchInput" placeholder="Cerca articolo, misura, fornitore, codice...">
+      <input type="search" id="searchInput" placeholder="Cerca in tutti i settori: articolo, codice, fornitore...">
     </div>
     <div class="filters">
       <button class="chip active" data-filter="all">Tutti</button>
@@ -571,6 +536,11 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
     <button class="btn btn-ghost" id="btnAddCat">+ Settore</button>
     <button class="btn btn-yellow" id="btnAddArt">+ Articolo</button>
     <button class="btn" id="btnPrint">🖨 Stampa</button>
+  </div>
+
+  <div class="search-info" id="searchInfo">
+    <div>🔍 Ricerca in <b>tutti i settori</b>: <span id="searchQueryLabel"></span> — <b id="searchResultsCount">0</b> risultati</div>
+    <button class="btn btn-sm btn-ghost" id="btnClearSearch">✕ Cancella</button>
   </div>
 
   <div class="selection-bar" id="selectionBar">
@@ -589,7 +559,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
         <thead>
           <tr>
             <th class="td-check"><input type="checkbox" id="checkAllHead"></th>
-            <th>Articolo / Misura</th>
+            <th>Articolo / Codice</th>
             <th style="text-align:center">Unità</th>
             <th style="text-align:right">Prezzo</th>
             <th style="text-align:right">Costo</th>
@@ -648,7 +618,10 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
     </div>
     <div class="modal-body">
       <div class="panel active" data-panel="base">
-        <div class="field"><label>Nome / Misura</label><input type="text" id="edName"></div>
+        <div class="field-row">
+          <div class="field"><label>Nome / Misura *</label><input type="text" id="edName"></div>
+          <div class="field code-field"><label>Codice articolo</label><input type="text" id="edCode" class="mono" placeholder="Es. 902011"></div>
+        </div>
         <div class="field-row">
           <div class="field">
             <label>Unità di misura</label>
@@ -683,8 +656,8 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
           <button class="btn btn-yellow btn-sm" id="edApplySuggest">Applica</button>
         </div>
         <div class="field-row">
-          <div class="field"><label>Fornitore</label><input type="text" id="edSupplier"></div>
-          <div class="field"><label>Codice articolo fornitore</label><input type="text" id="edSupplierCode"></div>
+          <div class="field"><label>Fornitore (nome)</label><input type="text" id="edSupplier"></div>
+          <div class="field"><label>Codice articolo fornitore (opzionale)</label><input type="text" id="edSupplierCode" class="mono"></div>
         </div>
         <div class="field"><label>Note magazzino</label><textarea id="edNotes" rows="2"></textarea></div>
       </div>
@@ -750,11 +723,14 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
     <div class="modal-body">
       <div class="field">
         <label>🔍 Cerca in rubrica (codice o nome)</label>
-        <input type="text" id="rubricaSearch" placeholder="Es. 1980008 o vite m8..." autocomplete="off">
+        <input type="text" id="rubricaSearch" placeholder="Es. 902011 o vite m8..." autocomplete="off">
         <div id="rubricaResults"></div>
         <div class="field-hint" id="rubricaHint">Caricamento rubrica...</div>
       </div>
-      <div class="field"><label>Nome / Misura *</label><input type="text" id="naName"></div>
+      <div class="field-row">
+        <div class="field"><label>Nome / Misura *</label><input type="text" id="naName"></div>
+        <div class="field code-field"><label>Codice articolo *</label><input type="text" id="naCode" class="mono" placeholder="Es. 902011"></div>
+      </div>
       <div class="field-row">
         <div class="field"><label>Unità</label>
           <select id="naUnit">
@@ -766,9 +742,9 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
       </div>
       <div class="field-row">
         <div class="field"><label>Costo acquisto</label><input type="number" step="0.01" id="naCost"></div>
-        <div class="field"><label>Fornitore</label><input type="text" id="naSupplier"></div>
+        <div class="field"><label>Fornitore (nome)</label><input type="text" id="naSupplier"></div>
       </div>
-      <div class="field"><label>Codice fornitore</label><input type="text" id="naSupplierCode"></div>
+      <div class="field"><label>Codice articolo fornitore (opzionale)</label><input type="text" id="naSupplierCode" class="mono"></div>
       <div class="field"><label>Note</label><input type="text" id="naNotes"></div>
     </div>
     <div class="modal-footer">
@@ -829,11 +805,15 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.7 — Versione stabile per GitHub Pages
+   RATTAZZI CARTELLINI PREZZI v3.8 — Versione stabile per GitHub Pages
    ---------------------------------------------------------------------------
-   Novità v3.7:
-     - Stampa A4: rimossa la data automatica
-     - Al suo posto: "Data: __________" (da scrivere a matita)
+   Novità v3.8:
+     - Nuovo campo "Codice articolo" (principale) visibile ovunque accanto al nome:
+       nella tabella, nel giro, nella stampa A4 e nel titolo della scheda
+     - "Codice articolo fornitore" resta un campo separato opzionale
+     - Ricerca GLOBALE su tutti i settori (non solo quello attivo)
+     - Banner "Ricerca in tutti i settori" con contatore risultati
+     - La rubrica popola il campo Codice articolo (non più il codice fornitore)
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -888,16 +868,16 @@ function renderRubricaResults(results){
   box.style.display='block';
   box.innerHTML=results.map((r,i)=>`
     <div class="rubrica-item" data-idx="${i}">
-      <div class="rb-name">${esc(r.nome)}</div>
-      <div class="rb-meta">Cod: ${esc(r.cod)} · Unità: ${esc(r.unit||'pz')}</div>
+      <div class="rb-name"><span class="rb-code">${esc(r.cod)}</span>${esc(r.nome)}</div>
+      <div class="rb-meta">Unità: ${esc(r.unit||'pz')}</div>
     </div>`).join('');
   box.querySelectorAll('.rubrica-item').forEach(el=>{
     el.addEventListener('click',()=>{
       const idx=parseInt(el.dataset.idx,10);
       const r=results[idx];if(!r)return;
       $('#naName').value=r.nome||'';
+      $('#naCode').value=r.cod||'';
       $('#naUnit').value=(r.unit && UNIT_LBL[r.unit])?r.unit:'pz';
-      $('#naSupplierCode').value=r.cod||'';
       box.style.display='none';
       $('#rubricaSearch').value=r.cod+' — '+r.nome;
       setTimeout(()=>$('#naPrice').focus(),50);
@@ -980,34 +960,34 @@ function buildSeed(){
     categories:[
       {id:'cat_paletti_t',name:'Paletti a T',defaultMargin:45,articles:[
         mkArt('Paletto a T zincato 1.00 m',5.50,3.20,'pz',daysAgo(20),'',[{date:daysAgo(400),cost:3.20,qty:100}],
-          [{minQty:10,discountPct:5},{minQty:50,discountPct:10}]),
+          [{minQty:10,discountPct:5},{minQty:50,discountPct:10}],'2100010'),
         mkArt('Paletto a T zincato 1.20 m',6.80,4.10,'pz',daysAgo(75),'',[{date:daysAgo(420),cost:4.10,qty:80}],
-          [{minQty:10,discountPct:5}]),
+          [{minQty:10,discountPct:5}],'2100012'),
         mkArt('Paletto a T zincato 1.70 m',9.40,5.80,'pz',daysAgo(190),'Lotto vecchio in fondo',
           [{date:daysAgo(1500),cost:5.80,qty:100},{date:daysAgo(200),cost:7.20,qty:60}],
-          [{minQty:10,discountPct:5}]),
+          [{minQty:10,discountPct:5}],'2100017'),
         mkArt('Paletto a T zincato 2.00 m',11.90,7.60,'pz',daysAgo(310),'Cambio fornitore',
-          [{date:daysAgo(1200),cost:7.60,qty:80}],[]),
+          [{date:daysAgo(1200),cost:7.60,qty:80}],[],'2100020'),
         mkArt('Paletto a T plastificato 1.50 m',8.90,5.90,'pz',daysAgo(430),'Prezzo bloccato',
-          [{date:daysAgo(1300),cost:5.90,qty:60}],[])
+          [{date:daysAgo(1300),cost:5.90,qty:60}],[],'2100015')
       ]},
       {id:'cat_botti_inox',name:'Botti Inox',defaultMargin:35,articles:[
-        mkArt('Botte inox 500 L',420.00,285.00,'pz',daysAgo(45),'',[{date:daysAgo(60),cost:285.00,qty:5}],[]),
+        mkArt('Botte inox 500 L',420.00,285.00,'pz',daysAgo(45),'',[{date:daysAgo(60),cost:285.00,qty:5}],[],'3100500'),
         mkArt('Botte inox 1000 L',720.00,510.00,'pz',daysAgo(240),'Verificare fornitore',
-          [{date:daysAgo(700),cost:510.00,qty:3}],[])
+          [{date:daysAgo(700),cost:510.00,qty:3}],[],'3101000')
       ]},
       {id:'cat_reti',name:'Reti',defaultMargin:50,articles:[
         mkArt('Rete zincata 1 m x 10 m',38.50,24.00,'pz',daysAgo(15),'',[{date:daysAgo(30),cost:24.00,qty:20}],
-          [{minQty:5,discountPct:8}]),
+          [{minQty:5,discountPct:8}],'3300110'),
         mkArt('Rete zincata 1.5 m x 10 m',52.00,33.50,'pz',daysAgo(400),'Da rivedere',
-          [{date:daysAgo(900),cost:33.50,qty:12}],[])
+          [{date:daysAgo(900),cost:33.50,qty:12}],[],'3300115')
       ]}
     ]
   };
 }
-function mkArt(name,price,cost,unit,updatedAt,notes,purchases,sconti){
+function mkArt(name,price,cost,unit,updatedAt,notes,purchases,sconti,code){
   return {
-    id:uid(),name,price,cost,unit:unit||'pz',
+    id:uid(),name,code:code||'',price,cost,unit:unit||'pz',
     updatedAt,notes:notes||'',
     purchases:(purchases||[]).map(p=>({id:uid(),date:p.date,cost:num(p.cost),qty:num(p.qty)})),
     quantityDiscounts:(sconti||[]).map(s=>({id:uid(),minQty:num(s.minQty),discountPct:num(s.discountPct)})),
@@ -1073,6 +1053,7 @@ function normalizeState(p){
     c.articles.forEach(a=>{
       a.id=a.id||uid();
       a.name=String(a.name||'Senza nome').slice(0,300);
+      a.code=String(a.code||'').slice(0,100);
       a.unit=UNIT_LBL[a.unit]?a.unit:'pz';
       a.photo=typeof a.photo==='string'?a.photo:'';
       a.supplier=String(a.supplier||'').slice(0,200);
@@ -1227,16 +1208,38 @@ function updateInfoBar(){
 function getActiveCategory(){return state.categories.find(c=>c.id===activeCategoryId)||null;}
 function findArticle(id){for(const c of state.categories){const a=c.articles.find(x=>x.id===id);if(a)return a;}return null;}
 
+/* ============================================================================
+   FILTRO ARTICOLI — Ricerca GLOBALE su tutti i settori
+   ---------------------------------------------------------------------------
+   Se c'è un testo di ricerca → cerca in TUTTI i settori e ritorna copie
+   shallow degli articoli con proprietà extra `_searchCatName` / `_searchCatId`
+   per mostrare il badge del settore nella tabella.
+   Se non c'è ricerca → ritorna solo gli articoli del settore attivo.
+   ========================================================================== */
 function getFilteredArticles(){
-  const cat=getActiveCategory();if(!cat)return [];
   const q=searchQuery.trim().toLowerCase();
+
+  // Modalità ricerca: tutti i settori
+  if(q){
+    const results=[];
+    state.categories.forEach(cat=>{
+      cat.articles.forEach(a=>{
+        const hay=(a.name+' '+(a.code||'')+' '+(a.notes||'')+' '
+                  +(a.supplier||'')+' '+(a.supplierCode||'')).toLowerCase();
+        if(!hay.includes(q)) return;
+        if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return;
+        if(activeFilter==='12'&& monthsSince(a.updatedAt)<12)return;
+        results.push(Object.assign({},a,{_searchCatName:cat.name,_searchCatId:cat.id}));
+      });
+    });
+    return results;
+  }
+
+  // Modalità normale: solo settore attivo
+  const cat=getActiveCategory();if(!cat)return [];
   return cat.articles.filter(a=>{
     if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return false;
     if(activeFilter==='12'&& monthsSince(a.updatedAt)<12)return false;
-    if(q){
-      const hay=(a.name+' '+(a.notes||'')+' '+(a.supplier||'')+' '+(a.supplierCode||'')).toLowerCase();
-      if(!hay.includes(q)) return false;
-    }
     return true;
   });
 }
@@ -1252,8 +1255,14 @@ function renderTabs(){
     b.addEventListener('click',()=>{
       activeCategoryId=cat.id;
       selectedArticles.clear();
+      // Cambiando settore: pulisco la ricerca (così non rimane "bloccata" su risultati di altri)
+      if(searchQuery.trim()){
+        searchQuery='';
+        const si=$('#searchInput'); if(si) si.value='';
+      }
       if(selectionMode) exitSelectionMode();
       updateSelectionBar();
+      updateSearchBar();
       render();
     });
     b.addEventListener('contextmenu',e=>{e.preventDefault();renameCategory(cat.id);});
@@ -1264,12 +1273,16 @@ function renderTabs(){
 function renderTable(){
   const tbody=$('#tableBody');tbody.innerHTML='';
   const articles=getFilteredArticles();
+  const isSearching = !!searchQuery.trim();
+
   if(!articles.length){
     tbody.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="big">📦</div>'+
-      '<strong>Nessun articolo da mostrare</strong><p>'+
-      (searchQuery?'Nessun risultato.':'Aggiungi il primo articolo con "+ Articolo".')+
+      '<strong>'+(isSearching?'Nessun risultato':'Nessun articolo da mostrare')+'</strong><p>'+
+      (isSearching?'Prova con un altro termine di ricerca.':'Aggiungi il primo articolo con "+ Articolo".')+
       '</p></div></td></tr>';
-    updateSelectionBar();return;
+    updateSelectionBar();
+    updateSearchBar();
+    return;
   }
   const frag=document.createDocumentFragment();
   articles.forEach(a=>{
@@ -1283,6 +1296,8 @@ function renderTable(){
       :'<div class="photo-ph">📷</div>';
     const isSel=selectedArticles.has(a.id);
     const hasSconti=a.quantityDiscounts && a.quantityDiscounts.length>0;
+    const codeBadge = a.code ? '<span class="art-code-badge">'+esc(a.code)+'</span>' : '';
+    const catBadge = a._searchCatName ? '<span class="search-cat-badge">📁 '+esc(a._searchCatName)+'</span>' : '';
 
     const tr=document.createElement('tr');
     tr.dataset.art=a.id;
@@ -1294,7 +1309,7 @@ function renderTable(){
         <div class="row-head">
           ${thumbHtml}
           <div class="name-wrap">
-            <span class="art-name" data-open="${a.id}">${esc(a.name)}</span>
+            <span class="art-name" data-open="${a.id}">${esc(a.name)}</span>${codeBadge}${catBadge}
             <span class="age-badge ${age.cls}">${age.label}</span>
             ${hasSconti?'<span class="sconto-badge" title="Sconti quantità">💰 '+a.quantityDiscounts.length+'</span>':''}
             ${supLine?'<div class="art-sub"><span class="sup">'+esc(supLine)+'</span></div>':''}
@@ -1324,6 +1339,7 @@ function renderTable(){
   tbody.appendChild(frag);
   updateSelectionBar();
   updateCheckAllState();
+  updateSearchBar();
 }
 
 function refreshRow(art){
@@ -1358,6 +1374,25 @@ function updateCheckAllState(){
   const boxes=$$('#tableBody input[data-check]');
   const all=boxes.length>0 && Array.from(boxes).every(b=>b.checked);
   const head=$('#checkAllHead');if(head)head.checked=all;
+}
+
+/* Barra "Ricerca in tutti i settori" */
+function updateSearchBar(){
+  const q=searchQuery.trim();
+  const bar=$('#searchInfo');
+  const label=$('#searchQueryLabel');
+  const cnt=$('#searchResultsCount');
+  if(q){
+    document.body.classList.add('searching');
+    if(label) label.textContent='"'+q+'"';
+    if(cnt) cnt.textContent=getFilteredArticles().length;
+    // Cambio placeholder a seconda se sto cercando
+    const si=$('#searchInput'); if(si) si.placeholder='Ricerca in tutti i settori...';
+  } else {
+    document.body.classList.remove('searching');
+    const si=$('#searchInput'); if(si) si.placeholder='Cerca in tutti i settori: articolo, codice, fornitore...';
+  }
+  if(bar) bar.style.display = q ? 'flex' : 'none';
 }
 
 function render(){
@@ -1472,7 +1507,7 @@ $('#tableBody').addEventListener('click',e=>{
 /* -------- AZIONI -------- */
 function deleteArticle(id){
   const art=findArticle(id);if(!art)return;
-  if(!confirm('Eliminare "'+art.name+'"?\n\nRecuperabile con Ctrl+Z oppure da backup.'))return;
+  if(!confirm('Eliminare "'+art.name+'"'+(art.code?' ('+art.code+')':'')+'?\n\nRecuperabile con Ctrl+Z oppure da backup.'))return;
   pushUndo('Elimina "'+art.name+'"');
   for(const c of state.categories){
     const i=c.articles.findIndex(x=>x.id===id);
@@ -1486,10 +1521,16 @@ function deleteArticle(id){
 function openArticleModal(id){
   const art=findArticle(id);if(!art)return;
   editingArticleId=id;pendingPhoto=art.photo||'';
-  $('#artTitle').textContent=art.name;
+  // Titolo con codice articolo ben visibile
+  $('#artTitle').innerHTML = esc(art.name) +
+    (art.code ? ' <span style="display:inline-block;font-family:var(--mono);font-size:12px;font-weight:800;'+
+      'color:var(--yellow);background:rgba(255,204,0,.12);border:1px solid var(--yellow-dk);'+
+      'padding:2px 7px;border-radius:4px;margin-left:6px;letter-spacing:.5px;vertical-align:middle">'+
+      esc(art.code)+'</span>' : '');
   const cat=getActiveCategory();
   $('#artSub').textContent=cat?'Settore: '+cat.name:'';
   $('#edName').value=art.name;
+  $('#edCode').value=art.code||'';
   $('#edUnit').value=art.unit||'pz';
   $('#edPrice').value=art.price.toFixed(2);
   $('#edCost').value=art.cost.toFixed(2);
@@ -1701,6 +1742,7 @@ $('#btnSaveArt').addEventListener('click',()=>{
   const art=findArticle(editingArticleId);if(!art)return;
   const newName=$('#edName').value.trim();
   if(!newName)return alert('Inserisci un nome valido.');
+  const newCode=$('#edCode').value.trim().slice(0,100);
   const newPrice=num($('#edPrice').value);
   const newCost=num($('#edCost').value);
   const newMargin=parseFloat($('#edMargin').value);
@@ -1715,6 +1757,7 @@ $('#btnSaveArt').addEventListener('click',()=>{
     state.meta.lastRevision=art.updatedAt;
   }
   art.name=newName;
+  art.code=newCode;
   art.unit=$('#edUnit').value;
   art.price=newPrice;
   art.cost=newCost;
@@ -1733,7 +1776,7 @@ $('#btnSaveArt').addEventListener('click',()=>{
 $('#btnAddArt').addEventListener('click',()=>{
   const cat=getActiveCategory();if(!cat)return alert('Crea prima un settore.');
   $('#newArtSub').textContent='Settore: '+cat.name;
-  $('#naName').value='';$('#naPrice').value='';$('#naCost').value='';
+  $('#naName').value='';$('#naCode').value='';$('#naPrice').value='';$('#naCost').value='';
   $('#naSupplier').value='';$('#naSupplierCode').value='';$('#naNotes').value='';
   $('#naUnit').value='pz';
   resetRubrica();
@@ -1744,12 +1787,13 @@ $('#btnCreateArt').addEventListener('click',()=>{
   const cat=getActiveCategory();if(!cat)return;
   const name=$('#naName').value.trim();
   if(!name)return alert('Inserisci il nome.');
+  const code=$('#naCode').value.trim().slice(0,100);
   const price=num($('#naPrice').value);
   const cost=num($('#naCost').value);
   const now=new Date().toISOString();
   pushUndo('Nuovo articolo "'+name+'"');
   const art={
-    id:uid(),name,unit:$('#naUnit').value,price,cost,margin:null,
+    id:uid(),name,code,unit:$('#naUnit').value,price,cost,margin:null,
     supplier:$('#naSupplier').value.trim().slice(0,200),
     supplierCode:$('#naSupplierCode').value.trim().slice(0,100),
     notes:$('#naNotes').value.trim().slice(0,1000),
@@ -1854,6 +1898,7 @@ $('#btnImport').addEventListener('click',()=>{
         state=normalized;
         activeCategoryId=state.categories[0]?state.categories[0].id:null;
         selectedArticles.clear();
+        searchQuery=''; const si=$('#searchInput'); if(si) si.value='';
         saveState();render();
         alert('✅ Backup ripristinato.');
       }catch(err){alert('❌ File non valido: '+err.message);}
@@ -1876,7 +1921,18 @@ $$('.chip').forEach(chip=>{
 let searchTimer=null;
 $('#searchInput').addEventListener('input',e=>{
   clearTimeout(searchTimer);
-  searchTimer=setTimeout(()=>{searchQuery=e.target.value;renderTable();},120);
+  searchTimer=setTimeout(()=>{
+    searchQuery=e.target.value;
+    // Quando inizio a cercare, se sono in selezione esco (la selezione è per singolo settore visibile)
+    if(searchQuery.trim() && selectionMode) exitSelectionMode();
+    renderTable();
+  },120);
+});
+$('#btnClearSearch').addEventListener('click',()=>{
+  searchQuery='';
+  const si=$('#searchInput'); if(si) si.value='';
+  renderTable();
+  if(si) si.focus();
 });
 
 /* -------- SELEZIONE: pulsanti barra -------- */
@@ -1905,11 +1961,13 @@ $('#checkAllHead').addEventListener('change',e=>{
 });
 
 /* ============================================================================
-   STAMPA A4 — senza data (da scrivere a matita)
+   STAMPA A4 — nome + codice articolo + spazio per il prezzo
    ========================================================================== */
 function doActualPrint(){
+  const isSearching = !!searchQuery.trim();
   const cat=getActiveCategory();
-  if(!cat)return alert('Nessun settore selezionato.');
+  if(!isSearching && !cat)return alert('Nessun settore selezionato.');
+
   let articles=getFilteredArticles();
   if(selectionMode && selectedArticles.size>0){
     articles=articles.filter(a=>selectedArticles.has(a.id));
@@ -1925,12 +1983,13 @@ function doActualPrint(){
   const hRowPx = hRow + 'mm';
 
   const rowsHtml = articles.map(a=>{
-    const cod = a.supplierCode ? 'Cod. ' + esc(a.supplierCode) : '';
+    const codeHtml = a.code
+      ? ' <span class="art-code-inline">'+esc(a.code)+'</span>'
+      : '';
     return `
       <div class="articolo" style="min-height:${hRowPx}">
         <div class="art-info">
-          <div class="art-nome">${esc(a.name)}</div>
-          ${cod ? `<div class="art-cod">${cod}</div>` : ''}
+          <div class="art-nome">${esc(a.name)}${codeHtml}</div>
         </div>
         <div class="art-prezzo-box">
           <div class="art-prezzo-label">Prezzo</div>
@@ -1942,11 +2001,14 @@ function doActualPrint(){
 
   const filterNote = activeFilter!=='all' ? ' — <em>filtro &gt;'+activeFilter+' mesi</em>' : '';
   const selNote = (selectionMode && selectedArticles.size>0) ? ' — <em>solo '+articles.length+' selezionati</em>' : '';
+  const sectorLabel = isSearching
+    ? 'Ricerca: "'+esc(searchQuery)+'"'
+    : esc(cat.name);
 
   $('#printArea').innerHTML = `
     <div class="print-header">
       <h1>RATTAZZI</h1>
-      <div class="print-sub">Cartellini Prezzi — ${esc(cat.name)}</div>
+      <div class="print-sub">Cartellini Prezzi — ${sectorLabel}</div>
       <div class="print-meta">
         <span>${articles.length} articoli${filterNote}${selNote}</span>
         <span class="print-date-line">Data: <span class="print-date-blank"></span></span>
@@ -1977,8 +2039,11 @@ $$('.nav-item').forEach(b=>{
     if(act==='stampa'){  $('#btnPrint').click();return;}
     if(act==='backup'){  $('#btnExport').click();return;}
     if(act==='walk'){    openWalkthrough();return;}
+    // "Listini": cancella ricerca + torna in cima
+    searchQuery=''; const si=$('#searchInput'); if(si) si.value='';
     document.body.classList.remove('compact');
     document.querySelector('main.content').scrollTo({top:0,behavior:'smooth'});
+    render();
   });
 });
 
@@ -2000,6 +2065,11 @@ document.addEventListener('keydown',e=>{
     }
   }
   if(e.key==='Escape'){
+    // Esc con ricerca attiva → pulisci ricerca
+    if(searchQuery.trim()){
+      searchQuery=''; const si=$('#searchInput'); if(si){si.value='';}
+      renderTable(); return;
+    }
     if(selectionMode){ exitSelectionMode(); return; }
     $$('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
   }
@@ -2017,7 +2087,7 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ============================================================================
-   WALKTHROUGH — solo prezzo vendita (no costo, no margine)
+   WALKTHROUGH — solo prezzo + codice articolo (no costo, no margine)
    ========================================================================== */
 let walkArticles=[];
 let walkIndex=0;
@@ -2059,6 +2129,7 @@ function renderWalkCard(){
   const age=ageInfo(a.updatedAt);
   const photoHtml=a.photo?'<div class="walk-photo"><img src="'+esc(a.photo)+'" alt=""></div>':'';
   const supLine=[a.supplier,a.supplierCode].filter(Boolean).join(' • ');
+  const codeHtml = a.code ? '<span class="walk-code">'+esc(a.code)+'</span>' : '';
 
   const scontiHtml=a.quantityDiscounts && a.quantityDiscounts.length
     ?a.quantityDiscounts.slice().sort((x,y)=>x.minQty-y.minQty)
@@ -2084,7 +2155,10 @@ function renderWalkCard(){
   wrap.innerHTML=`
     <div class="walk-card">
       ${photoHtml}
-      <div class="walk-name">${esc(a.name)}</div>
+      <div class="walk-name-row">
+        <h2 class="walk-name">${esc(a.name)}</h2>
+        ${codeHtml}
+      </div>
       <div class="walk-meta">
         <span class="age-badge ${age.cls}" style="margin-left:0">${age.label}</span>
         <span class="sep">•</span>Unità: <b style="color:var(--text)">${esc(a.unit||'pz')}</b>
@@ -2173,13 +2247,8 @@ document.addEventListener('keydown',e=>{
   function update(){
     const y=content.scrollTop;
     if(y < TOP_THRESHOLD){
-      if(isCompact){
-        isCompact=false;
-        document.body.classList.remove('compact');
-      }
-      lastScroll=y;
-      ticking=false;
-      return;
+      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
+      lastScroll=y;ticking=false;return;
     }
     const diff = y - lastScroll;
     if(diff > DELTA && y > DOWN_THRESHOLD){
@@ -2187,15 +2256,11 @@ document.addEventListener('keydown',e=>{
     } else if(diff < -DELTA){
       if(isCompact){isCompact=false;document.body.classList.remove('compact');}
     }
-    lastScroll=y;
-    ticking=false;
+    lastScroll=y;ticking=false;
   }
 
   content.addEventListener('scroll',()=>{
-    if(!ticking){
-      requestAnimationFrame(update);
-      ticking=true;
-    }
+    if(!ticking){requestAnimationFrame(update);ticking=true;}
   }, { passive: true });
 
   window.__resetCompact=function(){
@@ -2227,7 +2292,7 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-  console.log('%cRattazzi Cartellini v3.7 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.8 avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>

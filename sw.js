@@ -1,9 +1,4 @@
-/* ============================================================================
-   Service Worker — Rattazzi Cartellini Prezzi v3.7
-   Strategia: stale-while-revalidate
-   ========================================================================== */
-
-const CACHE_NAME = 'rattazzi-v3.7';
+const CACHE_NAME = 'rattazzi-v3.8';
 const ASSETS = [
   './',
   './index.html',
