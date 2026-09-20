@@ -1,5 +1,9 @@
 /* ============================================================================
-   RATTAZZI — Sincronizzazione Firebase (squadra unica, nessun codice)
+   RATTAZZI — Sincronizzazione Firebase
+   ---------------------------------------------------------------------------
+   Logica: all'avvio si carica SEMPRE la versione dal cloud.
+   Il localStorage è solo cache di sicurezza per l'uso offline.
+   Se il locale è più recente del cloud di >10 sec → chiedi (hai lavorato offline).
    ========================================================================== */
 
 const FIREBASE_CONFIG = {
@@ -69,14 +73,16 @@ async function cloudInit(){
   }
 }
 
+/* Primo sync: SEMPRE dal cloud (con protezione se locale più recente) */
 async function cloudFirstSync(){
   if(fb.firstPullDone) return;
   fb.firstPullDone = true;
-  cloudStatusSet('🟡 Controllo cloud...','warn');
+  cloudStatusSet('🟡 Sincronizzo...','warn');
   try{
     const ref = fb.db.collection('squadre').doc(SQUADRA_ID);
     const snap = await ref.get();
 
+    // Cloud vuoto → primo setup, carico i locali
     if(!snap.exists){
       console.log('☁️ Cloud vuoto: carico i dati locali');
       if(state) await cloudPush(true);
@@ -86,67 +92,45 @@ async function cloudFirstSync(){
 
     const remote = snap.data();
     if(!remote || !remote.payload){
-      console.log('☁️ Cloud esiste ma è vuoto: carico i dati locali');
+      console.log('☁️ Cloud vuoto: carico i dati locali');
       if(state) await cloudPush(true);
       return;
     }
 
     const remoteTime = remote.updatedAt ? new Date(remote.updatedAt).getTime() : 0;
-    const localTime  = (state && state.meta && state.meta.lastRevision)
+    const localTime = (state && state.meta && state.meta.lastRevision)
       ? new Date(state.meta.lastRevision).getTime() : 0;
 
-    let remoteCount = 0, localCount = 0;
-    try{
-      const rp = JSON.parse(remote.payload);
-      rp.categories.forEach(c => remoteCount += (c.articles||[]).length);
-    }catch(e){}
-    try{
-      state.categories.forEach(c => localCount += (c.articles||[]).length);
-    }catch(e){}
-
-    if(localCount === 0){
-      console.log('☁️ Nessun dato locale → pull automatico');
-      await cloudPullInternal(remote);
-      cloudStatusSet('🟢 Sincronizzato','ok');
-      return;
-    }
-
-    const diffSec = (remoteTime - localTime) / 1000;
-    if(diffSec > 10){
-      const msg = '☁️ Sincronizzazione cloud\n\n' +
-        'Sul cloud ci sono dati PIÙ RECENTI di quelli di questo dispositivo.\n\n' +
-        '  • Cloud: ' + remoteCount + ' articoli\n' +
-        '  • Locale: ' + localCount + ' articoli\n\n' +
-        'Vuoi scaricare i dati dal cloud?\n\n' +
-        'OK = scarica dal cloud (i tuoi dati locali vanno in backup)\n' +
-        'Annulla = tieni i tuoi dati locali e caricali sul cloud';
+    // Se il locale è significativamente più recente (>10 sec) → chiedi
+    if(localTime > remoteTime + 10000){
+      const msg = '⚠️ Sincronizzazione cloud\n\n' +
+        'I tuoi dati LOCALI sono più recenti di quelli del cloud.\n\n' +
+        'Sembra che tu abbia lavorato offline o su un altro dispositivo.\n\n' +
+        '  • Locale: ' + new Date(localTime).toLocaleString('it-IT') + '\n' +
+        '  • Cloud:  ' + new Date(remoteTime).toLocaleString('it-IT') + '\n\n' +
+        'OK = CARICA i tuoi dati locali sul cloud (sovrascrive il cloud)\n' +
+        'Annulla = SCARICA i dati dal cloud (perdi le modifiche locali)';
       if(confirm(msg)){
-        await cloudPullInternal(remote);
-        cloudStatusSet('🟢 Sincronizzato','ok');
-      } else {
-        console.log('☁️ Utente ha scelto locale → push');
         await cloudPush(true);
+      } else {
+        await cloudPullInternal(remote);
       }
       return;
     }
 
-    if(localTime > remoteTime){
-      console.log('☁️ Locale più recente → push');
-      await cloudPush(true);
-      return;
-    }
-
-    console.log('☁️ Già sincronizzato');
-    cloudStatusSet('🟢 Salvato','ok');
-
+    // Altrimenti: pull diretto dal cloud (comportamento principale)
+    console.log('☁️ Carico dal cloud...');
+    await cloudPullInternal(remote);
+    cloudStatusSet('🟢 Caricato da cloud','ok');
   }catch(e){
     console.error('First sync fallito:', e);
-    cloudStatusSet('🔴 Offline','err');
+    cloudStatusSet('🔴 Offline — uso locale','err');
   }
 }
 
 async function cloudPullInternal(remote){
   try{
+    // Backup pre-sync
     try{
       const localBackup = localStorage.getItem(STORAGE_KEY);
       if(localBackup){
@@ -157,6 +141,7 @@ async function cloudPullInternal(remote){
       }
     }catch(e){}
 
+    // Sopprimi push per 3 secondi
     fb.suppressUntil = Date.now() + 3000;
     clearTimeout(fb.pushTimer);
 
@@ -165,7 +150,6 @@ async function cloudPullInternal(remote){
     render();
 
     console.log('☁️ Pull OK');
-    cloudStatusSet('🟢 Caricato da cloud','ok');
     return true;
   }catch(e){
     console.error('Pull fallito:', e);
@@ -177,9 +161,7 @@ async function cloudPush(force){
   if(!fb.ready){ fb.pendingPush = true; return false; }
   if(!state) return false;
 
-  if(fb.suppressUntil && Date.now() < fb.suppressUntil){
-    return false;
-  }
+  if(fb.suppressUntil && Date.now() < fb.suppressUntil) return false;
 
   if(!force){
     fb.pendingPush = true;
@@ -225,7 +207,10 @@ async function cloudPull(){
     }
     const remote = snap.data();
     const ok = await cloudPullInternal(remote);
-    if(ok) alert('✅ Dati scaricati dal cloud.\n\nSe hai problemi, il backup pre-sync è in Impostazioni.');
+    if(ok){
+      cloudStatusSet('🟢 Caricato da cloud','ok');
+      alert('✅ Dati scaricati dal cloud.');
+    }
     return ok;
   }catch(e){
     console.error('Pull manuale fallito:', e);
@@ -280,14 +265,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     });
   }
+  // Pulsante "Carica dal cloud ora"
   const btnSync = document.getElementById('btnCloudSync');
   if(btnSync){
     btnSync.addEventListener('click', async ()=>{
       if(!fb.ready){ alert('Firebase non pronto.'); return; }
-      await cloudPush(true);
-      alert('✅ Sincronizzato con il cloud.');
+      if(confirm('☁️ Scaricare i dati dal cloud?\n\nI dati locali andranno in backup.')){
+        await cloudPull();
+      }
     });
   }
+  // Pulsante "Forza invio al cloud"
+  const btnPush = document.getElementById('btnCloudPush');
+  if(btnPush){
+    btnPush.addEventListener('click', async ()=>{
+      if(!fb.ready){ alert('Firebase non pronto.'); return; }
+      if(confirm('⬆ Inviare i dati locali al cloud?\n\nIl cloud verrà sovrascritto.')){
+        await cloudPush(true);
+        alert('✅ Dati inviati al cloud.');
+      }
+    });
+  }
+  // Pulsante ripristino backup pre-sync
   const btnRestore = document.getElementById('btnRestorePrePull');
   if(btnRestore){
     btnRestore.addEventListener('click', cloudRestorePrePullBackup);

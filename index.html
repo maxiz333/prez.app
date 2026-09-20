@@ -226,10 +226,15 @@ body.drag-active main.content{overflow:hidden;}
   padding:1px 5px;border-radius:4px;
   text-transform:uppercase;letter-spacing:.4px;
 }
+.linked-item .li-source{
+  font-size:9px;font-weight:800;
+  padding:1px 5px;border-radius:4px;
+  text-transform:uppercase;letter-spacing:.4px;
+  background:rgba(99,179,237,.18);color:#7dd3fc;
+}
 .li-req  {background:rgba(239,68,68,.18);color:#f87171;}
 .li-opt  {background:rgba(34,197,94,.15);color:#4ade80;}
 
-/* Correlati — prezzo modificabile */
 .linked-price-wrap{
   display:flex;flex-direction:column;align-items:flex-end;gap:2px;
   flex-shrink:0;margin-right:4px;
@@ -481,11 +486,14 @@ body.drag-active main.content{overflow:hidden;}
   @page{size:A4;margin:8mm;}
 }
 #printArea{background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;}
-#printArea .print-header{display:flex;justify-content:flex-end;align-items:baseline;
+#printArea .print-header{display:flex;justify-content:space-between;align-items:baseline;gap:6mm;
   padding-bottom:1.5mm;margin-bottom:3mm;border-bottom:1.5px solid #000;}
+#printArea .print-sector{font-size:11pt;font-weight:800;color:#000;
+  display:inline-flex;align-items:baseline;gap:2mm;flex-shrink:0;max-width:60%;}
+#printArea .print-sector b{font-size:13pt;}
 #printArea .print-date-line{font-size:11pt;font-weight:800;color:#000;
-  display:inline-flex;align-items:baseline;gap:3mm;}
-#printArea .print-date-blank{display:inline-block;min-width:50mm;border-bottom:2px solid #000;height:1em;}
+  display:inline-flex;align-items:baseline;gap:3mm;flex-shrink:0;}
+#printArea .print-date-blank{display:inline-block;min-width:45mm;border-bottom:2px solid #000;height:1em;}
 #printArea .articoli-list{display:flex;flex-direction:column;gap:2mm;}
 #printArea .articolo{display:flex;align-items:stretch;justify-content:space-between;
   border:2px solid #000;border-radius:2mm;padding:2mm 3mm;
@@ -768,8 +776,8 @@ body.drag-active main.content{overflow:hidden;}
         <div class="field-hint" style="margin-bottom:14px">
           Aggiungi articoli <b style="color:var(--text)">correlati</b> a questo prodotto.
           Es. per una botte inox: galleggiante, pompetta, ecc.<br>
-          Puoi indicare se sono <b style="color:#f87171">obbligatori</b> o
-          <b style="color:#4ade80">opzionali</b>, aggiungere una nota e <b style="color:var(--yellow)">modificare il prezzo</b> direttamente.
+          Puoi cercare <b style="color:var(--yellow)">anche nella rubrica</b> (19.000 prodotti):
+          quelli non ancora nei settori verranno aggiunti automaticamente al settore corrente.
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <strong style="font-size:12.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">
@@ -808,14 +816,14 @@ body.drag-active main.content{overflow:hidden;}
 <div class="modal-overlay" id="modalLinkPicker">
   <div class="modal" style="max-width:560px">
     <div class="modal-header">
-      <div><h2>Aggiungi articolo correlato</h2><div class="sub">Cerca in tutti i settori</div></div>
+      <div><h2>Aggiungi articolo correlato</h2><div class="sub">Cerca in tutti i settori e nella rubrica</div></div>
       <button class="modal-close" data-close>✕</button>
     </div>
     <div class="modal-body">
       <div class="field">
         <label>🔍 Cerca articolo (nome o codice)</label>
         <input type="text" id="linkSearch" placeholder="Es. galleggiante o 6115..." autocomplete="off">
-        <div id="linkResults" style="margin-top:6px;max-height:320px;overflow:auto;"></div>
+        <div id="linkResults" style="margin-top:6px;max-height:340px;overflow:auto;"></div>
       </div>
       <div id="linkChosen" style="display:none;background:#131313;border:1px solid var(--yellow-dk);border-radius:8px;padding:12px;margin-top:8px">
         <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Articolo selezionato</div>
@@ -908,11 +916,12 @@ body.drag-active main.content{overflow:hidden;}
       <div class="field">
         <label>☁️ Sincronizzazione cloud</label>
         <div class="field-hint">
-          L'app si sincronizza <b style="color:var(--yellow)">automaticamente</b> su tutti i dispositivi che la aprono.
-          Clicca l'indicatore di stato in alto a destra per scaricare manualmente i dati dal cloud.
+          Alla apertura l'app carica <b style="color:var(--yellow)">automaticamente</b> i dati dal cloud.
+          Il locale è solo cache di sicurezza per l'uso offline.
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Sincronizza ora</button>
+          <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Carica dal cloud ora</button>
+          <button class="btn btn-sm" id="btnCloudPush" type="button">⬆ Forza invio al cloud</button>
           <button class="btn btn-sm" id="btnRestorePrePull" type="button" style="color:var(--amber)">↺ Ripristina backup pre-sync</button>
         </div>
       </div>
@@ -954,12 +963,13 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.14
+   RATTAZZI CARTELLINI PREZZI v3.15
    ---------------------------------------------------------------------------
-   Novità v3.14:
-     - Correlati con prezzo modificabile inline
-     - Ricerca intelligente: accent-insensitive, multi-parola AND, fuzzy leggero
-     - Ordinamento risultati per rilevanza
+   Novità v3.15:
+     - Sync sempre da cloud all'avvio (il locale è solo cache offline)
+     - Ricerca correlati estesa alla rubrica (19.000 prodotti)
+     - Nome settore visibile in stampa
+     - Fix bug compact header con rotella del mouse
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -996,7 +1006,7 @@ const unitSuffix=u=>'/'+(UNIT_LBL[u]||u||'pz');
 function scontoLabel(s,u){return 'da '+num(s.minQty)+' '+(UNIT_LBL[u]||'pz')+' → -'+num(s.discountPct)+'%';}
 
 /* ============================================================================
-   RICERCA INTELLIGENTE (accent-insensitive, multi-parola, fuzzy)
+   RICERCA INTELLIGENTE
    ========================================================================== */
 function normalizeStr(s){
   return String(s||'').toLowerCase()
@@ -1845,6 +1855,7 @@ $('#tableBody').addEventListener('click',e=>{
    ARTICOLI CORRELATI
    ========================================================================== */
 let pendingLinkArticleId = null;
+let pendingLinkFromRubrica = null; // se proviene dalla rubrica, salvo nome/codice/unit
 
 function renderLinked(){
   const art = findArticle(editingArticleId);
@@ -1892,6 +1903,7 @@ function openLinkPicker(){
   const art = findArticle(editingArticleId);
   if(!art) return;
   pendingLinkArticleId = null;
+  pendingLinkFromRubrica = null;
   $('#linkSearch').value = '';
   $('#linkResults').innerHTML = '<div style="text-align:center;color:var(--text-mute);padding:16px 0;font-size:12.5px">Digita almeno 2 caratteri per cercare</div>';
   $('#linkChosen').style.display = 'none';
@@ -1903,17 +1915,53 @@ function searchAllArticles(query){
   const q = normalizeStr(query);
   if(q.length < 2) return [];
   const matches = [];
+
+  // 1. Cerca nei settori
+  const existingCodes = new Set();
   for(const cat of state.categories){
     for(const a of cat.articles){
+      if(a.code) existingCodes.add(normalizeStr(a.code));
       if(a.id === editingArticleId) continue;
       const hay = normalizeStr(a.name + ' ' + (a.code||''));
       if(smartMatch(hay, q)){
-        matches.push({article:a, category:cat, score: smartScore(hay, q)});
+        matches.push({
+          article: a,
+          category: cat,
+          score: smartScore(hay, q),
+          source: 'settore'
+        });
       }
     }
   }
+
+  // 2. Cerca anche nella rubrica (prodotti non ancora nei settori)
+  const rub = getRubrica();
+  for(let i = 0; i < rub.length; i++){
+    const r = rub[i];
+    if(!r || !r.cod) continue;
+    // Salto se il codice è già presente in un settore
+    if(existingCodes.has(normalizeStr(r.cod))) continue;
+    const hay = normalizeStr((r.cod||'') + ' ' + (r.nome||''));
+    if(smartMatch(hay, q)){
+      matches.push({
+        article: {
+          id: null,
+          name: r.nome,
+          code: r.cod,
+          unit: r.unit || 'pz',
+          price: 0,
+          cost: 0
+        },
+        category: null,
+        score: smartScore(hay, q) - 5, // leggermente meno prioritari
+        source: 'rubrica'
+      });
+    }
+    if(matches.length > 200) break; // safety
+  }
+
   matches.sort((a,b) => b.score - a.score);
-  return matches.slice(0, 40);
+  return matches.slice(0, 50);
 }
 
 function renderLinkResults(results){
@@ -1922,21 +1970,33 @@ function renderLinkResults(results){
     box.innerHTML = '<div style="text-align:center;color:var(--text-mute);padding:16px 0;font-size:12.5px">Nessun risultato</div>';
     return;
   }
-  box.innerHTML = results.map((r,i)=>`
-    <div class="rubrica-item" data-linkidx="${i}">
-      <div class="rb-name"><span class="rb-code">${esc(r.article.code||'—')}</span>${esc(r.article.name)}</div>
-      <div class="rb-meta">📁 ${esc(r.category.name)}</div>
-    </div>
-  `).join('');
+  box.innerHTML = results.map((r,i)=>{
+    const isRub = r.source === 'rubrica';
+    const code = isRub ? r.article.code : (r.article.code || '—');
+    const srcBadge = isRub
+      ? '<span class="li-source">📚 Rubrica</span>'
+      : '<span class="search-cat-badge">📁 '+esc(r.category.name)+'</span>';
+    return `
+      <div class="rubrica-item" data-linkidx="${i}">
+        <div class="rb-name"><span class="rb-code">${esc(code)}</span>${esc(r.article.name)} ${srcBadge}</div>
+      </div>`;
+  }).join('');
   box.querySelectorAll('[data-linkidx]').forEach(el=>{
     el.addEventListener('click',()=>{
       const idx = parseInt(el.dataset.linkidx, 10);
       const r = results[idx];
       if(!r) return;
-      pendingLinkArticleId = r.article.id;
+      pendingLinkArticleId = r.article.id; // può essere null se dalla rubrica
+      pendingLinkFromRubrica = (r.source === 'rubrica') ? r : null;
+
       $('#linkChosen').style.display = 'block';
       $('#linkChosenName').textContent = r.article.name;
-      $('#linkChosenMeta').textContent = 'Cod. ' + (r.article.code||'—') + ' · ' + r.category.name;
+      if(r.source === 'rubrica'){
+        $('#linkChosenMeta').innerHTML = 'Cod. ' + (r.article.code||'—') +
+          ' · <span style="color:var(--yellow)">📚 Sarà aggiunto al settore corrente</span>';
+      } else {
+        $('#linkChosenMeta').textContent = 'Cod. ' + (r.article.code||'—') + ' · ' + r.category.name;
+      }
       $('#linkNote').value = '';
       $('#linkRequired').value = 'opt';
     });
@@ -1996,29 +2056,78 @@ $('#linkSearch').addEventListener('input', e=>{
 });
 
 $('#btnLinkConfirm').addEventListener('click', ()=>{
-  if(!pendingLinkArticleId){ alert('Seleziona prima un articolo dalla lista.'); return; }
   const art = findArticle(editingArticleId);
   if(!art) return;
+
+  // Se viene dalla rubrica e non ha id, creo l'articolo nel settore corrente
+  let linkedId = pendingLinkArticleId;
+  if(!linkedId && pendingLinkFromRubrica){
+    const r = pendingLinkFromRubrica.article;
+    if(!r || !r.code){ alert('Dati rubrica non validi.'); return; }
+    const cat = getActiveCategory();
+    if(!cat){ alert('Nessun settore attivo per aggiungere il prodotto.'); return; }
+
+    // Controllo se esiste già per codice nel settore
+    const existing = cat.articles.find(x =>
+      normalizeStr(x.code) === normalizeStr(r.code)
+    );
+    if(existing){
+      linkedId = existing.id;
+    } else {
+      // Aggiungo l'articolo al settore corrente con prezzo 0
+      const now = new Date().toISOString();
+      pushUndo('Aggiunto "'+r.name+'" al settore '+cat.name);
+      const newArt = {
+        id: uid(),
+        name: r.name,
+        code: r.code,
+        unit: r.unit || 'pz',
+        price: 0,
+        cost: 0,
+        margin: null,
+        supplier: '',
+        supplierCode: '',
+        notes: 'Aggiunto dalla rubrica',
+        photo: '',
+        purchases: [],
+        quantityDiscounts: [],
+        linkedArticles: [],
+        updatedAt: now,
+        history: [{date:now, price:0, cost:0, prevPrice:0, prevCost:0, note:'Aggiunto da rubrica'}]
+      };
+      cat.articles.push(newArt);
+      linkedId = newArt.id;
+      saveState();
+    }
+  }
+
+  if(!linkedId){ alert('Seleziona prima un articolo dalla lista.'); return; }
   if(!Array.isArray(art.linkedArticles)) art.linkedArticles = [];
-  if(art.linkedArticles.some(la => la.articleId === pendingLinkArticleId)){
+  if(art.linkedArticles.some(la => la.articleId === linkedId)){
     alert('Questo articolo è già correlato.');
     return;
   }
   art.linkedArticles.push({
-    articleId: pendingLinkArticleId,
+    articleId: linkedId,
     note: $('#linkNote').value.trim().slice(0,200),
     required: $('#linkRequired').value === 'req'
   });
   art.updatedAt = new Date().toISOString();
   state.meta.lastRevision = art.updatedAt;
   saveState();
+
+  // Se ho aggiunto un nuovo articolo al settore, ricarico la tabella per mostrarlo
+  if(pendingLinkFromRubrica){
+    render();
+  }
   renderLinked();
   updateLinkedBadgeInTable(art.id);
   closeModal('#modalLinkPicker');
   pendingLinkArticleId = null;
+  pendingLinkFromRubrica = null;
 });
 
-/* Modifica prezzo correlato direttamente nella lista */
+/* Modifica prezzo correlato */
 $('#linkedList').addEventListener('change', e=>{
   const inp = e.target.closest('[data-linkprice-id]');
   if(!inp) return;
@@ -2498,7 +2607,7 @@ $('#btnClearSearch').addEventListener('click',()=>{
   if(si) si.focus();
 });
 
-/* -------- STAMPA — pulsante bottom nav -------- */
+/* -------- STAMPA -------- */
 function toggleSelectionMode(){
   if(selectionMode) exitSelectionMode();
   else enterSelectionMode();
@@ -2523,7 +2632,6 @@ $('#checkAllHead').addEventListener('change',e=>{
   updateSelectionBar();
 });
 
-/* -------- STAMPA A4 minimal -------- */
 function doActualPrint(){
   const isSearching = !!searchQuery.trim();
   const cat=getActiveCategory();
@@ -2560,8 +2668,13 @@ function doActualPrint(){
       </div>`;
   }).join('');
 
+  const sectorLabel = isSearching
+    ? 'Ricerca: "'+searchQuery.trim()+'"'
+    : esc(cat.name);
+
   $('#printArea').innerHTML = `
     <div class="print-header">
+      <span class="print-sector">Settore: <b>${sectorLabel}</b></span>
       <span class="print-date-line">Data: <span class="print-date-blank"></span></span>
     </div>
     <div class="articoli-list ${compact?'compact':''}">
@@ -2596,7 +2709,6 @@ $$('.nav-item').forEach(b=>{
   });
 });
 
-/* -------- LOGO click → toggle modalità cliente -------- */
 $('#brandToggle').addEventListener('click', toggleClientMode);
 
 /* -------- SCORCIATOIE GLOBALI -------- */
@@ -2792,41 +2904,80 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ============================================================================
-   COMPACT HEADER ON SCROLL
+   COMPACT HEADER ON SCROLL — versione con isteresi e cooldown
+   ---------------------------------------------------------------------------
+   - Soglia più alta per attivare (evita ping-pong con rotella)
+   - Cooldown di 350ms dopo ogni cambio di stato
+   - Isteresi: entrare in compact richiede scroll giù >60px, uscire richiede -20px
    ========================================================================== */
 (function initCompactHeader(){
   const content=document.querySelector('#mainContent');
   if(!content) return;
+
   let lastScroll=0;
   let ticking=false;
   let isCompact=false;
-  const DOWN_THRESHOLD=40;
-  const TOP_THRESHOLD=20;
-  const DELTA=8;
+  let lastToggleTime=0;
+
+  const COOLDOWN_MS=350;      // millisecondi minimi tra due cambi di stato
+  const ENTER_DELTA=60;       // pixel verso il basso per entrare in compact
+  const EXIT_DELTA=-20;       // pixel verso l'alto per uscire da compact
+  const TOP_THRESHOLD=20;     // sotto questa soglia di scroll, header sempre visibile
+  const ENTER_MIN_Y=80;       // attiva il compact solo se scroll > 80px
 
   function update(){
     const y=content.scrollTop;
+    const now=Date.now();
+
+    // Se siamo in cima, mostra sempre header
     if(y < TOP_THRESHOLD){
-      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
-      lastScroll=y;ticking=false;return;
+      if(isCompact && (now - lastToggleTime) > COOLDOWN_MS){
+        isCompact=false;
+        document.body.classList.remove('compact');
+        lastToggleTime=now;
+      }
+      lastScroll=y;
+      ticking=false;
+      return;
     }
+
+    // Durante il cooldown, non fare nulla (evita ping-pong)
+    if((now - lastToggleTime) < COOLDOWN_MS){
+      lastScroll=y;
+      ticking=false;
+      return;
+    }
+
     const diff = y - lastScroll;
-    if(diff > DELTA && y > DOWN_THRESHOLD){
-      if(!isCompact){isCompact=true;document.body.classList.add('compact');}
-    } else if(diff < -DELTA){
-      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
+
+    if(!isCompact && diff > ENTER_DELTA && y > ENTER_MIN_Y){
+      // Entra in compact
+      isCompact=true;
+      document.body.classList.add('compact');
+      lastToggleTime=now;
+    } else if(isCompact && diff < EXIT_DELTA){
+      // Esce da compact
+      isCompact=false;
+      document.body.classList.remove('compact');
+      lastToggleTime=now;
     }
-    lastScroll=y;ticking=false;
+
+    lastScroll=y;
+    ticking=false;
   }
 
   content.addEventListener('scroll',()=>{
-    if(!ticking){requestAnimationFrame(update);ticking=true;}
+    if(!ticking){
+      requestAnimationFrame(update);
+      ticking=true;
+    }
   }, { passive: true });
 
   window.__resetCompact=function(){
     document.body.classList.remove('compact');
     isCompact=false;
     lastScroll=0;
+    lastToggleTime=0;
   };
 })();
 
@@ -2853,7 +3004,7 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-  console.log('%cRattazzi Cartellini v3.14 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.15 avviato','color:#ffcc00;font-weight:bold');
   setTimeout(()=>{ try{ if(window.cloudInit) window.cloudInit(); }catch(e){console.warn('Cloud init:',e);} }, 1500);
 })();
 </script>
