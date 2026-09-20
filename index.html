@@ -50,12 +50,25 @@ body.compact .app-header{
   display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;}
 .brand-name{font-weight:800;font-size:15px;letter-spacing:.5px;color:var(--yellow);line-height:1;}
 .brand-sub{font-size:10.5px;color:var(--text-dim);letter-spacing:1.2px;margin-top:2px;}
-.header-actions{display:flex;gap:6px;align-items:center;}
+.header-actions{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;}
 .icon-btn{width:36px;height:36px;border-radius:8px;background:var(--card);
   border:1px solid var(--border);color:var(--text-dim);
-  display:flex;align-items:center;justify-content:center;font-size:16px;transition:.15s;position:relative;}
+  display:flex;align-items:center;justify-content:center;font-size:16px;transition:.15s;position:relative;flex-shrink:0;}
 .icon-btn:hover:not(:disabled){color:var(--yellow);border-color:var(--yellow-dk);}
 .icon-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+/* Indicatore stato cloud */
+.cloud-status{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 10px;border-radius:8px;font-size:11px;font-weight:700;
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text-dim);cursor:pointer;transition:.15s;
+  white-space:nowrap;flex-shrink:0;
+}
+.cloud-status:hover{background:var(--card-2);}
+.cloud-status.ok  {color:var(--green);border-color:rgba(34,197,94,.4);}
+.cloud-status.warn{color:var(--amber);border-color:rgba(245,158,11,.4);}
+.cloud-status.err {color:var(--red);  border-color:rgba(239,68,68,.4);}
 
 .info-bar{display:flex;flex-wrap:wrap;gap:14px;padding:6px 14px;background:#0e0e0e;
   border-bottom:1px solid var(--border);font-size:11px;color:var(--text-mute);flex-shrink:0;
@@ -106,7 +119,6 @@ body.selection-mode .selection-bar{display:flex;}
 .selection-bar .sb-info b{font-size:15px;color:var(--yellow);}
 .selection-bar .sb-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
-/* Barra info ricerca globale */
 .search-info{display:none;align-items:center;justify-content:space-between;gap:10px;
   padding:6px 14px;background:rgba(255,204,0,.06);
   border-bottom:1px solid var(--yellow-dk);font-size:12px;color:var(--yellow);
@@ -158,7 +170,6 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .art-name{font-weight:600;color:var(--text);cursor:pointer;border-bottom:1px dashed transparent;
   transition:.15s;display:inline-block;}
 .art-name:hover{color:var(--yellow);border-bottom-color:var(--yellow-dk);}
-/* CODICE ARTICOLO — ben visibile accanto al nome */
 .art-code-badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;
   margin-left:6px;border-radius:4px;background:rgba(255,204,0,.13);
   color:var(--yellow);border:1px solid var(--yellow-dk);
@@ -371,9 +382,6 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 .undo-badge{position:absolute;top:-4px;right:-4px;background:var(--yellow);color:#111;
   font-size:9px;font-weight:800;padding:1px 5px;border-radius:20px;min-width:16px;text-align:center;}
 
-/* =========================================================
-   STAMPA A4 — foglio grande, semplificato, senza data
-   ========================================================= */
 #printArea{display:none;}
 @media print{
   body{background:#fff !important;color:#000 !important;overflow:visible;}
@@ -450,6 +458,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   .brand-name{font-size:12.5px;letter-spacing:.3px;}
   .brand-sub{font-size:9px;letter-spacing:.8px;}
   .icon-btn{width:32px;height:32px;font-size:14px;}
+  .cloud-status{padding:5px 8px;font-size:10px;}
   .header-actions{gap:4px;}
   .info-bar{padding:4px 10px;font-size:10px;gap:10px;max-height:40px;
     overflow-x:auto;white-space:nowrap;flex-wrap:nowrap;}
@@ -492,6 +501,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
   .art-name{font-size:13.5px;}
   .art-code-badge{font-size:9px;padding:1px 5px;}
   .age-badge{font-size:9px;padding:1px 5px;margin-left:4px;}
+  .cloud-status{padding:4px 6px;font-size:9.5px;max-width:100px;overflow:hidden;text-overflow:ellipsis;}
 }
 </style>
 </head>
@@ -507,6 +517,7 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
       </div>
     </div>
     <div class="header-actions">
+      <button class="cloud-status" id="cloudStatus" title="Stato sincronizzazione">⏳ Avvio...</button>
       <button class="icon-btn" id="btnUndo" title="Annulla (Ctrl+Z)" disabled>↶<span class="undo-badge" id="undoBadge" style="display:none"></span></button>
       <button class="icon-btn" id="btnRedo" title="Ripeti (Ctrl+Y)" disabled>↷</button>
       <button class="icon-btn" id="btnExport" title="Scarica backup JSON">⬇</button>
@@ -778,6 +789,19 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
       <button class="modal-close" data-close>✕</button>
     </div>
     <div class="modal-body">
+      <div class="field">
+        <label>☁️ Codice squadra (per sincronizzare tra dispositivi)</label>
+        <input type="text" id="setSquadra" placeholder="Es. rattazzi-2025" autocomplete="off">
+        <div class="field-hint">
+          Metti lo stesso codice su tutti i dispositivi che vuoi sincronizzare.
+          Senza codice, l'app funziona solo in locale.
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-yellow btn-sm" id="btnSetSquadra" type="button">Imposta codice</button>
+          <button class="btn btn-sm" id="btnCloudSync" type="button">☁️ Sincronizza ora</button>
+          <button class="btn btn-sm" id="btnCloudPull" type="button">⬇ Scarica da cloud</button>
+        </div>
+      </div>
       <div class="field"><label>Nome operatore</label><input type="text" id="setOperator"></div>
       <div class="field"><label>Data ultima revisione</label><input type="date" id="setRevision"></div>
       <div class="field"><label>Margine target globale % (fallback)</label><input type="number" id="setGlobalMargin" value="40"></div>
@@ -801,19 +825,17 @@ tr.row-loss td:nth-child(4) input{color:var(--red);font-weight:700;}
 
 <div id="printArea"></div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
 <script src="./rubrica.js"></script>
+<script src="./cloud.js"></script>
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.8 — Versione stabile per GitHub Pages
-   ---------------------------------------------------------------------------
-   Novità v3.8:
-     - Nuovo campo "Codice articolo" (principale) visibile ovunque accanto al nome:
-       nella tabella, nel giro, nella stampa A4 e nel titolo della scheda
-     - "Codice articolo fornitore" resta un campo separato opzionale
-     - Ricerca GLOBALE su tutti i settori (non solo quello attivo)
-     - Banner "Ricerca in tutti i settori" con contatore risultati
-     - La rubrica popola il campo Codice articolo (non più il codice fornitore)
+   RATTAZZI CARTELLINI PREZZI v3.9 — con Firebase multi-dispositivo
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -1012,6 +1034,7 @@ function saveState(silent=false){
     localStorage.removeItem(TEMP_KEY);
     updateStorageInfo();
     setInfo('save','● Dati salvati '+new Date().toLocaleTimeString('it-IT'),'ok');
+    try{ if(window.cloudPush) window.cloudPush(false); }catch(e){}
     return true;
   }catch(e){
     console.error('Save error:',e);
@@ -1208,18 +1231,8 @@ function updateInfoBar(){
 function getActiveCategory(){return state.categories.find(c=>c.id===activeCategoryId)||null;}
 function findArticle(id){for(const c of state.categories){const a=c.articles.find(x=>x.id===id);if(a)return a;}return null;}
 
-/* ============================================================================
-   FILTRO ARTICOLI — Ricerca GLOBALE su tutti i settori
-   ---------------------------------------------------------------------------
-   Se c'è un testo di ricerca → cerca in TUTTI i settori e ritorna copie
-   shallow degli articoli con proprietà extra `_searchCatName` / `_searchCatId`
-   per mostrare il badge del settore nella tabella.
-   Se non c'è ricerca → ritorna solo gli articoli del settore attivo.
-   ========================================================================== */
 function getFilteredArticles(){
   const q=searchQuery.trim().toLowerCase();
-
-  // Modalità ricerca: tutti i settori
   if(q){
     const results=[];
     state.categories.forEach(cat=>{
@@ -1234,8 +1247,6 @@ function getFilteredArticles(){
     });
     return results;
   }
-
-  // Modalità normale: solo settore attivo
   const cat=getActiveCategory();if(!cat)return [];
   return cat.articles.filter(a=>{
     if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return false;
@@ -1255,7 +1266,6 @@ function renderTabs(){
     b.addEventListener('click',()=>{
       activeCategoryId=cat.id;
       selectedArticles.clear();
-      // Cambiando settore: pulisco la ricerca (così non rimane "bloccata" su risultati di altri)
       if(searchQuery.trim()){
         searchQuery='';
         const si=$('#searchInput'); if(si) si.value='';
@@ -1274,7 +1284,6 @@ function renderTable(){
   const tbody=$('#tableBody');tbody.innerHTML='';
   const articles=getFilteredArticles();
   const isSearching = !!searchQuery.trim();
-
   if(!articles.length){
     tbody.innerHTML='<tr><td colspan="10"><div class="empty-state"><div class="big">📦</div>'+
       '<strong>'+(isSearching?'Nessun risultato':'Nessun articolo da mostrare')+'</strong><p>'+
@@ -1376,7 +1385,6 @@ function updateCheckAllState(){
   const head=$('#checkAllHead');if(head)head.checked=all;
 }
 
-/* Barra "Ricerca in tutti i settori" */
 function updateSearchBar(){
   const q=searchQuery.trim();
   const bar=$('#searchInfo');
@@ -1386,7 +1394,6 @@ function updateSearchBar(){
     document.body.classList.add('searching');
     if(label) label.textContent='"'+q+'"';
     if(cnt) cnt.textContent=getFilteredArticles().length;
-    // Cambio placeholder a seconda se sto cercando
     const si=$('#searchInput'); if(si) si.placeholder='Ricerca in tutti i settori...';
   } else {
     document.body.classList.remove('searching');
@@ -1521,7 +1528,6 @@ function deleteArticle(id){
 function openArticleModal(id){
   const art=findArticle(id);if(!art)return;
   editingArticleId=id;pendingPhoto=art.photo||'';
-  // Titolo con codice articolo ben visibile
   $('#artTitle').innerHTML = esc(art.name) +
     (art.code ? ' <span style="display:inline-block;font-family:var(--mono);font-size:12px;font-weight:800;'+
       'color:var(--yellow);background:rgba(255,204,0,.12);border:1px solid var(--yellow-dk);'+
@@ -1839,6 +1845,11 @@ $('#btnSettings').addEventListener('click',()=>{
   $('#setOperator').value=state.meta.operator||'';
   $('#setRevision').value=state.meta.lastRevision?new Date(state.meta.lastRevision).toISOString().slice(0,10):'';
   $('#setGlobalMargin').value=state.meta.globalMargin||40;
+  // Precompila codice squadra se già salvato
+  try{
+    const sq=localStorage.getItem('rattazzi_squadra');
+    if(sq) $('#setSquadra').value=sq;
+  }catch(e){}
   updateStorageInfo();
   openModal('#modalSettings');
 });
@@ -1923,7 +1934,6 @@ $('#searchInput').addEventListener('input',e=>{
   clearTimeout(searchTimer);
   searchTimer=setTimeout(()=>{
     searchQuery=e.target.value;
-    // Quando inizio a cercare, se sono in selezione esco (la selezione è per singolo settore visibile)
     if(searchQuery.trim() && selectionMode) exitSelectionMode();
     renderTable();
   },120);
@@ -1960,9 +1970,7 @@ $('#checkAllHead').addEventListener('change',e=>{
   updateSelectionBar();
 });
 
-/* ============================================================================
-   STAMPA A4 — nome + codice articolo + spazio per il prezzo
-   ========================================================================== */
+/* -------- STAMPA -------- */
 function doActualPrint(){
   const isSearching = !!searchQuery.trim();
   const cat=getActiveCategory();
@@ -1974,7 +1982,6 @@ function doActualPrint(){
   }
   if(!articles.length)return alert('Nessun articolo da stampare.');
 
-  // Altezza riga proporzionale per riempire il foglio A4
   const n = articles.length;
   const usable = 225;
   const gap = 4;
@@ -2039,7 +2046,6 @@ $$('.nav-item').forEach(b=>{
     if(act==='stampa'){  $('#btnPrint').click();return;}
     if(act==='backup'){  $('#btnExport').click();return;}
     if(act==='walk'){    openWalkthrough();return;}
-    // "Listini": cancella ricerca + torna in cima
     searchQuery=''; const si=$('#searchInput'); if(si) si.value='';
     document.body.classList.remove('compact');
     document.querySelector('main.content').scrollTo({top:0,behavior:'smooth'});
@@ -2065,7 +2071,6 @@ document.addEventListener('keydown',e=>{
     }
   }
   if(e.key==='Escape'){
-    // Esc con ricerca attiva → pulisci ricerca
     if(searchQuery.trim()){
       searchQuery=''; const si=$('#searchInput'); if(si){si.value='';}
       renderTable(); return;
@@ -2087,7 +2092,7 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ============================================================================
-   WALKTHROUGH — solo prezzo + codice articolo (no costo, no margine)
+   WALKTHROUGH
    ========================================================================== */
 let walkArticles=[];
 let walkIndex=0;
@@ -2292,7 +2297,8 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-  console.log('%cRattazzi Cartellini v3.8 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.9 avviato','color:#ffcc00;font-weight:bold');
+  setTimeout(()=>{ try{ if(window.cloudInit) window.cloudInit(); }catch(e){console.warn('Cloud init:',e);} }, 1500);
 })();
 </script>
 </body>
