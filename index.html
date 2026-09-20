@@ -156,7 +156,7 @@ body.compact .tabs{padding:0 10px;}
 .tab .count{font-size:10.5px;background:#2a2a2a;color:var(--text-mute);padding:2px 7px;border-radius:20px;font-weight:700;}
 .tab.active .count{background:rgba(255,204,0,.18);color:var(--yellow);}
 
-main.content{flex:1;overflow:auto;padding:0 0 90px;-webkit-overflow-scrolling:touch;}
+main.content{flex:1;overflow:auto;padding:0 0 130px;-webkit-overflow-scrolling:touch;}
 .table-wrap{min-width:100%;}
 table#mainTable{width:100%;border-collapse:collapse;font-size:13px;}
 #mainTable thead th{position:sticky;top:0;z-index:5;background:#171717;color:var(--text-dim);
@@ -478,6 +478,9 @@ body.drag-active main.content{overflow:hidden;}
 .undo-badge{position:absolute;top:-4px;right:-4px;background:var(--yellow);color:#111;
   font-size:9px;font-weight:800;padding:1px 5px;border-radius:20px;min-width:16px;text-align:center;}
 
+/* =========================================================
+   STAMPA A4 — header con settore grande + lista adattiva
+   ========================================================= */
 #printArea{display:none;}
 @media print{
   body{background:#fff !important;color:#000 !important;overflow:visible;}
@@ -485,38 +488,152 @@ body.drag-active main.content{overflow:hidden;}
   #printArea{display:block !important;}
   @page{size:A4;margin:8mm;}
 }
-#printArea{background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;}
-#printArea .print-header{display:flex;justify-content:space-between;align-items:baseline;gap:6mm;
-  padding-bottom:1.5mm;margin-bottom:3mm;border-bottom:1.5px solid #000;}
-#printArea .print-sector{font-size:11pt;font-weight:800;color:#000;
-  display:inline-flex;align-items:baseline;gap:2mm;flex-shrink:0;max-width:60%;}
-#printArea .print-sector b{font-size:13pt;}
-#printArea .print-date-line{font-size:11pt;font-weight:800;color:#000;
-  display:inline-flex;align-items:baseline;gap:3mm;flex-shrink:0;}
-#printArea .print-date-blank{display:inline-block;min-width:45mm;border-bottom:2px solid #000;height:1em;}
-#printArea .articoli-list{display:flex;flex-direction:column;gap:2mm;}
-#printArea .articolo{display:flex;align-items:stretch;justify-content:space-between;
-  border:2px solid #000;border-radius:2mm;padding:2mm 3mm;
-  page-break-inside:avoid;background:#fff;}
-#printArea .art-info{flex:1;display:flex;flex-direction:column;justify-content:center;
-  padding-right:3mm;min-width:0;}
-#printArea .art-nome{font-size:14pt;font-weight:800;line-height:1.15;color:#000;word-wrap:break-word;}
+#printArea{
+  background:#fff;color:#000;font-family:Arial,Helvetica,sans-serif;padding:0;display:none;
+}
+/* Header: settore a sinistra (grande) + data a destra */
+#printArea .print-header{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;
+  gap:8mm;
+  padding-bottom:3mm;
+  margin-bottom:15mm;
+  border-bottom:2.5px solid #000;
+}
+#printArea .print-sector{
+  display:flex;
+  flex-direction:column;
+  gap:1mm;
+  min-width:0;
+}
+#printArea .print-sector-prefix{
+  font-size:9pt;
+  font-weight:700;
+  color:#666;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  line-height:1;
+}
+#printArea .print-sector-name{
+  font-size:20pt;
+  font-weight:900;
+  color:#000;
+  letter-spacing:1.5px;
+  line-height:1.1;
+  text-transform:uppercase;
+  word-wrap:break-word;
+}
+#printArea .print-date-line{
+  font-size:11pt;
+  font-weight:700;
+  color:#000;
+  display:inline-flex;
+  align-items:baseline;
+  gap:3mm;
+  flex-shrink:0;
+  white-space:nowrap;
+}
+#printArea .print-date-blank{
+  display:inline-block;
+  min-width:42mm;
+  border-bottom:2px solid #000;
+  height:1em;
+  vertical-align:baseline;
+}
+/* Lista articoli */
+#printArea .articoli-list{
+  display:flex;
+  flex-direction:column;
+  gap:2mm;
+}
+#printArea .articolo{
+  display:flex;
+  align-items:stretch;
+  justify-content:space-between;
+  border:2px solid #000;
+  border-radius:2mm;
+  padding:2mm 3mm;
+  page-break-inside:avoid;
+  background:#fff;
+}
+#printArea .art-info{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding-right:3mm;
+  min-width:0;
+}
+#printArea .art-nome{
+  font-size:14pt;
+  font-weight:800;
+  line-height:1.15;
+  color:#000;
+  word-wrap:break-word;
+}
 #printArea .articoli-list.compact .art-nome{font-size:12pt;}
-#printArea .art-code-inline{display:inline-block;font-size:11pt;font-weight:900;color:#000;
-  background:#fff;border:2px solid #000;border-radius:1.5mm;
-  padding:0.5mm 2mm;margin-left:2mm;
-  font-family:"Courier New",Courier,monospace;letter-spacing:.5px;
-  vertical-align:middle;white-space:nowrap;}
+#printArea .art-code-inline{
+  display:inline-block;
+  font-size:11pt;
+  font-weight:900;
+  color:#000;
+  background:#fff;
+  border:2px solid #000;
+  border-radius:1.5mm;
+  padding:0.5mm 2mm;
+  margin-left:2mm;
+  font-family:"Courier New",Courier,monospace;
+  letter-spacing:.5px;
+  vertical-align:middle;
+  white-space:nowrap;
+}
 #printArea .articoli-list.compact .art-code-inline{font-size:10pt;}
-#printArea .art-prezzo-box{width:55mm;flex-shrink:0;border-left:2px dashed #888;padding-left:3mm;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;}
-#printArea .art-prezzo-label{font-size:9pt;font-weight:800;text-transform:uppercase;color:#000;
-  letter-spacing:1.2px;margin-bottom:1mm;}
-#printArea .articoli-list.compact .art-prezzo-label{font-size:8pt;margin-bottom:0.5mm;}
-#printArea .art-prezzo-empty{width:100%;flex:1;min-height:8mm;border-bottom:2px solid #000;
-  display:flex;align-items:flex-end;justify-content:flex-end;padding-bottom:0.5mm;}
-#printArea .art-prezzo-unit{font-size:9pt;font-weight:700;color:#666;margin-top:1mm;}
-#printArea .articoli-list.compact .art-prezzo-unit{font-size:8pt;margin-top:0.5mm;}
+#printArea .art-prezzo-box{
+  width:55mm;
+  flex-shrink:0;
+  border-left:2px dashed #888;
+  padding-left:3mm;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+#printArea .art-prezzo-label{
+  font-size:9pt;
+  font-weight:800;
+  text-transform:uppercase;
+  color:#000;
+  letter-spacing:1.2px;
+  margin-bottom:1mm;
+}
+#printArea .art-prezzo-empty{
+  width:100%;
+  flex:1;
+  min-height:8mm;
+  border-bottom:2px solid #000;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  padding-bottom:0.5mm;
+}
+#printArea .art-prezzo-unit{
+  font-size:9pt;
+  font-weight:700;
+  color:#666;
+  margin-top:1mm;
+}
+/* Compact mode: articoli piccoli */
+#printArea .articoli-list.compact .art-prezzo-label{
+  font-size:7pt;
+  letter-spacing:.8px;
+  margin-bottom:0.3mm;
+}
+#printArea .articoli-list.compact .art-prezzo-empty{min-height:3mm;}
+#printArea .articoli-list.compact .art-prezzo-unit{
+  font-size:7pt;
+  margin-top:0.3mm;
+}
 
 @media (max-width:900px){
   #mainTable th:nth-child(6),#mainTable td:nth-child(6){display:none;}
@@ -963,13 +1080,13 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v3.15
+   RATTAZZI CARTELLINI PREZZI v3.16
    ---------------------------------------------------------------------------
-   Novità v3.15:
-     - Sync sempre da cloud all'avvio (il locale è solo cache offline)
-     - Ricerca correlati estesa alla rubrica (19.000 prodotti)
-     - Nome settore visibile in stampa
-     - Fix bug compact header con rotella del mouse
+   Novità v3.16:
+     - Fix stampa: settore visibile in alto a sinistra (grid layout)
+     - Stampa adattiva: riempi la pagina senza spazi bianchi (max 62mm per riga)
+     - Gap 15mm tra header e articoli
+     - Fix tremolio compact header con rotella (freeze al fondo + conferma doppia)
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_v3';
@@ -1015,7 +1132,6 @@ function normalizeStr(s){
     .replace(/\s+/g,' ')
     .trim();
 }
-
 function tokenMatch(token, hayWords, hayFull){
   if(!token) return true;
   if(hayFull.includes(token)) return true;
@@ -1024,7 +1140,6 @@ function tokenMatch(token, hayWords, hayFull){
   if(stem.length < 3) return false;
   return hayWords.some(w => w.startsWith(stem));
 }
-
 function smartMatch(hay, query){
   if(!query) return true;
   const tokens = query.split(/\s+/).filter(Boolean);
@@ -1032,7 +1147,6 @@ function smartMatch(hay, query){
   const hayWords = hay.split(/\s+/);
   return tokens.every(t => tokenMatch(t, hayWords, hay));
 }
-
 function smartScore(hay, query){
   if(!query) return 0;
   const tokens = query.split(/\s+/).filter(Boolean);
@@ -1491,10 +1605,7 @@ function renderTabs(){
       + (isActive?' <span style="opacity:.55;font-size:11px">✎</span>':'')
       + ' <span class="count">'+cat.articles.length+'</span>';
     b.addEventListener('click',()=>{
-      if(activeCategoryId === cat.id){
-        renameCategory(cat.id);
-        return;
-      }
+      if(activeCategoryId === cat.id){ renameCategory(cat.id); return; }
       activeCategoryId=cat.id;
       selectedArticles.clear();
       if(searchQuery.trim()){
@@ -1855,7 +1966,7 @@ $('#tableBody').addEventListener('click',e=>{
    ARTICOLI CORRELATI
    ========================================================================== */
 let pendingLinkArticleId = null;
-let pendingLinkFromRubrica = null; // se proviene dalla rubrica, salvo nome/codice/unit
+let pendingLinkFromRubrica = null;
 
 function renderLinked(){
   const art = findArticle(editingArticleId);
@@ -1915,8 +2026,6 @@ function searchAllArticles(query){
   const q = normalizeStr(query);
   if(q.length < 2) return [];
   const matches = [];
-
-  // 1. Cerca nei settori
   const existingCodes = new Set();
   for(const cat of state.categories){
     for(const a of cat.articles){
@@ -1925,41 +2034,25 @@ function searchAllArticles(query){
       const hay = normalizeStr(a.name + ' ' + (a.code||''));
       if(smartMatch(hay, q)){
         matches.push({
-          article: a,
-          category: cat,
-          score: smartScore(hay, q),
-          source: 'settore'
+          article: a, category: cat, score: smartScore(hay, q), source: 'settore'
         });
       }
     }
   }
-
-  // 2. Cerca anche nella rubrica (prodotti non ancora nei settori)
   const rub = getRubrica();
   for(let i = 0; i < rub.length; i++){
     const r = rub[i];
     if(!r || !r.cod) continue;
-    // Salto se il codice è già presente in un settore
     if(existingCodes.has(normalizeStr(r.cod))) continue;
     const hay = normalizeStr((r.cod||'') + ' ' + (r.nome||''));
     if(smartMatch(hay, q)){
       matches.push({
-        article: {
-          id: null,
-          name: r.nome,
-          code: r.cod,
-          unit: r.unit || 'pz',
-          price: 0,
-          cost: 0
-        },
-        category: null,
-        score: smartScore(hay, q) - 5, // leggermente meno prioritari
-        source: 'rubrica'
+        article: { id: null, name: r.nome, code: r.cod, unit: r.unit || 'pz', price: 0, cost: 0 },
+        category: null, score: smartScore(hay, q) - 5, source: 'rubrica'
       });
     }
-    if(matches.length > 200) break; // safety
+    if(matches.length > 200) break;
   }
-
   matches.sort((a,b) => b.score - a.score);
   return matches.slice(0, 50);
 }
@@ -1972,7 +2065,7 @@ function renderLinkResults(results){
   }
   box.innerHTML = results.map((r,i)=>{
     const isRub = r.source === 'rubrica';
-    const code = isRub ? r.article.code : (r.article.code || '—');
+    const code = r.article.code || '—';
     const srcBadge = isRub
       ? '<span class="li-source">📚 Rubrica</span>'
       : '<span class="search-cat-badge">📁 '+esc(r.category.name)+'</span>';
@@ -1986,9 +2079,8 @@ function renderLinkResults(results){
       const idx = parseInt(el.dataset.linkidx, 10);
       const r = results[idx];
       if(!r) return;
-      pendingLinkArticleId = r.article.id; // può essere null se dalla rubrica
+      pendingLinkArticleId = r.article.id;
       pendingLinkFromRubrica = (r.source === 'rubrica') ? r : null;
-
       $('#linkChosen').style.display = 'block';
       $('#linkChosenName').textContent = r.article.name;
       if(r.source === 'rubrica'){
@@ -2010,13 +2102,9 @@ function updateLinkedBadgeInTable(artId){
   if(!art) return;
   const oldBadge = tr.querySelector('.linked-btn');
   const n = (art.linkedArticles||[]).length;
-  if(n === 0){
-    if(oldBadge) oldBadge.remove();
-    return;
-  }
-  if(oldBadge){
-    oldBadge.textContent = '🔗 ' + n;
-  } else {
+  if(n === 0){ if(oldBadge) oldBadge.remove(); return; }
+  if(oldBadge){ oldBadge.textContent = '🔗 ' + n; }
+  else {
     const wrap = tr.querySelector('.name-wrap');
     if(wrap){
       const b = document.createElement('button');
@@ -2036,10 +2124,7 @@ function showLinkedPopup(artId){
   const art = findArticle(artId);
   if(!art) return;
   const list = art.linkedArticles || [];
-  if(!list.length){
-    alert('Questo articolo non ha correlati.');
-    return;
-  }
+  if(!list.length){ alert('Questo articolo non ha correlati.'); return; }
   openArticleModal(artId, 'correlati');
 }
 
@@ -2058,40 +2143,23 @@ $('#linkSearch').addEventListener('input', e=>{
 $('#btnLinkConfirm').addEventListener('click', ()=>{
   const art = findArticle(editingArticleId);
   if(!art) return;
-
-  // Se viene dalla rubrica e non ha id, creo l'articolo nel settore corrente
   let linkedId = pendingLinkArticleId;
   if(!linkedId && pendingLinkFromRubrica){
     const r = pendingLinkFromRubrica.article;
     if(!r || !r.code){ alert('Dati rubrica non validi.'); return; }
     const cat = getActiveCategory();
     if(!cat){ alert('Nessun settore attivo per aggiungere il prodotto.'); return; }
-
-    // Controllo se esiste già per codice nel settore
-    const existing = cat.articles.find(x =>
-      normalizeStr(x.code) === normalizeStr(r.code)
-    );
+    const existing = cat.articles.find(x => normalizeStr(x.code) === normalizeStr(r.code));
     if(existing){
       linkedId = existing.id;
     } else {
-      // Aggiungo l'articolo al settore corrente con prezzo 0
       const now = new Date().toISOString();
       pushUndo('Aggiunto "'+r.name+'" al settore '+cat.name);
       const newArt = {
-        id: uid(),
-        name: r.name,
-        code: r.code,
-        unit: r.unit || 'pz',
-        price: 0,
-        cost: 0,
-        margin: null,
-        supplier: '',
-        supplierCode: '',
-        notes: 'Aggiunto dalla rubrica',
-        photo: '',
-        purchases: [],
-        quantityDiscounts: [],
-        linkedArticles: [],
+        id: uid(), name: r.name, code: r.code, unit: r.unit || 'pz',
+        price: 0, cost: 0, margin: null,
+        supplier: '', supplierCode: '', notes: 'Aggiunto dalla rubrica', photo: '',
+        purchases: [], quantityDiscounts: [], linkedArticles: [],
         updatedAt: now,
         history: [{date:now, price:0, cost:0, prevPrice:0, prevCost:0, note:'Aggiunto da rubrica'}]
       };
@@ -2100,12 +2168,10 @@ $('#btnLinkConfirm').addEventListener('click', ()=>{
       saveState();
     }
   }
-
   if(!linkedId){ alert('Seleziona prima un articolo dalla lista.'); return; }
   if(!Array.isArray(art.linkedArticles)) art.linkedArticles = [];
   if(art.linkedArticles.some(la => la.articleId === linkedId)){
-    alert('Questo articolo è già correlato.');
-    return;
+    alert('Questo articolo è già correlato.'); return;
   }
   art.linkedArticles.push({
     articleId: linkedId,
@@ -2115,11 +2181,7 @@ $('#btnLinkConfirm').addEventListener('click', ()=>{
   art.updatedAt = new Date().toISOString();
   state.meta.lastRevision = art.updatedAt;
   saveState();
-
-  // Se ho aggiunto un nuovo articolo al settore, ricarico la tabella per mostrarlo
-  if(pendingLinkFromRubrica){
-    render();
-  }
+  if(pendingLinkFromRubrica) render();
   renderLinked();
   updateLinkedBadgeInTable(art.id);
   closeModal('#modalLinkPicker');
@@ -2127,7 +2189,6 @@ $('#btnLinkConfirm').addEventListener('click', ()=>{
   pendingLinkFromRubrica = null;
 });
 
-/* Modifica prezzo correlato */
 $('#linkedList').addEventListener('change', e=>{
   const inp = e.target.closest('[data-linkprice-id]');
   if(!inp) return;
@@ -2136,20 +2197,15 @@ $('#linkedList').addEventListener('change', e=>{
   if(!linkedArt) return;
   const newPrice = parseFloat(inp.value);
   if(isNaN(newPrice) || newPrice < 0){
-    inp.value = linkedArt.price.toFixed(2);
-    return;
+    inp.value = linkedArt.price.toFixed(2); return;
   }
   if(linkedArt.price === newPrice) return;
-
   pushUndo('Modifica prezzo correlato "' + linkedArt.name + '"');
   const oldPrice = linkedArt.price;
   linkedArt.price = newPrice;
   linkedArt.history.push({
-    date: new Date().toISOString(),
-    price: newPrice,
-    cost: linkedArt.cost,
-    prevPrice: oldPrice,
-    prevCost: linkedArt.cost,
+    date: new Date().toISOString(), price: newPrice, cost: linkedArt.cost,
+    prevPrice: oldPrice, prevCost: linkedArt.cost,
     operator: state.meta.operator || ''
   });
   linkedArt.updatedAt = new Date().toISOString();
@@ -2632,6 +2688,21 @@ $('#checkAllHead').addEventListener('change',e=>{
   updateSelectionBar();
 });
 
+/* ============================================================================
+   STAMPA A4 — settore visibile + dimensione adattiva per riempire la pagina
+   ============================================================================
+   Formato A4: 297mm altezza - 16mm margini = 281mm utilizzabili
+   - Header (settore + data): ~15mm
+   - Gap 15mm (richiesta utente)
+   - Rimangono ~250mm per gli articoli
+   Regole altezza righe:
+     - n=1 → max 62mm (non troppo gigante)
+     - n=2 → max 62mm
+     - n=3 → max 62mm
+     - n=4 → ~60mm (riempe la pagina)
+     - n=5..16 → adattivo per riempire
+     - n=17+ → compact (12.5mm minimo)
+   ========================================================================== */
 function doActualPrint(){
   const isSearching = !!searchQuery.trim();
   const cat=getActiveCategory();
@@ -2644,10 +2715,10 @@ function doActualPrint(){
   if(!articles.length)return alert('Nessun articolo da stampare.');
 
   const n = articles.length;
-  const usable = 260;
-  const gap = 2;
-  let hRow = (usable - (n-1)*gap) / n;
-  hRow = Math.max(12, Math.min(28, hRow));
+  const USABLE = 248;   // mm disponibili per la lista
+  const GAP = 2;        // mm tra le righe
+  let hRow = (USABLE - (n-1)*GAP) / n;
+  hRow = Math.max(12.5, Math.min(62, hRow));
   const hRowPx = hRow + 'mm';
   const compact = hRow < 16;
 
@@ -2670,12 +2741,15 @@ function doActualPrint(){
 
   const sectorLabel = isSearching
     ? 'Ricerca: "'+searchQuery.trim()+'"'
-    : esc(cat.name);
+    : (cat ? cat.name : 'Articoli');
 
   $('#printArea').innerHTML = `
     <div class="print-header">
-      <span class="print-sector">Settore: <b>${sectorLabel}</b></span>
-      <span class="print-date-line">Data: <span class="print-date-blank"></span></span>
+      <div class="print-sector">
+        <span class="print-sector-prefix">Settore</span>
+        <span class="print-sector-name">${esc(sectorLabel)}</span>
+      </div>
+      <div class="print-date-line">Data: <span class="print-date-blank"></span></div>
     </div>
     <div class="articoli-list ${compact?'compact':''}">
       ${rowsHtml}
@@ -2904,11 +2978,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ============================================================================
-   COMPACT HEADER ON SCROLL — versione con isteresi e cooldown
-   ---------------------------------------------------------------------------
-   - Soglia più alta per attivare (evita ping-pong con rotella)
-   - Cooldown di 350ms dopo ogni cambio di stato
-   - Isteresi: entrare in compact richiede scroll giù >60px, uscire richiede -20px
+   COMPACT HEADER ON SCROLL — versione anti-tremolio con freeze al fondo
    ========================================================================== */
 (function initCompactHeader(){
   const content=document.querySelector('#mainContent');
@@ -2918,48 +2988,80 @@ document.addEventListener('keydown',e=>{
   let ticking=false;
   let isCompact=false;
   let lastToggleTime=0;
+  let lastDirection=0;
+  let consecutiveCount=0;
 
-  const COOLDOWN_MS=350;      // millisecondi minimi tra due cambi di stato
-  const ENTER_DELTA=60;       // pixel verso il basso per entrare in compact
-  const EXIT_DELTA=-20;       // pixel verso l'alto per uscire da compact
-  const TOP_THRESHOLD=20;     // sotto questa soglia di scroll, header sempre visibile
-  const ENTER_MIN_Y=80;       // attiva il compact solo se scroll > 80px
+  const COOLDOWN_MS=500;
+  const ENTER_DELTA=70;
+  const EXIT_DELTA=-30;
+  const TOP_THRESHOLD=20;
+  const BOTTOM_THRESHOLD=50;   // se vicino al fondo, FREEZE
+  const ENTER_MIN_Y=100;
+  const MIN_ABS_DIFF=4;
+  const CONFIRM_COUNT=2;
 
   function update(){
     const y=content.scrollTop;
     const now=Date.now();
+    const maxScroll=content.scrollHeight - content.clientHeight;
+    const distFromBottom = maxScroll - y;
 
-    // Se siamo in cima, mostra sempre header
+    // In cima: sempre espanso
     if(y < TOP_THRESHOLD){
-      if(isCompact && (now - lastToggleTime) > COOLDOWN_MS){
+      if(isCompact){
         isCompact=false;
         document.body.classList.remove('compact');
-        lastToggleTime=now;
       }
-      lastScroll=y;
-      ticking=false;
+      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false;
       return;
     }
 
-    // Durante il cooldown, non fare nulla (evita ping-pong)
-    if((now - lastToggleTime) < COOLDOWN_MS){
-      lastScroll=y;
-      ticking=false;
+    // Vicino al fondo: FREEZE (qui era il tremolio)
+    if(distFromBottom < BOTTOM_THRESHOLD){
+      lastScroll=y; lastDirection=0; consecutiveCount=0; ticking=false;
       return;
+    }
+
+    // Cooldown
+    if((now - lastToggleTime) < COOLDOWN_MS){
+      lastScroll=y; ticking=false; return;
     }
 
     const diff = y - lastScroll;
 
-    if(!isCompact && diff > ENTER_DELTA && y > ENTER_MIN_Y){
-      // Entra in compact
+    // Micro-movimento: ignora
+    if(Math.abs(diff) < MIN_ABS_DIFF){
+      lastDirection=0; consecutiveCount=0;
+      lastScroll=y; ticking=false; return;
+    }
+
+    const dir = diff > 0 ? 1 : -1;
+
+    // Serve conferma: 2 eventi consecutivi nella stessa direzione
+    if(dir === lastDirection){
+      consecutiveCount++;
+    } else {
+      lastDirection = dir;
+      consecutiveCount = 1;
+      lastScroll = y;
+      ticking = false;
+      return;
+    }
+
+    if(consecutiveCount < CONFIRM_COUNT){
+      lastScroll=y; ticking=false; return;
+    }
+
+    if(!isCompact && lastDirection === 1 && diff > ENTER_DELTA && y > ENTER_MIN_Y){
       isCompact=true;
       document.body.classList.add('compact');
       lastToggleTime=now;
-    } else if(isCompact && diff < EXIT_DELTA){
-      // Esce da compact
+      consecutiveCount=0;
+    } else if(isCompact && lastDirection === -1 && diff < EXIT_DELTA){
       isCompact=false;
       document.body.classList.remove('compact');
       lastToggleTime=now;
+      consecutiveCount=0;
     }
 
     lastScroll=y;
@@ -2978,6 +3080,8 @@ document.addEventListener('keydown',e=>{
     isCompact=false;
     lastScroll=0;
     lastToggleTime=0;
+    lastDirection=0;
+    consecutiveCount=0;
   };
 })();
 
@@ -3004,7 +3108,7 @@ document.addEventListener('keydown',e=>{
       },1800);
     }
   }catch(e){}
-  console.log('%cRattazzi Cartellini v3.15 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v3.16 avviato','color:#ffcc00;font-weight:bold');
   setTimeout(()=>{ try{ if(window.cloudInit) window.cloudInit(); }catch(e){console.warn('Cloud init:',e);} }, 1500);
 })();
 </script>
