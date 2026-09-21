@@ -43,6 +43,16 @@ button{cursor:pointer;border:none;background:none;}
              opacity .2s ease;}
 body.compact .app-header{max-height:0;padding-top:0;padding-bottom:0;
   border-bottom-width:0;opacity:0;}
+/* Su PC il compact header NON si attiva mai */
+@media (min-width:721px){
+  body.compact .app-header{max-height:none !important;padding:10px 14px !important;
+    border-bottom-width:1px !important;opacity:1 !important;}
+  body.compact .info-bar{max-height:none !important;padding:6px 14px !important;
+    border-bottom-width:1px !important;opacity:1 !important;}
+  body.compact .toolbar{padding-top:10px !important;padding-bottom:10px !important;}
+  body.compact .search-box{height:38px !important;}
+  body.compact .tabs{padding:0 14px !important;}
+}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;
   transition:.15s;padding:2px 4px;border-radius:8px;}
 .brand:hover{background:rgba(255,255,255,.04);}
@@ -237,6 +247,116 @@ body.drag-active main.content{overflow:hidden;}
   font-family:var(--mono);letter-spacing:.3px;white-space:nowrap;}
 .linked-btn:hover{background:rgba(255,180,0,.25);border-color:var(--amber-soft);color:#ffcc66;}
 .linked-btn:active{transform:scale(.95);}
+
+/* Badge prezzo accanto al nome articolo */
+.art-price-badge{
+  display:inline-block;
+  font-family:var(--mono);
+  font-weight:800;
+  font-size:11.5px;
+  padding:2px 8px;
+  border-radius:4px;
+  background:rgba(34,197,94,.12);
+  color:#4ade80;
+  border:1px solid rgba(34,197,94,.35);
+  vertical-align:middle;
+  margin-left:6px;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.3px;
+  white-space:nowrap;
+}
+body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yellow);border-color:var(--yellow-dk);}
+
+/* Pulsante "+" per aprire tendina correlati */
+.linked-open-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:4px;
+  background:rgba(255,180,0,.15);
+  border:1px solid rgba(255,180,0,.5);
+  color:var(--amber-soft);
+  font-size:14px;font-weight:900;
+  cursor:pointer;transition:.15s;
+  vertical-align:middle;margin-left:5px;
+  line-height:1;padding:0;
+}
+.linked-open-btn:hover{background:rgba(255,180,0,.3);border-color:var(--amber-soft);}
+.linked-open-btn.rotated{transform:rotate(45deg);background:rgba(255,204,0,.3);}
+
+/* Tendina correlati nella tabella */
+.correlati-row td{
+  padding:0 !important;
+  background:#0d0d0d;
+  border-bottom:2px solid var(--yellow-dk);
+}
+.correlati-panel{padding:14px 20px;}
+.correlati-panel .cp-title{
+  font-size:10.5px;
+  color:var(--text-mute);
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:.6px;
+  margin-bottom:10px;
+}
+.correlati-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.correlato-check{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:#1a1a1a;
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  transition:.12s;
+}
+.correlato-check:hover{background:#222;border-color:#444;}
+.correlato-check input[type=checkbox]{
+  width:18px;height:18px;accent-color:var(--yellow);
+  cursor:pointer;flex-shrink:0;
+}
+.cc-code{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:11.5px;
+  color:var(--amber-soft);
+  background:rgba(255,180,0,.15);
+  padding:2px 7px;
+  border-radius:4px;
+  white-space:nowrap;
+}
+.cc-name{flex:1;font-weight:600;font-size:13px;}
+.cc-price{
+  font-weight:800;
+  color:var(--yellow);
+  font-variant-numeric:tabular-nums;
+  font-size:13px;
+  white-space:nowrap;
+}
+.correlati-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;
+  background:rgba(255,204,0,.08);
+  border:1px solid var(--yellow-dk);
+  border-radius:8px;
+  font-weight:800;
+}
+.correlati-total .ct-label{
+  font-size:11px;color:var(--text-dim);
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+.correlati-total .ct-right{
+  display:flex;align-items:baseline;gap:8px;
+}
+.correlati-total .ct-value{
+  font-size:20px;
+  color:var(--yellow);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.5px;
+}
+.correlati-total .ct-count{
+  font-size:11px;
+  color:var(--text-mute);
+  font-weight:700;
+}
 
 .linked-item{display:flex;align-items:center;gap:8px;
   padding:8px 10px;background:rgba(255,180,0,.06);
@@ -516,6 +636,64 @@ body.drag-active main.content{overflow:hidden;}
   border-color:var(--yellow-dk);color:var(--yellow);}
 .walk-nav-btn:disabled{opacity:.3;cursor:not-allowed;}
 
+/* Tendina correlati nel walkthrough */
+.walk-corr-panel{
+  margin-top:14px;
+  padding:14px;
+  background:#0d0d0d;
+  border:1px solid var(--yellow-dk);
+  border-radius:10px;
+}
+.walk-corr-panel .wcp-title{
+  font-size:10.5px;
+  color:var(--text-mute);
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:.6px;
+  margin-bottom:10px;
+}
+.walk-corr-panel .wcp-list{
+  display:flex;flex-direction:column;gap:6px;
+  margin-bottom:12px;
+}
+.walk-corr-panel .wcp-check{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;
+  background:#161616;
+  border:1px solid var(--border);
+  border-radius:8px;
+  cursor:pointer;
+  transition:.12s;
+}
+.walk-corr-panel .wcp-check:hover{background:#1e1e1e;}
+.walk-corr-panel .wcp-check input[type=checkbox]{
+  width:20px;height:20px;accent-color:var(--yellow);flex-shrink:0;
+}
+.walk-corr-panel .wcp-total{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:10px 12px;
+  background:rgba(255,204,0,.08);
+  border:1px solid var(--yellow-dk);
+  border-radius:8px;
+  font-weight:800;
+  gap:10px;
+}
+.walk-corr-panel .wcp-total .wct-label{
+  font-size:11px;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.walk-corr-panel .wcp-total .wct-right{
+  display:flex;align-items:baseline;gap:8px;
+}
+.walk-corr-panel .wcp-total .wct-value{
+  font-size:22px;color:var(--yellow);
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.5px;
+}
+.walk-corr-panel .wcp-total .wct-count{
+  font-size:11px;color:var(--text-mute);font-weight:700;
+}
+
 .undo-badge{position:absolute;top:-4px;right:-4px;background:var(--yellow);
   color:#111;font-size:9px;font-weight:800;padding:1px 5px;
   border-radius:20px;min-width:16px;text-align:center;}
@@ -609,7 +787,9 @@ body.drag-active main.content{overflow:hidden;}
   #mainTable tbody td{padding:12px 8px;}
   .art-name{font-size:14px;line-height:1.35;}
   .art-code-badge{font-size:10px;padding:1px 6px;margin-left:4px;}
+  .art-price-badge{font-size:10px;padding:1px 6px;margin-left:4px;}
   .linked-btn{font-size:10px;padding:1px 6px;}
+  .linked-open-btn{width:20px;height:20px;font-size:13px;margin-left:4px;}
   .linked-price-input{width:78px;font-size:13px;padding:5px 6px;}
   .age-badge{font-size:9.5px;padding:2px 6px;}
   .sconto-badge{font-size:9px;padding:1px 5px;}
@@ -621,7 +801,7 @@ body.drag-active main.content{overflow:hidden;}
   .field-row .field.code-field{flex:0 0 130px;}
 }
 @media (max-width:520px){
-  #mainTable th:nth-child(3),#mainTable td:nth-child(3){display:none;}
+  #mainTable th:nth-child(3),#mainTable tbody td:nth-child(3){display:none;}
   .photo-thumb,.photo-ph{width:28px;height:28px;}
   .brand-name{font-size:12px;}
   .brand-sub{font-size:8.5px;letter-spacing:.5px;}
@@ -633,7 +813,9 @@ body.drag-active main.content{overflow:hidden;}
   #mainTable tbody td{padding:11px 6px;}
   .art-name{font-size:13.5px;}
   .art-code-badge{font-size:9px;padding:1px 5px;}
+  .art-price-badge{font-size:9px;padding:1px 5px;}
   .linked-btn{font-size:9px;padding:1px 5px;margin-left:3px;}
+  .linked-open-btn{width:18px;height:18px;font-size:12px;margin-left:3px;}
   .linked-price-input{width:70px;font-size:12.5px;padding:4px 6px;}
   .age-badge{font-size:9px;padding:1px 5px;margin-left:4px;}
   .cloud-status{padding:4px 6px;font-size:9.5px;
@@ -1031,16 +1213,15 @@ body.drag-active main.content{overflow:hidden;}
       <div style="background:#131313;border:1px solid var(--border);border-radius:8px;padding:12px;
         font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px">
         <strong style="color:var(--yellow)">🛡️ Sicurezza dati</strong><br>
-        Tutto viene salvato <b style="color:var(--yellow)">online su Firebase</b>. Zero copie locali.
-        Alla apertura l'app carica sempre e solo dal cloud.<br><br>
+        Tutto viene salvato <b style="color:var(--yellow)">online su Firebase</b>. Zero copie locali.<br><br>
         <strong style="color:var(--yellow)">👁 Modalità Cliente</strong><br>
         Clicca il logo RZ in alto a sinistra per nascondere costo e margine.<br><br>
         <strong style="color:var(--yellow)">🌳 Sotto-settori</strong><br>
-        Click destro su un tab (o long press su mobile) → apri menu per rinominare,
+        Click destro su un tab (o long press su mobile) → menu per rinominare,
         spostare, aggiungere sotto-settori.<br><br>
-        <strong style="color:var(--yellow)">🔗 Correlati</strong><br>
-        Nella scheda articolo, tab "🔗 Correlati" per collegare prodotti complementari
-        con prezzo modificabile al volo.<br><br>
+        <strong style="color:var(--yellow)">➕ Calcolatore correlati</strong><br>
+        Nella tabella e nel giro, il pulsante "+" apre la lista correlati
+        per calcolare il totale.<br><br>
         <strong style="color:var(--yellow)">↩️ Undo / Redo</strong><br>
         Ctrl+Z = annulla · Ctrl+Y = ripeti. Conserva le ultime 15 modifiche.
       </div>
@@ -1064,14 +1245,13 @@ body.drag-active main.content{overflow:hidden;}
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v4.0
+   RATTAZZI CARTELLINI PREZZI v4.1
    ---------------------------------------------------------------------------
-   Novità v4.0:
-     - Sotto-settori (albero gerarchico)
-     - Menu contestuale sui tab (click destro / long press)
-     - Riordino settori a sinistra/destra
-     - Ricerca settori integrata nella barra principale
-     - Rimosso icona ✎ dai tab
+   Novità v4.1:
+     - Badge prezzo accanto al nome articolo (verde)
+     - Pulsante "+" nella tabella → tendina correlati + calcolatore totale
+     - Tendina walkthrough correlati + totale + conteggio
+     - Compact header solo su mobile (PC resta fisso)
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_cache_only';
@@ -1282,7 +1462,7 @@ function compressImage(file,maxPx=MAX_PHOTO_PX,quality=PHOTO_QUALITY){
   });
 }
 
-/* -------- SEED (primo setup) -------- */
+/* -------- SEED -------- */
 function buildSeed(){
   return {
     version:APP_VERSION,
@@ -1398,6 +1578,7 @@ let selectionMode=false;
 let editingArticleId=null;
 let pendingPhoto=null;
 let cloudReady=false;
+let walkCorrOpen=false; // stato tendina correlati nel walkthrough
 
 /* -------- UNDO/REDO -------- */
 let undoStack=[];
@@ -1768,10 +1949,14 @@ function renderTable(){
     const isSel=selectedArticles.has(a.id);
     const hasSconti=a.quantityDiscounts && a.quantityDiscounts.length>0;
     const codeBadge = a.code ? '<span class="art-code-badge">'+esc(a.code)+'</span>' : '';
+    const priceBadge = '<span class="art-price-badge">'+fmtEuro(a.price)+unitSuffix(a.unit)+'</span>';
     const catBadge = a._searchCatName ? '<span class="search-cat-badge">📁 '+esc(a._searchCatName)+'</span>' : '';
     const linkedCount = (a.linkedArticles||[]).length;
     const linkedBadge = linkedCount > 0
       ? '<button class="linked-btn" data-linked-open="'+a.id+'" title="Articoli correlati">🔗 '+linkedCount+'</button>'
+      : '';
+    const plusBtn = linkedCount > 0
+      ? '<button class="linked-open-btn" data-open-corr="'+a.id+'" title="Apri calcolatore correlati">+</button>'
       : '';
 
     const tr=document.createElement('tr');
@@ -1784,7 +1969,7 @@ function renderTable(){
         <div class="row-head">
           ${thumbHtml}
           <div class="name-wrap">
-            <span class="art-name" data-open="${a.id}">${esc(a.name)}</span>${codeBadge}${linkedBadge}${catBadge}
+            <span class="art-name" data-open="${a.id}">${esc(a.name)}</span>${priceBadge}${codeBadge}${plusBtn}${linkedBadge}${catBadge}
             <span class="age-badge ${age.cls}">${age.label}</span>
             ${hasSconti?'<span class="sconto-badge" title="Sconti quantità">💰 '+a.quantityDiscounts.length+'</span>':''}
             ${supLine?'<div class="art-sub"><span class="sup">'+esc(supLine)+'</span></div>':''}
@@ -1810,6 +1995,39 @@ function renderTable(){
         <button class="del"  data-del="${a.id}"  title="Elimina">🗑</button>
       </td>`;
     frag.appendChild(tr);
+
+    // Riga tendina correlati (nascosta di default)
+    if(linkedCount > 0){
+      const correlatiHtml = (a.linkedArticles||[]).map(la=>{
+        const linked = findArticle(la.articleId);
+        if(!linked) return '';
+        return `<label class="correlato-check">
+          <input type="checkbox" data-parent="${a.id}" data-corr-id="${linked.id}" data-corr-price="${linked.price}">
+          <span class="cc-code">${esc(linked.code||'—')}</span>
+          <span class="cc-name">${esc(linked.name)}</span>
+          <span class="cc-price">${fmtEuro(linked.price)}</span>
+        </label>`;
+      }).filter(Boolean).join('');
+
+      const tr2 = document.createElement('tr');
+      tr2.className = 'correlati-row';
+      tr2.dataset.for = a.id;
+      tr2.style.display = 'none';
+      tr2.innerHTML = `
+        <td colspan="10">
+          <div class="correlati-panel">
+            <div class="cp-title">🔗 Articoli correlati — spunta per calcolare il totale</div>
+            <div class="correlati-list">${correlatiHtml}</div>
+            <div class="correlati-total">
+              <span class="ct-label">Totale</span>
+              <div class="ct-right">
+                <span class="ct-value" data-parent="${a.id}">${fmtEuro(a.price)}</span>
+              </div>
+            </div>
+          </div>
+        </td>`;
+      frag.appendChild(tr2);
+    }
   });
   tbody.appendChild(frag);
   updateSelectionBar();
@@ -1832,6 +2050,9 @@ function refreshRow(art){
   tr.querySelector('.date-cell').textContent=fmtDate(art.updatedAt);
   tr.querySelector('.price-in').value=art.price.toFixed(2);
   tr.querySelector('.cost-in').value=art.cost.toFixed(2);
+  // aggiorna anche badge prezzo
+  const pb = tr.querySelector('.art-price-badge');
+  if(pb) pb.textContent = fmtEuro(art.price) + unitSuffix(art.unit);
 }
 
 function updateSelectionBar(){
@@ -1971,6 +2192,10 @@ $('#tableBody').addEventListener('change',e=>{
     updateSelectionBar();
     updateCheckAllState();
   }
+  // Checkbox correlati → ricalcola totale
+  if(inp.dataset.parent && inp.dataset.corrPrice !== undefined){
+    recalcCorrelatiTotal(inp.dataset.parent);
+  }
 });
 
 $('#tableBody').addEventListener('keydown',e=>{
@@ -1980,7 +2205,7 @@ $('#tableBody').addEventListener('keydown',e=>{
 $('#tableBody').addEventListener('click',e=>{
   if(selectionMode){
     const tr=e.target.closest('tr');
-    if(tr && tr.dataset.art && !e.target.closest('button')){
+    if(tr && tr.dataset.art && !e.target.closest('button') && !e.target.closest('.correlati-row')){
       if(e.target.tagName==='INPUT'){
         if(e.target.dataset.check) return;
         return;
@@ -1996,6 +2221,12 @@ $('#tableBody').addEventListener('click',e=>{
       return;
     }
   }
+  const corrBtn=e.target.closest('[data-open-corr]');
+  if(corrBtn){
+    e.stopPropagation();
+    toggleCorrelatiPanel(corrBtn.dataset.openCorr, corrBtn);
+    return;
+  }
   const linkedBtn=e.target.closest('[data-linked-open]');
   if(linkedBtn){
     e.stopPropagation();
@@ -2006,6 +2237,52 @@ $('#tableBody').addEventListener('click',e=>{
   if(openBtn){openArticleModal(openBtn.dataset.open);return;}
   const delBtn=e.target.closest('[data-del]');
   if(delBtn){deleteArticle(delBtn.dataset.del);return;}
+});
+
+/* -------- TENDINA CORRELATI TABELLA -------- */
+function toggleCorrelatiPanel(artId, btn){
+  // chiudi eventuali altre aperte
+  document.querySelectorAll('.correlati-row').forEach(r=>{
+    if(r.dataset.for !== artId) r.style.display = 'none';
+  });
+  document.querySelectorAll('.linked-open-btn').forEach(b=>{
+    if(b !== btn) b.classList.remove('rotated');
+  });
+
+  const row = document.querySelector('.correlati-row[data-for="'+artId+'"]');
+  if(!row) return;
+
+  if(row.style.display === 'none'){
+    row.style.display = 'table-row';
+    btn.classList.add('rotated');
+    recalcCorrelatiTotal(artId);
+  } else {
+    row.style.display = 'none';
+    btn.classList.remove('rotated');
+  }
+}
+
+function recalcCorrelatiTotal(parentId){
+  const parent = findArticle(parentId);
+  if(!parent) return;
+  let total = parent.price;
+  let count = 0;
+  document.querySelectorAll('input[data-parent="'+parentId+'"][type="checkbox"]').forEach(cb=>{
+    if(cb.checked){
+      total += parseFloat(cb.dataset.corrPrice) || 0;
+      count++;
+    }
+  });
+  const val = document.querySelector('.ct-value[data-parent="'+parentId+'"]');
+  if(val) val.textContent = fmtEuro(total);
+}
+
+// Chiudi tendina cliccando fuori
+document.addEventListener('click', e=>{
+  if(e.target.closest('.correlati-row')) return;
+  if(e.target.closest('[data-open-corr]')) return;
+  document.querySelectorAll('.correlati-row').forEach(r=>r.style.display='none');
+  document.querySelectorAll('.linked-open-btn').forEach(b=>b.classList.remove('rotated'));
 });
 
 /* ============================================================================
@@ -2033,7 +2310,7 @@ $('#tableBody').addEventListener('click',e=>{
   function onStart(e){
     if(selectionMode) return;
     const tgt = e.target;
-    if(tgt.tagName === 'INPUT' || tgt.closest('button')) return;
+    if(tgt.tagName === 'INPUT' || tgt.closest('button') || tgt.closest('.correlati-row')) return;
     const row = tgt.closest('tr[data-art]');
     if(!row) return;
     const pt = getPoint(e);
@@ -2101,7 +2378,7 @@ $('#tableBody').addEventListener('click',e=>{
 })();
 
 /* ============================================================================
-   ARTICOLI CORRELATI
+   ARTICOLI CORRELATI (modale)
    ========================================================================== */
 let pendingLinkArticleId = null;
 let pendingLinkFromRubrica = null;
@@ -2930,18 +3207,33 @@ function openWalkthrough(){
   walkIndex=0;
   walkUnlocked=false;
   walkUndoSnapshot=null;
+  walkCorrOpen=false;
   updateWalkLockUI();
   renderWalkCard();
   $('#walkthrough').classList.add('open');
 }
-function closeWalkthrough(){walkUndoSnapshot=null;$('#walkthrough').classList.remove('open');}
+function closeWalkthrough(){walkUndoSnapshot=null;walkCorrOpen=false;$('#walkthrough').classList.remove('open');}
 function walkCurrentArticle(){if(!walkArticles.length)return null;return findArticle(walkArticles[walkIndex]);}
-function walkNext(){if(walkIndex<walkArticles.length-1){walkUndoSnapshot=null;walkIndex++;renderWalkCard();}}
-function walkPrev(){if(walkIndex>0){walkUndoSnapshot=null;walkIndex--;renderWalkCard();}}
+function walkNext(){if(walkIndex<walkArticles.length-1){walkUndoSnapshot=null;walkCorrOpen=false;walkIndex++;renderWalkCard();}}
+function walkPrev(){if(walkIndex>0){walkUndoSnapshot=null;walkCorrOpen=false;walkIndex--;renderWalkCard();}}
 function updateWalkLockUI(){
   const btn=$('#walkLock');
   if(walkUnlocked){btn.classList.add('unlocked');btn.innerHTML='🔓 Modifica attiva — tocca per bloccare';}
   else{btn.classList.remove('unlocked');btn.innerHTML='🔒 Bloccato — tocca per modificare';}
+}
+function recalcWalkTotal(){
+  const a = walkCurrentArticle();
+  if(!a) return;
+  let total = a.price;
+  let count = 0;
+  document.querySelectorAll('.walk-corr-panel input[type=checkbox]:checked').forEach(cb=>{
+    total += parseFloat(cb.dataset.price) || 0;
+    count++;
+  });
+  const val = document.querySelector('.wct-value');
+  if(val) val.textContent = fmtEuro(total);
+  const cnt = document.querySelector('.wct-count');
+  if(cnt) cnt.textContent = count === 0 ? '(nessun correlato)' : '(' + count + ' correlato' + (count===1?'':'i') + ')';
 }
 function renderWalkCard(){
   const a=walkCurrentArticle();
@@ -2969,6 +3261,11 @@ function renderWalkCard(){
     ?'<div class="scont">'+esc(a.notes)+'</div>'
     :'<span style="color:var(--text-mute);font-size:13px">Nessuna nota</span>';
 
+  const linkedCount = (a.linkedArticles||[]).length;
+  const plusBtn = linkedCount > 0
+    ? '<button class="linked-open-btn" id="walkCorrToggle" title="Apri calcolatore correlati">+</button>'
+    : '';
+
   const linkedList = (a.linkedArticles||[]).map(la=>{
     const l = findArticle(la.articleId);
     if(!l) return '';
@@ -2989,6 +3286,30 @@ function renderWalkCard(){
     ? linkedList
     : '<span style="color:var(--text-mute);font-size:13px">Nessun correlato</span>';
 
+  const corrPanelHtml = (linkedCount > 0) ? `
+    <div class="walk-corr-panel" id="walkCorrPanel" style="display:${walkCorrOpen?'block':'none'}">
+      <div class="wcp-title">🔗 Correlati — spunta per calcolare</div>
+      <div class="wcp-list">
+        ${(a.linkedArticles||[]).map(la=>{
+          const l = findArticle(la.articleId);
+          if(!l) return '';
+          return `<label class="wcp-check">
+            <input type="checkbox" data-price="${l.price}" data-corr="${l.id}">
+            <span class="cc-code">${esc(l.code||'—')}</span>
+            <span class="cc-name">${esc(l.name)}</span>
+            <span class="cc-price">${fmtEuro(l.price)}</span>
+          </label>`;
+        }).filter(Boolean).join('')}
+      </div>
+      <div class="wcp-total">
+        <span class="wct-label">Totale</span>
+        <div class="wct-right">
+          <span class="wct-value">${fmtEuro(a.price)}</span>
+          <span class="wct-count">(nessun correlato)</span>
+        </div>
+      </div>
+    </div>` : '';
+
   const priceCellClass='walk-price-cell'+(walkUnlocked?' editable':'');
 
   wrap.innerHTML=`
@@ -2997,6 +3318,7 @@ function renderWalkCard(){
       <div class="walk-name-row">
         <h2 class="walk-name">${esc(a.name)}</h2>
         ${codeHtml}
+        ${plusBtn}
       </div>
       <div class="walk-meta">
         <span class="age-badge ${age.cls}" style="margin-left:0">${age.label}</span>
@@ -3012,12 +3334,35 @@ function renderWalkCard(){
         </div>
       </div>
 
+      ${corrPanelHtml}
+
       <div class="walk-section"><div class="stitle">💰 Sconti quantità</div>
         <div class="walk-sconti-list">${scontiHtml}</div></div>
       <div class="walk-section"><div class="stitle">🔗 Completabile con</div>${linkedHtml}</div>
       <div class="walk-section"><div class="stitle">📅 Ultima modifica</div>${lastUpdateHtml}</div>
       <div class="walk-section"><div class="stitle">📝 Note magazzino</div>${notesHtml}</div>
     </div>`;
+
+  // Listener per il pulsante + nel walkthrough
+  const corrToggle = wrap.querySelector('#walkCorrToggle');
+  if(corrToggle){
+    corrToggle.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      walkCorrOpen = !walkCorrOpen;
+      const panel = wrap.querySelector('#walkCorrPanel');
+      if(panel){
+        panel.style.display = walkCorrOpen ? 'block' : 'none';
+        corrToggle.classList.toggle('rotated', walkCorrOpen);
+        if(walkCorrOpen) recalcWalkTotal();
+      }
+    });
+    if(walkCorrOpen) corrToggle.classList.add('rotated');
+  }
+  // Listener per checkbox nel pannello walkthrough
+  wrap.querySelectorAll('#walkCorrPanel input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change', recalcWalkTotal);
+  });
+
   if(walkUnlocked){
     const inp=wrap.querySelector('.edit-input');
     if(inp) setTimeout(()=>inp.focus(),50);
@@ -3069,7 +3414,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ============================================================================
-   COMPACT HEADER ON SCROLL — anti-tremolio
+   COMPACT HEADER ON SCROLL — attivo solo su mobile
    ========================================================================== */
 (function initCompactHeader(){
   const content=document.querySelector('#mainContent');
@@ -3089,8 +3434,15 @@ document.addEventListener('keydown',e=>{
   const ENTER_MIN_Y=100;
   const MIN_ABS_DIFF=4;
   const CONFIRM_COUNT=2;
+  const MOBILE_MAX=720;
 
   function update(){
+    // Su PC (>720px) non facciamo nulla
+    if(window.innerWidth > MOBILE_MAX){
+      if(isCompact){isCompact=false;document.body.classList.remove('compact');}
+      ticking=false;
+      return;
+    }
     const y=content.scrollTop;
     const now=Date.now();
     const maxScroll=content.scrollHeight - content.clientHeight;
@@ -3133,6 +3485,14 @@ document.addEventListener('keydown',e=>{
   content.addEventListener('scroll',()=>{
     if(!ticking){requestAnimationFrame(update);ticking=true;}
   }, { passive: true });
+
+  // Se si cambia dimensioni finestra (es. rotazione iPad o resize PC), reset
+  window.addEventListener('resize', ()=>{
+    if(window.innerWidth > MOBILE_MAX){
+      document.body.classList.remove('compact');
+      isCompact=false;
+    }
+  });
 
   window.__resetCompact=function(){
     document.body.classList.remove('compact');
@@ -3186,7 +3546,7 @@ window.__cloudFallbackLocal = function(){
     console.error('Init error:',e);
     alert('Errore avvio: '+e.message);
   }
-  console.log('%cRattazzi Cartellini v4.0 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v4.1 avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>
