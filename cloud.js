@@ -1,5 +1,5 @@
 /* ============================================================================
-   RATTAZZI — Cloud SOLO (v4.2)
+   RATTAZZI — Cloud SOLO (v4.3)
    ---------------------------------------------------------------------------
    L'app carica SEMPRE e SOLO i dati dal cloud. Nessun confronto.
    Nessun popup di scelta. Il localStorage non viene mai letto all'avvio.
