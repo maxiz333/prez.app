@@ -25,9 +25,142 @@
   --shadow:0 4px 14px rgba(0,0,0,.45);
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
+
+/* =========================================================
+   TEMA CHIARO (bianco + viola)
+   ========================================================= */
+body.light{
+  --bg:#f5f5f7;--bg-2:#ffffff;--card:#ffffff;--card-2:#f0f0f2;--border:#e0e0e0;
+  --text:#1a1a1a;--text-dim:#666666;--text-mute:#999999;
+  --yellow:#7c3aed;--yellow-dk:#6d28d9;--amber-soft:#a78bfa;
+  --green:#16a34a;--lime:#65a30d;--amber:#ea580c;--red:#dc2626;
+  --shadow:0 4px 14px rgba(0,0,0,.08);
+}
+body.light .app-header{background:linear-gradient(180deg,#ffffff,#fafafa);}
+body.light .info-bar{background:#fafafa;}
+body.light .bottom-nav{background:#ffffff;}
+body.light .walkthrough{background:#f5f5f7;}
+body.light .walk-top{background:linear-gradient(180deg,#ffffff,#fafafa);}
+body.light .walk-bottom{background:#fafafa;}
+body.light .walk-card{background:#ffffff;}
+body.light .walk-photo{background:#f0f0f2;}
+body.light .walk-price-cell{background:#f5f5f7;}
+body.light .brand-badge{color:#ffffff;}
+body.light .btn-yellow,
+body.light .btn-yellow:hover:not(:disabled),
+body.light .chip.active,
+body.light .subtab.active,
+body.light .walk-lock.unlocked{color:#ffffff;}
+body.light .chip.warn.active{color:#ffffff;}
+body.light .chip.danger.active{color:#ffffff;}
+body.light #mainTable thead th{background:#fafafa;}
+body.light #mainTable tbody tr:hover{background:#fafafa;}
+body.light tr.row-selected{background:rgba(124,58,237,.06);}
+body.light .tab.has-children .tab-name{border-color:#c0c0c0;background:rgba(0,0,0,.03);}
+body.light .tab .count{background:#e8e8e8;color:#666;}
+body.light .subtabs{background:#fafafa;}
+body.light .subtab{background:#f5f5f7;}
+body.light .subtab .count{background:rgba(0,0,0,.08);}
+body.light .cell-input:hover{background:#f5f5f7;}
+body.light .cell-input:focus{background:#ffffff;}
+body.light .modal-tabs{background:#fafafa;}
+body.light .field input,
+body.light .field textarea,
+body.light .field select{background:#f5f5f7;}
+body.light .field input:focus,
+body.light .field textarea:focus,
+body.light .field select:focus{background:#ffffff;}
+body.light .summary-box{background:#f5f5f7;}
+body.light .photo-preview{background:#f5f5f7;}
+body.light .photo-thumb,
+body.light .photo-ph{background:#f5f5f7;border-color:#e0e0e0;}
+body.light .photo-ph{color:#bbb;}
+body.light .lotto-row{background:#f5f5f7;}
+body.light .history-item{background:#f5f5f7;}
+body.light .sconto-row{background:#f5f5f7;}
+body.light .sconto-row input{background:#ffffff;}
+body.light #rubricaResults{background:#f5f5f7;}
+body.light .rubrica-item:hover{background:#ebebeb;}
+body.light .linked-item{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.3);}
+body.light .linked-item .li-code{background:rgba(124,58,237,.15);color:#6d28d9;}
+body.light .linked-btn{background:rgba(124,58,237,.12);color:#6d28d9;border-color:rgba(124,58,237,.5);}
+body.light .linked-btn:hover{background:rgba(124,58,237,.2);color:#5b21b6;}
+body.light .linked-open-btn{background:rgba(124,58,237,.12);color:#6d28d9;border-color:rgba(124,58,237,.5);}
+body.light .linked-open-btn:hover{background:rgba(124,58,237,.25);}
+body.light .linked-open-btn.rotated{background:rgba(124,58,237,.3);}
+body.light .linked-price-input{background:#ffffff;border-color:#d0d0d0;}
+body.light .art-price-badge{color:#7c3aed;background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);}
+body.light .correlati-row td{background:#fafafa;}
+body.light .correlato-check{background:#f5f5f7;border-color:#e0e0e0;}
+body.light .correlato-check:hover{background:#ebebeb;}
+body.light .correlato-check .cc-code{background:rgba(124,58,237,.12);color:#6d28d9;}
+body.light .correlati-total{background:rgba(124,58,237,.08);border-color:#c4b5fd;}
+body.light .correlati-total .ct-value{color:#7c3aed;}
+body.light .tab-menu-item{background:#f5f5f7;border-color:#e0e0e0;}
+body.light .tab-menu-item:hover:not(:disabled){background:#ebebeb;border-color:#c4b5fd;color:#6d28d9;}
+body.light .suggest-box{background:rgba(124,58,237,.07);border-color:#c4b5fd;}
+body.light .suggest-box .txt b{color:#7c3aed;}
+body.light .search-info{background:rgba(124,58,237,.05);border-color:#c4b5fd;}
+body.light .sc-pill{background:rgba(124,58,237,.12);border-color:#c4b5fd;color:#6d28d9;}
+body.light .sc-pill:hover{background:rgba(124,58,237,.22);border-color:#7c3aed;}
+body.light .selection-bar{background:rgba(124,58,237,.08);border-color:#c4b5fd;}
+body.light tr.dragging{background:rgba(124,58,237,.14) !important;box-shadow:0 0 0 2px #7c3aed,0 8px 24px rgba(0,0,0,.15);}
+body.light .walk-sconto-pill{background:rgba(124,58,237,.12);border-color:#c4b5fd;color:#6d28d9;}
+body.light .walk-corr-panel{background:#f5f5f7;border-color:#c4b5fd;}
+body.light .walk-corr-panel .wcp-check{background:#ffffff;}
+body.light .walk-corr-panel .wcp-check:hover{background:#f0f0f2;}
+body.light .walk-corr-panel .wcp-total{background:rgba(124,58,237,.08);border-color:#c4b5fd;}
+body.light .walk-corr-panel .wcp-total .wct-value{color:#7c3aed;}
+body.light .modal-overlay{background:rgba(0,0,0,.4);}
+body.light .walk-top .icon-btn,
+body.light .walk-lock{background:#ffffff;border-color:#e0e0e0;}
+body.light .walk-nav{background:linear-gradient(90deg,#f5f5f7,#ffffff);}
+body.light .walk-nav.right{background:linear-gradient(90deg,#ffffff,#f5f5f7);}
+body.light .walk-nav:hover:not(.disabled){background:linear-gradient(90deg,#f5f5f7,#ebebeb);}
+body.light .walk-price-cell .edit-input{background:#ffffff;}
+body.light .linked-price-wrap .linked-price-unit{color:#999;}
+body.light .art-code-badge{background:rgba(124,58,237,.1);color:#6d28d9;border-color:#c4b5fd;}
+body.light .unit-pill{background:#ebebeb;color:#666;}
+body.light .app-header{border-bottom-color:#e0e0e0;}
+body.light .tabs,
+body.light .toolbar{background:#fafafa;}
+body.light .info-bar{border-bottom-color:#e0e0e0;}
+body.light .walk-lock.unlocked{background:rgba(124,58,237,.12);border-color:#7c3aed;color:#7c3aed;}
+body.light .walk-corr-panel .wct-label{color:#666;}
+body.light .walk-corr-panel .wct-count{color:#999;}
+body.light .empty-state{color:#999;}
+body.light .photo-actions .btn{background:#ffffff;border-color:#e0e0e0;}
+body.light .modal-close:hover{background:#f0f0f2;}
+body.light .btn-ghost{background:transparent;}
+body.light .btn:hover:not(:disabled){background:#f0f0f2;border-color:#d0d0d0;}
+body.light .chip:hover{background:#f0f0f2;}
+body.light .subtab:hover{color:#333;}
+body.light .tab:hover{color:#333;}
+body.light .nav-item:hover{color:#333;}
+body.light .icon-btn:hover:not(:disabled){color:#7c3aed;border-color:#c4b5fd;}
+body.light .cloud-status:hover{background:#f0f0f2;}
+body.light .cloud-status.ok{color:#16a34a;border-color:rgba(22,163,74,.4);}
+body.light .cloud-status.warn{color:#ea580c;border-color:rgba(234,88,12,.4);}
+body.light .cloud-status.err{color:#dc2626;border-color:rgba(220,38,38,.4);}
+body.light .client-indicator{color:#ffffff;}
+body.light .age-green{background:rgba(22,163,74,.15);color:#15803d;}
+body.light .age-yellow{background:rgba(234,179,8,.15);color:#a16207;}
+body.light .age-orange{background:rgba(234,88,12,.15);color:#c2410c;}
+body.light .age-red{background:rgba(220,38,38,.18);color:#b91c1c;}
+body.light .sconto-badge{background:rgba(124,58,237,.12);color:#6d28d9;}
+body.light .margin-good{color:#16a34a;}
+body.light .margin-warn{color:#ea580c;}
+body.light .margin-bad{color:#dc2626;}
+body.light .suggest-box .txt{color:#1a1a1a;}
+body.light .btn-yellow:hover:not(:disabled){background:#6d28d9;}
+
+/* =========================================================
+   RESET + VARIABILI (dark default)
+   ========================================================= */
 html,body{height:100%;background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  font-size:14px;line-height:1.35;overflow:hidden;overscroll-behavior:none;}
+  font-size:14px;line-height:1.35;overflow:hidden;overscroll-behavior:none;
+  transition:background .2s ease,color .2s ease;}
 button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit;outline:none;}
 button{cursor:pointer;border:none;background:none;}
 
@@ -40,10 +173,9 @@ button{cursor:pointer;border:none;background:none;}
   transition:max-height .28s cubic-bezier(.4,0,.2,1),
              padding .28s cubic-bezier(.4,0,.2,1),
              border-width .28s cubic-bezier(.4,0,.2,1),
-             opacity .2s ease;}
+             opacity .2s ease,background .2s ease;}
 body.compact .app-header{max-height:0;padding-top:0;padding-bottom:0;
   border-bottom-width:0;opacity:0;}
-/* Su PC il compact header NON si attiva mai */
 @media (min-width:721px){
   body.compact .app-header{max-height:none !important;padding:10px 14px !important;
     border-bottom-width:1px !important;opacity:1 !important;}
@@ -55,7 +187,7 @@ body.compact .app-header{max-height:0;padding-top:0;padding-bottom:0;
 }
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer;
   transition:.15s;padding:2px 4px;border-radius:8px;}
-.brand:hover{background:rgba(255,255,255,.04);}
+.brand:hover{background:rgba(128,128,128,.08);}
 .brand:active{transform:scale(.97);}
 .brand-badge{width:38px;height:38px;background:var(--yellow);color:#111;border-radius:8px;
   display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;
@@ -94,6 +226,7 @@ body.client-mode #mainTable thead th:nth-child(5),
 body.client-mode #mainTable tbody td:nth-child(5),
 body.client-mode #mainTable thead th:nth-child(6),
 body.client-mode #mainTable tbody td:nth-child(6){display:none !important;}
+body.light.client-mode .brand-badge{background:#ebebeb;color:var(--yellow);}
 
 .info-bar{display:flex;flex-wrap:wrap;gap:14px;padding:6px 14px;background:#0e0e0e;
   border-bottom:1px solid var(--border);font-size:11px;color:var(--text-mute);flex-shrink:0;
@@ -101,7 +234,7 @@ body.client-mode #mainTable tbody td:nth-child(6){display:none !important;}
   transition:max-height .28s cubic-bezier(.4,0,.2,1),
              padding .28s cubic-bezier(.4,0,.2,1),
              border-width .28s cubic-bezier(.4,0,.2,1),
-             opacity .2s ease;}
+             opacity .2s ease,background .2s ease;}
 body.compact .info-bar{max-height:0;padding-top:0;padding-bottom:0;
   border-bottom-width:0;opacity:0;}
 .info-bar .ok{color:var(--green);}.info-bar .warn{color:var(--amber);}.info-bar .err{color:var(--red);}
@@ -110,7 +243,7 @@ body.compact .info-bar{max-height:0;padding-top:0;padding-bottom:0;
   border-bottom:1px solid var(--border);flex-shrink:0;align-items:center;
   transition:padding .25s ease,background .2s ease,border-bottom-color .2s ease;}
 body.compact .toolbar{padding-top:6px;padding-bottom:6px;}
-body.searching .toolbar{background:rgba(255,204,0,.05);border-bottom-color:var(--yellow-dk);}
+body.searching .toolbar{background:rgba(128,128,128,.05);border-bottom-color:var(--yellow-dk);}
 .search-box{flex:1 1 200px;min-width:160px;display:flex;align-items:center;gap:8px;
   background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0 10px;height:38px;
   transition:height .25s ease,border-color .15s;}
@@ -118,10 +251,10 @@ body.searching .search-box{border-color:var(--yellow-dk);}
 body.compact .search-box{height:34px;}
 .search-box span{color:var(--text-mute);}.search-box input{flex:1;border:none;background:none;height:100%;}
 .filters{display:flex;gap:4px;}
-.chip{padding:8px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);
+.chip{padding:8px 10px;border-radius:8px;background:var(--card);border:1px solid var(--border);
   color:var(--text-dim);font-size:12px;font-weight:600;transition:.15s;white-space:nowrap;}
 .chip.active{background:var(--yellow);border-color:var(--yellow);color:#111;}
-.chip.warn.active{background:var(--amber);border-color:var(--amber);}
+.chip.warn.active{background:var(--amber);border-color:var(--amber);color:#111;}
 .chip.danger.active{background:var(--red);border-color:var(--red);color:#fff;}
 .btn{height:38px;padding:0 14px;border-radius:8px;background:var(--card);border:1px solid var(--border);
   color:var(--text);font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;
@@ -169,7 +302,7 @@ body.selection-mode #mainTable tbody tr:hover{background:rgba(255,204,0,.04);}
   overflow-x:auto;flex-shrink:0;scrollbar-width:thin;
   transition:padding .25s ease;}
 body.compact .tabs{padding:0 10px;}
-.tabs::-webkit-scrollbar{height:4px;}.tabs::-webkit-scrollbar-thumb{background:#333;border-radius:4px;}
+.tabs::-webkit-scrollbar{height:4px;}.tabs::-webkit-scrollbar-thumb{background:#555;border-radius:4px;}
 .tab{padding:11px 14px;font-size:13px;font-weight:600;color:var(--text-dim);
   border-bottom:3px solid transparent;white-space:nowrap;transition:.15s;
   display:flex;align-items:center;gap:6px;background:transparent;}
@@ -187,7 +320,7 @@ body.compact .tab-arrow{display:none;}
   overflow-x:auto;flex-shrink:0;scrollbar-width:thin;}
 body.compact .subtabs{padding:5px 10px;}
 .subtabs::-webkit-scrollbar{height:4px;}
-.subtabs::-webkit-scrollbar-thumb{background:#333;border-radius:4px;}
+.subtabs::-webkit-scrollbar-thumb{background:#555;border-radius:4px;}
 .subtab{padding:5px 10px;border-radius:6px;background:var(--card);
   border:1px solid var(--border);color:var(--text-dim);
   font-size:11.5px;font-weight:600;white-space:nowrap;transition:.15s;
@@ -248,7 +381,6 @@ body.drag-active main.content{overflow:hidden;}
 .linked-btn:hover{background:rgba(255,180,0,.25);border-color:var(--amber-soft);color:#ffcc66;}
 .linked-btn:active{transform:scale(.95);}
 
-/* Badge prezzo accanto al nome articolo */
 .art-price-badge{
   display:inline-block;
   font-family:var(--mono);
@@ -267,7 +399,6 @@ body.drag-active main.content{overflow:hidden;}
 }
 body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yellow);border-color:var(--yellow-dk);}
 
-/* Pulsante "+" per aprire tendina correlati */
 .linked-open-btn{
   display:inline-flex;align-items:center;justify-content:center;
   width:22px;height:22px;border-radius:4px;
@@ -282,7 +413,6 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
 .linked-open-btn:hover{background:rgba(255,180,0,.3);border-color:var(--amber-soft);}
 .linked-open-btn.rotated{transform:rotate(45deg);background:rgba(255,204,0,.3);}
 
-/* Tendina correlati nella tabella */
 .correlati-row td{
   padding:0 !important;
   background:#0d0d0d;
@@ -351,11 +481,6 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   color:var(--yellow);
   font-variant-numeric:tabular-nums;
   letter-spacing:-.5px;
-}
-.correlati-total .ct-count{
-  font-size:11px;
-  color:var(--text-mute);
-  font-weight:700;
 }
 
 .linked-item{display:flex;align-items:center;gap:8px;
@@ -446,7 +571,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
 .empty-state{padding:60px 20px;text-align:center;color:var(--text-mute);}
 .empty-state .big{font-size:42px;margin-bottom:12px;opacity:.35;}
 .empty-state .sync-spinner{display:inline-block;width:38px;height:38px;border-radius:50%;
-  border:3px solid rgba(255,204,0,.2);border-top-color:var(--yellow);
+  border:3px solid rgba(128,128,128,.2);border-top-color:var(--yellow);
   animation:spin 1s linear infinite;margin-bottom:16px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
@@ -601,7 +726,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   border:1px solid var(--yellow-dk);font-family:var(--mono);
   letter-spacing:1px;vertical-align:middle;white-space:nowrap;}
 .walk-meta{font-size:12.5px;color:var(--text-mute);margin-bottom:20px;}
-.walk-meta .sep{margin:0 6px;color:#333;}
+.walk-meta .sep{margin:0 6px;color:#555;}
 .walk-price-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;}
 .walk-price-cell{background:#131313;border:1px solid var(--border);
   border-radius:10px;padding:16px 18px;
@@ -636,7 +761,6 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   border-color:var(--yellow-dk);color:var(--yellow);}
 .walk-nav-btn:disabled{opacity:.3;cursor:not-allowed;}
 
-/* Tendina correlati nel walkthrough */
 .walk-corr-panel{
   margin-top:14px;
   padding:14px;
@@ -699,7 +823,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   border-radius:20px;min-width:16px;text-align:center;}
 
 /* =========================================================
-   STAMPA A4 — titolo grande + riempimento totale
+   STAMPA A4
    ========================================================= */
 #printArea{display:none;}
 @media print{
@@ -763,7 +887,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   .brand-badge{width:32px;height:32px;font-size:14px;border-radius:6px;}
   .brand-name{font-size:12.5px;letter-spacing:.3px;}
   .brand-sub{font-size:9px;letter-spacing:.8px;}
-  .icon-btn{width:32px;height:32px;font-size:14px;}
+  .icon-btn{width:30px;height:30px;font-size:13px;}
   .cloud-status{padding:5px 8px;font-size:10px;}
   .client-indicator{padding:4px 7px;font-size:9px;letter-spacing:.5px;}
   .header-actions{gap:4px;}
@@ -774,7 +898,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   .search-box{height:34px;flex-basis:100%;order:-1;padding:0 8px;}
   .search-box input{font-size:12.5px;}
   .filters{gap:3px;overflow-x:auto;flex-shrink:0;}
-  .chip{padding:6px 10px;font-size:11.5px;border-radius:6px;}
+  .chip{padding:6px 8px;font-size:11px;border-radius:6px;}
   .btn{height:34px;padding:0 10px;font-size:12px;gap:4px;}
   .btn-sm{height:28px;padding:0 8px;font-size:11px;}
   #btnAddCat,#btnAddArt{display:none;}
@@ -805,9 +929,11 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
   .photo-thumb,.photo-ph{width:28px;height:28px;}
   .brand-name{font-size:12px;}
   .brand-sub{font-size:8.5px;letter-spacing:.5px;}
+  .icon-btn{width:28px;height:28px;font-size:12px;}
+  .header-actions{gap:3px;}
   .toolbar{padding:5px 8px;gap:5px;}
   .search-box{height:32px;}
-  .chip{padding:5px 9px;font-size:11px;}
+  .chip{padding:5px 8px;font-size:10.5px;}
   .btn{padding:0 8px;font-size:11.5px;height:32px;}
   .tab{padding:8px 10px;font-size:12px;}
   #mainTable tbody td{padding:11px 6px;}
@@ -842,6 +968,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
       <button class="icon-btn" id="btnRedo" title="Ripeti (Ctrl+Y)" disabled>↷</button>
       <button class="icon-btn" id="btnExport" title="Scarica backup JSON">⬇</button>
       <button class="icon-btn" id="btnImport" title="Ripristina da backup">⬆</button>
+      <button class="icon-btn" id="btnTheme" title="Cambia tema">☀️</button>
       <button class="icon-btn" id="btnSettings" title="Impostazioni">⚙</button>
     </div>
   </header>
@@ -860,8 +987,9 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
     </div>
     <div class="filters">
       <button class="chip active" data-filter="all">Tutti</button>
-      <button class="chip warn"   data-filter="6">&gt; 6 mesi</button>
-      <button class="chip danger" data-filter="12">&gt; 12 mesi</button>
+      <button class="chip warn" data-filter="3">&gt; 3mes</button>
+      <button class="chip warn" data-filter="6">&gt; 6mes</button>
+      <button class="chip danger" data-filter="12">&gt; 12mes</button>
     </div>
     <button class="btn btn-ghost" id="btnAddCat">+ Settore</button>
     <button class="btn btn-yellow" id="btnAddArt">+ Articolo</button>
@@ -1073,7 +1201,7 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
         <input type="text" id="linkSearch" placeholder="Es. galleggiante o 6115..." autocomplete="off">
         <div id="linkResults" style="margin-top:6px;max-height:340px;overflow:auto;"></div>
       </div>
-      <div id="linkChosen" style="display:none;background:#131313;border:1px solid var(--yellow-dk);border-radius:8px;padding:12px;margin-top:8px">
+      <div id="linkChosen" style="display:none;background:var(--card-2);border:1px solid var(--yellow-dk);border-radius:8px;padding:12px;margin-top:8px">
         <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">Articolo selezionato</div>
         <div id="linkChosenName" style="font-weight:700;font-size:14px;margin-bottom:2px"></div>
         <div id="linkChosenMeta" style="font-size:11.5px;color:var(--text-mute);margin-bottom:10px"></div>
@@ -1210,15 +1338,12 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
       <div class="field"><label>Nome operatore</label><input type="text" id="setOperator"></div>
       <div class="field"><label>Data ultima revisione</label><input type="date" id="setRevision"></div>
       <div class="field"><label>Margine target globale % (fallback)</label><input type="number" id="setGlobalMargin" value="40"></div>
-      <div style="background:#131313;border:1px solid var(--border);border-radius:8px;padding:12px;
+      <div style="background:var(--card-2);border:1px solid var(--border);border-radius:8px;padding:12px;
         font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:12px">
         <strong style="color:var(--yellow)">🛡️ Sicurezza dati</strong><br>
         Tutto viene salvato <b style="color:var(--yellow)">online su Firebase</b>. Zero copie locali.<br><br>
-        <strong style="color:var(--yellow)">👁 Modalità Cliente</strong><br>
-        Clicca il logo RZ in alto a sinistra per nascondere costo e margine.<br><br>
-        <strong style="color:var(--yellow)">🌳 Sotto-settori</strong><br>
-        Click destro su un tab (o long press su mobile) → menu per rinominare,
-        spostare, aggiungere sotto-settori.<br><br>
+        <strong style="color:var(--yellow)">🌗 Tema</strong><br>
+        Clicca il pulsante ☀️/🌙 in alto a destra per cambiare tema.<br><br>
         <strong style="color:var(--yellow)">➕ Calcolatore correlati</strong><br>
         Nella tabella e nel giro, il pulsante "+" apre la lista correlati
         per calcolare il totale.<br><br>
@@ -1245,17 +1370,18 @@ body.client-mode .art-price-badge{background:rgba(255,204,0,.15);color:var(--yel
 
 <script>
 /* ============================================================================
-   RATTAZZI CARTELLINI PREZZI v4.1
+   RATTAZZI CARTELLINI PREZZI v4.2
    ---------------------------------------------------------------------------
-   Novità v4.1:
-     - Badge prezzo accanto al nome articolo (verde)
-     - Pulsante "+" nella tabella → tendina correlati + calcolatore totale
-     - Tendina walkthrough correlati + totale + conteggio
-     - Compact header solo su mobile (PC resta fisso)
+   Novità v4.2:
+     - Tema chiaro (bianco + viola) toggle
+     - Fix bug input prezzo (non si resetta più mentre digiti)
+     - Badge anzianità: settimane e mesi (1 set, 2 set, 1 mese, 2 mesi...)
+     - Filtro > 3mes aggiunto
    ========================================================================== */
 
 const STORAGE_KEY='rattazzi_cartellini_cache_only';
 const CLIENT_MODE_KEY='rattazzi_client_mode';
+const THEME_KEY='rattazzi_theme';
 const APP_VERSION=4;
 const MAX_PHOTO_PX=500;
 const PHOTO_QUALITY=0.72;
@@ -1275,14 +1401,69 @@ function fmtEuro(v){return '€ '+num(v).toLocaleString('it-IT',{minimumFraction
 function monthsSince(iso){if(!iso)return 999;const d=new Date(iso);if(isNaN(d))return 999;
   const n=new Date();return (n.getFullYear()-d.getFullYear())*12+(n.getMonth()-d.getMonth())
   -(n.getDate()<d.getDate()?1:0);}
-function ageInfo(iso){const m=monthsSince(iso);
-  if(m<=3)return{cls:'age-green',label:m<=0?'nuovo':m+' mesi'};
-  if(m<=6)return{cls:'age-yellow',label:m+' mesi'};
-  if(m<=12)return{cls:'age-orange',label:m+' mesi'};
-  return{cls:'age-red',label:m+' mesi'};}
+function daysSince(iso){if(!iso)return 99999;const d=new Date(iso);if(isNaN(d))return 99999;
+  return Math.max(0, Math.floor((Date.now()-d)/86400000));}
+
+/* Badge anzianità: settimane nel primo mese, poi mesi */
+function ageInfo(iso){
+  if(!iso) return {cls:'age-red', label:'—'};
+  const d = new Date(iso);
+  if(isNaN(d)) return {cls:'age-red', label:'—'};
+  const days = daysSince(iso);
+  const m = monthsSince(iso);
+
+  let cls;
+  if(m <= 3) cls = 'age-green';
+  else if(m <= 6) cls = 'age-yellow';
+  else if(m <= 12) cls = 'age-orange';
+  else cls = 'age-red';
+
+  let label;
+  if(days <= 6) label = 'nuovo';
+  else if(days <= 13) label = '1 set';
+  else if(days <= 20) label = '2 set';
+  else if(days <= 27) label = '3 set';
+  else {
+    let mm = m;
+    if(mm < 1) mm = 1;
+    label = mm + (mm === 1 ? ' mese' : ' mesi');
+  }
+
+  return {cls, label};
+}
+
 const UNIT_LBL={pz:'pz',m:'m',m2:'m²',kg:'kg',lt:'lt',cf:'cf'};
 const unitSuffix=u=>'/'+(UNIT_LBL[u]||u||'pz');
 function scontoLabel(s,u){return 'da '+num(s.minQty)+' '+(UNIT_LBL[u]||'pz')+' → -'+num(s.discountPct)+'%';}
+
+/* ============================================================================
+   TEMA
+   ========================================================================== */
+function loadTheme(){
+  try{
+    const v = localStorage.getItem(THEME_KEY);
+    if(v === 'light'){
+      document.body.classList.add('light');
+      const b = $('#btnTheme'); if(b) b.textContent = '🌙';
+    } else {
+      const b = $('#btnTheme'); if(b) b.textContent = '☀️';
+    }
+  }catch(e){}
+}
+function toggleTheme(){
+  const isLight = document.body.classList.contains('light');
+  const b = $('#btnTheme');
+  if(isLight){
+    document.body.classList.remove('light');
+    try{ localStorage.setItem(THEME_KEY,'dark'); }catch(e){}
+    if(b) b.textContent = '☀️';
+  } else {
+    document.body.classList.add('light');
+    try{ localStorage.setItem(THEME_KEY,'light'); }catch(e){}
+    if(b) b.textContent = '🌙';
+  }
+  if(navigator.vibrate){ try{ navigator.vibrate(15); }catch(e){} }
+}
 
 /* ============================================================================
    RICERCA INTELLIGENTE
@@ -1578,7 +1759,7 @@ let selectionMode=false;
 let editingArticleId=null;
 let pendingPhoto=null;
 let cloudReady=false;
-let walkCorrOpen=false; // stato tendina correlati nel walkthrough
+let walkCorrOpen=false;
 
 /* -------- UNDO/REDO -------- */
 let undoStack=[];
@@ -1657,6 +1838,15 @@ function searchCategories(query){
   return state.categories.filter(c => smartMatch(normalizeStr(c.name), q)).slice(0, 10);
 }
 
+function matchesFilter(a){
+  if(!a || !a.updatedAt) return true;
+  const m = monthsSince(a.updatedAt);
+  if(activeFilter === '3'  && m < 3)  return false;
+  if(activeFilter === '6'  && m < 6)  return false;
+  if(activeFilter === '12' && m < 12) return false;
+  return true;
+}
+
 function getFilteredArticles(){
   const q = normalizeStr(searchQuery);
   if(q){
@@ -1665,8 +1855,7 @@ function getFilteredArticles(){
       cat.articles.forEach(a=>{
         const hay = normalizeStr(a.name + ' ' + (a.code||'') + ' ' + (a.notes||'') + ' ' + (a.supplier||'') + ' ' + (a.supplierCode||''));
         if(!smartMatch(hay, q)) return;
-        if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return;
-        if(activeFilter==='12' && monthsSince(a.updatedAt)<12) return;
+        if(!matchesFilter(a)) return;
         results.push({
           a: Object.assign({}, a, {_searchCatName:cat.name, _searchCatId:cat.id}),
           score: smartScore(hay, q)
@@ -1678,11 +1867,7 @@ function getFilteredArticles(){
   }
   const owner = getCurrentArticleOwner();
   if(!owner) return [];
-  return owner.articles.filter(a=>{
-    if(activeFilter==='6' && monthsSince(a.updatedAt)<6) return false;
-    if(activeFilter==='12'&& monthsSince(a.updatedAt)<12)return false;
-    return true;
-  });
+  return owner.articles.filter(matchesFilter);
 }
 
 /* -------- RENDER TABS -------- */
@@ -1996,7 +2181,6 @@ function renderTable(){
       </td>`;
     frag.appendChild(tr);
 
-    // Riga tendina correlati (nascosta di default)
     if(linkedCount > 0){
       const correlatiHtml = (a.linkedArticles||[]).map(la=>{
         const linked = findArticle(la.articleId);
@@ -2048,9 +2232,17 @@ function refreshRow(art){
   const mc=tr.querySelector('.margin-cell');
   if(mc){mc.className='margin-cell '+marginCls;mc.innerHTML=(isLoss?'⚠ ':'')+marginPct.toFixed(1)+'%';}
   tr.querySelector('.date-cell').textContent=fmtDate(art.updatedAt);
-  tr.querySelector('.price-in').value=art.price.toFixed(2);
-  tr.querySelector('.cost-in').value=art.cost.toFixed(2);
-  // aggiorna anche badge prezzo
+
+  // FIX BUG: non resettare l'input mentre l'utente sta digitando
+  const priceIn = tr.querySelector('.price-in');
+  const costIn  = tr.querySelector('.cost-in');
+  if(priceIn && document.activeElement !== priceIn){
+    priceIn.value = art.price.toFixed(2);
+  }
+  if(costIn && document.activeElement !== costIn){
+    costIn.value = art.cost.toFixed(2);
+  }
+
   const pb = tr.querySelector('.art-price-badge');
   if(pb) pb.textContent = fmtEuro(art.price) + unitSuffix(art.unit);
 }
@@ -2174,6 +2366,16 @@ $('#tableBody').addEventListener('input',e=>{
   }
 });
 
+/* Su blur, riformatta l'input a 2 decimali */
+$('#tableBody').addEventListener('focusout',e=>{
+  const inp = e.target;
+  if(!inp.matches || !inp.matches('.price-in, .cost-in')) return;
+  const art = findArticle(inp.dataset.id);
+  if(!art) return;
+  const fld = inp.dataset.field;
+  inp.value = art[fld].toFixed(2);
+});
+
 $('#tableBody').addEventListener('change',e=>{
   const inp=e.target;
   if(!inp.dataset)return;
@@ -2192,7 +2394,6 @@ $('#tableBody').addEventListener('change',e=>{
     updateSelectionBar();
     updateCheckAllState();
   }
-  // Checkbox correlati → ricalcola totale
   if(inp.dataset.parent && inp.dataset.corrPrice !== undefined){
     recalcCorrelatiTotal(inp.dataset.parent);
   }
@@ -2241,7 +2442,6 @@ $('#tableBody').addEventListener('click',e=>{
 
 /* -------- TENDINA CORRELATI TABELLA -------- */
 function toggleCorrelatiPanel(artId, btn){
-  // chiudi eventuali altre aperte
   document.querySelectorAll('.correlati-row').forEach(r=>{
     if(r.dataset.for !== artId) r.style.display = 'none';
   });
@@ -2277,7 +2477,6 @@ function recalcCorrelatiTotal(parentId){
   if(val) val.textContent = fmtEuro(total);
 }
 
-// Chiudi tendina cliccando fuori
 document.addEventListener('click', e=>{
   if(e.target.closest('.correlati-row')) return;
   if(e.target.closest('[data-open-corr]')) return;
@@ -2656,7 +2855,7 @@ function openArticleModal(id, initialTab){
   editingArticleId=id;pendingPhoto=art.photo||'';
   $('#artTitle').innerHTML = esc(art.name) +
     (art.code ? ' <span style="display:inline-block;font-family:var(--mono);font-size:12px;font-weight:800;'+
-      'color:var(--yellow);background:rgba(255,204,0,.12);border:1px solid var(--yellow-dk);'+
+      'color:var(--yellow);background:rgba(124,58,237,.12);border:1px solid var(--yellow-dk);'+
       'padding:2px 7px;border-radius:4px;margin-left:6px;letter-spacing:.5px;vertical-align:middle">'+
       esc(art.code)+'</span>' : '');
   const owner = getCurrentArticleOwner();
@@ -3152,6 +3351,7 @@ $$('.nav-item').forEach(b=>{
 });
 
 $('#brandToggle').addEventListener('click', toggleClientMode);
+$('#btnTheme').addEventListener('click', toggleTheme);
 
 /* -------- SCORCIATOIE GLOBALI -------- */
 document.addEventListener('keydown',e=>{
@@ -3343,7 +3543,6 @@ function renderWalkCard(){
       <div class="walk-section"><div class="stitle">📝 Note magazzino</div>${notesHtml}</div>
     </div>`;
 
-  // Listener per il pulsante + nel walkthrough
   const corrToggle = wrap.querySelector('#walkCorrToggle');
   if(corrToggle){
     corrToggle.addEventListener('click', (e)=>{
@@ -3358,7 +3557,6 @@ function renderWalkCard(){
     });
     if(walkCorrOpen) corrToggle.classList.add('rotated');
   }
-  // Listener per checkbox nel pannello walkthrough
   wrap.querySelectorAll('#walkCorrPanel input[type=checkbox]').forEach(cb=>{
     cb.addEventListener('change', recalcWalkTotal);
   });
@@ -3437,7 +3635,6 @@ document.addEventListener('keydown',e=>{
   const MOBILE_MAX=720;
 
   function update(){
-    // Su PC (>720px) non facciamo nulla
     if(window.innerWidth > MOBILE_MAX){
       if(isCompact){isCompact=false;document.body.classList.remove('compact');}
       ticking=false;
@@ -3486,7 +3683,6 @@ document.addEventListener('keydown',e=>{
     if(!ticking){requestAnimationFrame(update);ticking=true;}
   }, { passive: true });
 
-  // Se si cambia dimensioni finestra (es. rotazione iPad o resize PC), reset
   window.addEventListener('resize', ()=>{
     if(window.innerWidth > MOBILE_MAX){
       document.body.classList.remove('compact');
@@ -3527,6 +3723,7 @@ window.__cloudFallbackLocal = function(){
 
 (function init(){
   try{
+    loadTheme();
     loadClientMode();
     state = { version: APP_VERSION, meta:{operator:'',lastRevision:new Date().toISOString(),globalMargin:40}, categories: [] };
     activeCategoryId = null;
@@ -3546,7 +3743,7 @@ window.__cloudFallbackLocal = function(){
     console.error('Init error:',e);
     alert('Errore avvio: '+e.message);
   }
-  console.log('%cRattazzi Cartellini v4.1 avviato','color:#ffcc00;font-weight:bold');
+  console.log('%cRattazzi Cartellini v4.2 avviato','color:#ffcc00;font-weight:bold');
 })();
 </script>
 </body>

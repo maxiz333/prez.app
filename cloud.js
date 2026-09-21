@@ -1,5 +1,5 @@
 /* ============================================================================
-   RATTAZZI — Cloud SOLO (v4.1)
+   RATTAZZI — Cloud SOLO (v4.2)
    ---------------------------------------------------------------------------
    L'app carica SEMPRE e SOLO i dati dal cloud. Nessun confronto.
    Nessun popup di scelta. Il localStorage non viene mai letto all'avvio.
@@ -91,7 +91,7 @@ async function cloudInit(){
   }
 }
 
-/* Primo sync: SEMPRE e SOLO dal cloud. Nessun confronto. */
+/* Primo sync: SEMPRE e SOLO dal cloud */
 async function cloudFirstSync(){
   if(fb.firstPullDone) return;
   fb.firstPullDone = true;
@@ -103,7 +103,6 @@ async function cloudFirstSync(){
     clearTimeout(fb.fallbackTimer);
     fb.fallbackDone = true;
 
-    // Cloud vuoto → primo setup, carico seed demo e faccio push
     if(!snap.exists){
       console.log('☁️ Cloud vuoto: primo setup con dati demo');
       state = buildSeed();
@@ -128,14 +127,12 @@ async function cloudFirstSync(){
       return;
     }
 
-    // Cloud ha dati → pull SEMPRE. Punto.
     console.log('☁️ Carico dal cloud (fonte unica)');
     state = normalizeState(JSON.parse(remote.payload));
     const firstTop = state.categories.find(c=>!c.parentId);
     activeCategoryId = firstTop ? firstTop.id : null;
     activeSubCategoryId = null;
 
-    // Salvo solo come cache tecnica (mai letta all'avvio)
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
 
     render();
